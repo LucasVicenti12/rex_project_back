@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -138,5 +139,9 @@ class AuthUseCaseImplementation(
                 error = AUTH_UNEXPECTED
             )
         }
+    }
+
+    override fun getGrantedAuthorities(user: User): List<GrantedAuthority> {
+        TODO("Not yet implemented")
     }
 }

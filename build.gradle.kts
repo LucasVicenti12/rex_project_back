@@ -11,7 +11,7 @@ val exposedVersion = "0.60.0"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -31,6 +31,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.3")
 
 	/*Exposed ORM*/
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

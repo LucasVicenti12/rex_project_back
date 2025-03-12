@@ -44,6 +44,8 @@ class ServerConfig {
                 .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/web/login").permitAll()
                 .requestMatchers("/web/register").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
         }
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter::class.java)
@@ -66,7 +68,7 @@ class ServerConfig {
     fun webSecurityCustomizer(): WebSecurityCustomizer? {
         return WebSecurityCustomizer { web: WebSecurity ->
             web.ignoring().requestMatchers(
-                "/assets/**", "/favicon.ico", "/manifest.json", "/index.html"
+                "/assets/**", "/favicon.ico", "/manifest.json", "/index.html", "/swagger-ui.html"
             )
         }
     }

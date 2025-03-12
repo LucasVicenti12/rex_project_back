@@ -1,6 +1,7 @@
 package com.delice.crm.core.auth.domain.repository
 
 import com.delice.crm.core.user.domain.entities.User
+import org.springframework.security.core.GrantedAuthority
 import org.springframework.stereotype.Service
 
 @Service

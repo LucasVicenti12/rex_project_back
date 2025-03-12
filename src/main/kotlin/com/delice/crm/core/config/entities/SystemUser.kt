@@ -1,11 +1,13 @@
 package com.delice.crm.core.config.entities
 
 import com.delice.crm.core.user.domain.entities.User
+import org.springframework.security.core.GrantedAuthority
 import java.util.UUID
 import org.springframework.security.core.userdetails.User as SpringUser
 
 class SystemUser(
-    private val user: User
+    private val user: User,
+    authorities: List<GrantedAuthority>
 ) : SpringUser(
     user.login,
     user.pass,
@@ -13,7 +15,7 @@ class SystemUser(
     true,
     true,
     true,
-    user.authorities
+    authorities
 ) {
     fun getUserData(): User = user.copy(pass = null)
 
