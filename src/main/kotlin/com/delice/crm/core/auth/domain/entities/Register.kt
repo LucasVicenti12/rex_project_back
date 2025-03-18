@@ -2,6 +2,7 @@ package com.delice.crm.core.auth.domain.entities
 
 import com.delice.crm.core.user.domain.entities.UserStatus
 import com.delice.crm.core.user.domain.entities.UserType
+import java.time.LocalDate
 
 class Register(
     val login: String? = null,
@@ -12,5 +13,10 @@ class Register(
     val userType: UserType? = UserType.EMPLOYEE,
     val status: UserStatus? = UserStatus.ACTIVE,
     val avatar: String? = "",
-    val document: String? = ""
+    val document: String? = "",
+    val phone: String? = "",
+    val dateOfBirth: LocalDate? = null,
+    val state: String? = "",
+    val city: String? = "",
+    val zipCode: String? = "",
 )

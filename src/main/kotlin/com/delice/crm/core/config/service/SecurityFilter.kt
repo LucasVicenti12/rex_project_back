@@ -1,6 +1,8 @@
 package com.delice.crm.core.config.service
 
 import com.delice.crm.core.auth.domain.repository.AuthRepository
+import com.delice.crm.core.auth.domain.usecase.AuthUseCase
+import com.delice.crm.core.config.entities.SystemUser
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -25,11 +27,13 @@ class SecurityFilter : OncePerRequestFilter() {
     ) {
         val token = tokenService.recoverToken(request)
 
-        if(token.isNotBlank()) {
+        if (token.isNotBlank()) {
             val login = tokenService.validate(token)
-            val user = authRepository.findUserByLogin(login)
+            val user = authRepository.findUserByLogin(login).run {
+                SystemUser(this!!, authRepository.getGrantedAuthorities(this))
+            }
 
-            val authentication = UsernamePasswordAuthenticationToken(user, null, user!!.authorities)
+            val authentication = UsernamePasswordAuthenticationToken(user, null, user.authorities)
 
             SecurityContextHolder.getContext().authentication = authentication
         }

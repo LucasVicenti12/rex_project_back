@@ -11,12 +11,15 @@ interface RolesRepository {
     fun getRoleByUUID(roleUUID: UUID): Role?
     fun getRoleByCode(code: String): Role?
     fun getModules(): List<Module>?
-    fun getModuleByUUID(roleUUID: UUID): Module?
+    fun getModuleByUUID(moduleUUID: UUID): Module?
     fun getModuleByCode(code: String): Module?
     fun getRolesPerUser(userUUID: UUID): List<Role>?
+    fun getOwnerRoles(): List<Role>?
     fun createRole(role: Role): Role?
     fun deleteRole(roleUUID: UUID)
     fun createModule(module: Module): Module?
     fun deleteModule(moduleUUID: UUID)
-    fun attachRole(userUUID: UUID, roleUUID: UUID): List<Role>?
+    fun attachRole(userUUID: UUID, roles: List<UUID>): List<Role>?
+    fun verifyModuleWithRole(moduleUUID: UUID): Boolean
+    fun verifyUserWithRole(roleUUID: UUID): Boolean
 }

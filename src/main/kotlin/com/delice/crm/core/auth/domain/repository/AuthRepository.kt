@@ -8,4 +8,5 @@ import org.springframework.stereotype.Service
 interface AuthRepository {
     fun findUserByLogin(login: String): User?
     fun registerUser(user: User): User?
+    fun getGrantedAuthorities(user: User): List<GrantedAuthority>
 }

@@ -12,3 +12,8 @@ data class RoleListResponse (
     val roles: List<Role>? = listOf(),
     val error: RoleException? = null
 )
+
+data class RoleDeleteResponse(
+    val message: String,
+    val error: RoleException? = null
+)

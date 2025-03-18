@@ -1,6 +1,7 @@
 package com.delice.crm.core.user.domain.entities
 
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class User(
@@ -18,8 +19,7 @@ data class User(
     val dateOfBirth: LocalDate? = LocalDate.now(),
     val state: String? = "",
     val city: String? = "",
-    val createdAt: LocalDate? = LocalDate.now(),
-    val modifiedAt: LocalDate? = LocalDate.now(),
-    val createdBy: String? = "",
-    val modifiedBy: String? = "",
+    val zipCode: String? = "",
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
+    val modifiedAt: LocalDateTime? = LocalDateTime.now(),
 )

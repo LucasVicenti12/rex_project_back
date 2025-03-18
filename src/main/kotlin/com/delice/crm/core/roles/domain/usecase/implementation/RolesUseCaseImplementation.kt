@@ -5,10 +5,7 @@ import com.delice.crm.core.roles.domain.entities.Role
 import com.delice.crm.core.roles.domain.exceptions.*
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.roles.domain.usecase.RolesUseCase
-import com.delice.crm.core.roles.domain.usecase.response.ModuleListResponse
-import com.delice.crm.core.roles.domain.usecase.response.ModuleResponse
-import com.delice.crm.core.roles.domain.usecase.response.RoleListResponse
-import com.delice.crm.core.roles.domain.usecase.response.RoleResponse
+import com.delice.crm.core.roles.domain.usecase.response.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -16,7 +13,7 @@ import java.util.*
 @Service
 class RolesUseCaseImplementation(
     private val rolesRepository: RolesRepository
-): RolesUseCase {
+) : RolesUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(RolesUseCaseImplementation::class.java)
     }
@@ -24,12 +21,12 @@ class RolesUseCaseImplementation(
     override fun getRoles(): RoleListResponse = try {
         val roles = rolesRepository.getRoles()
 
-        if(roles.isNullOrEmpty()){
+        if (roles.isNullOrEmpty()) {
             RoleListResponse(roles = null, error = ROLES_IS_EMPTY)
-        }else{
+        } else {
             RoleListResponse(roles = roles, error = null)
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_GET_ROLES", e)
         RoleListResponse(roles = null, error = ROLE_UNEXPECTED_ERROR)
     }
@@ -37,12 +34,12 @@ class RolesUseCaseImplementation(
     override fun getModules(): ModuleListResponse = try {
         val modules = rolesRepository.getModules()
 
-        if(modules.isNullOrEmpty()){
+        if (modules.isNullOrEmpty()) {
             ModuleListResponse(modules = null, MODULES_IS_EMPTY)
-        }else{
+        } else {
             ModuleListResponse(modules = modules, error = null)
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_GET_MODULES", e)
         ModuleListResponse(modules = null, error = ROLE_UNEXPECTED_ERROR)
     }
@@ -50,81 +47,121 @@ class RolesUseCaseImplementation(
     override fun getRolesPerUser(userUUID: UUID): RoleListResponse = try {
         val roles = rolesRepository.getRolesPerUser(userUUID)
 
-        if(roles.isNullOrEmpty()){
+        if (roles.isNullOrEmpty()) {
             RoleListResponse(roles = null, error = ROLES_IS_EMPTY)
-        }else{
+        } else {
             RoleListResponse(roles = roles, error = null)
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_GET_ROLES_PER_USER", e)
         RoleListResponse(roles = null, error = ROLE_UNEXPECTED_ERROR)
     }
 
     override fun createRole(role: Role): RoleResponse = try {
-        if(role.code.isNullOrEmpty()){
-            RoleResponse(role = null, error = ROLE_CODE_IS_EMPTY)
-        }
+        when {
+            role.code.isNullOrEmpty() -> {
+                RoleResponse(role = null, error = ROLE_CODE_IS_EMPTY)
+            }
 
-        if(role.label.isNullOrEmpty()){
-            RoleResponse(role = null, error = ROLE_LABEL_IS_EMPTY)
-        }
+            role.label.isNullOrEmpty() -> {
+                RoleResponse(role = null, error = ROLE_LABEL_IS_EMPTY)
+            }
 
-        if(role.moduleUUID == null || role.moduleUUID.toString().isEmpty()){
-            RoleResponse(role = null, error = ROLE_MODULE_UUID_IS_EMPTY)
-        }
+            role.moduleUUID == null || role.moduleUUID.toString().isEmpty() -> {
+                RoleResponse(role = null, error = ROLE_MODULE_UUID_IS_EMPTY)
+            }
 
-        if(rolesRepository.getRoleByCode(role.code!!) != null){
-            RoleResponse(role = null, error = ROLE_ALREADY_EXISTS)
-        }
+            rolesRepository.getRoleByCode(role.code) != null -> {
+                RoleResponse(role = null, error = ROLE_ALREADY_EXISTS)
+            }
 
-        if(rolesRepository.getModuleByUUID(role.moduleUUID!!) != null){
-            RoleResponse(role = null, error = MODULE_NOT_FOUND)
-        }
+            rolesRepository.getModuleByUUID(role.moduleUUID) == null -> {
+                RoleResponse(role = null, error = MODULE_NOT_FOUND)
+            }
 
-        RoleResponse(role = rolesRepository.createRole(role), error = null)
-    }catch (e: Exception){
+            else -> {
+                RoleResponse(role = rolesRepository.createRole(role), error = null)
+            }
+        }
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_CREATE_ROLE", e)
         RoleResponse(role = null, error = ROLE_UNEXPECTED_ERROR)
     }
 
-    override fun deleteRole(roleUUID: UUID) = rolesRepository.deleteRole(roleUUID)
+    override fun deleteRole(roleUUID: UUID): RoleDeleteResponse = try {
+        val userWithRole = rolesRepository.verifyUserWithRole(roleUUID)
+
+        if (userWithRole) {
+            RoleDeleteResponse(message = "", error = ROLE_WITH_PERMISSION_ATTACH)
+        } else {
+            rolesRepository.deleteRole(roleUUID)
+
+            RoleDeleteResponse(message = "Deleted with success", error = null)
+        }
+    } catch (e: Exception) {
+        logger.error("ROLES_MODULE_DELETE_ROLE", e)
+        RoleDeleteResponse(message = "", error = ROLE_UNEXPECTED_ERROR)
+    }
 
     override fun createModule(module: Module): ModuleResponse = try {
-        if(module.code.isNullOrEmpty()){
-            ModuleResponse(module = null, error = MODULE_CODE_IS_EMPTY)
-        }
+        when {
+            module.code.isNullOrEmpty() -> {
+                ModuleResponse(module = null, error = MODULE_CODE_IS_EMPTY)
+            }
 
-        if(module.label.isNullOrEmpty()){
-            ModuleResponse(module = null, error = MODULE_LABEL_IS_EMPTY)
-        }
+            module.label.isNullOrEmpty() -> {
+                ModuleResponse(module = null, error = MODULE_LABEL_IS_EMPTY)
+            }
 
-        if(rolesRepository.getModuleByCode(module.code!!) != null){
-            ModuleResponse(module = null, error = MODULE_ALREADY_EXISTS)
-        }
+            rolesRepository.getModuleByCode(module.code!!) != null -> {
+                ModuleResponse(module = null, error = MODULE_ALREADY_EXISTS)
+            }
 
-        ModuleResponse(module = rolesRepository.createModule(module), error = null)
-    }catch (e: Exception){
+            else -> {
+                ModuleResponse(module = rolesRepository.createModule(module), error = null)
+            }
+        }
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_CREATE_MODULE", e)
         ModuleResponse(module = null, error = ROLE_UNEXPECTED_ERROR)
     }
 
-    override fun deleteModule(moduleUUID: UUID) = rolesRepository.deleteModule(moduleUUID)
+    override fun deleteModule(moduleUUID: UUID): ModuleDeleteResponse = try {
+        val moduleWithRole = rolesRepository.verifyModuleWithRole(moduleUUID)
 
-    override fun attachRole(userUUID: UUID, roleUUID: UUID): RoleListResponse = try {
-        if(roleUUID.toString().isEmpty()){
-            RoleListResponse(roles = null, error = ROLE_UUID_IS_EMPTY)
+        if (moduleWithRole) {
+            ModuleDeleteResponse(message = "", error = MODULE_WITH_ROLE_ATTACH)
+        } else {
+            rolesRepository.deleteModule(moduleUUID)
+
+            ModuleDeleteResponse(message = "Deleted with success", error = null)
         }
+    } catch (e: Exception) {
+        logger.error("ROLES_MODULE_DELETE_MODULE", e)
+        ModuleDeleteResponse(message = "", error = ROLE_UNEXPECTED_ERROR)
+    }
 
-        if(userUUID.toString().isEmpty()){
-            RoleListResponse(roles = null, error = USER_UUID_IS_EMPTY)
+    override fun attachRole(userUUID: UUID, roles: List<UUID>): RoleListResponse = try {
+        when {
+            roles.isEmpty() -> {
+                RoleListResponse(roles = null, error = ROLE_UUID_IS_EMPTY)
+            }
+
+            userUUID.toString().isEmpty() -> {
+                RoleListResponse(roles = null, error = USER_UUID_IS_EMPTY)
+            }
+
+            else -> {
+                roles.forEach {
+                    if (rolesRepository.getRoleByUUID(it) == null) {
+                        return RoleListResponse(roles = null, error = ROLE_NOT_FOUND)
+                    }
+                }
+
+                RoleListResponse(roles = rolesRepository.attachRole(userUUID, roles), error = ROLE_NOT_FOUND)
+            }
         }
-
-        if(rolesRepository.getRoleByUUID(roleUUID) == null){
-            RoleListResponse(roles = null, error = ROLE_NOT_FOUND)
-        }
-
-        RoleListResponse(roles = rolesRepository.attachRole(userUUID, roleUUID), error = ROLE_NOT_FOUND)
-    }catch (e: Exception){
+    } catch (e: Exception) {
         logger.error("ROLES_MODULE_ATTACH_ROLE_TO_USER", e)
         RoleListResponse(roles = null, error = ROLE_UNEXPECTED_ERROR)
     }

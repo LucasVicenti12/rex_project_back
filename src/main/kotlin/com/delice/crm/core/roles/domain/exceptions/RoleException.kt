@@ -20,4 +20,7 @@ val MODULE_LABEL_IS_EMPTY = RoleException("MODULE_LABEL_IS_EMPTY", "The module l
 val ROLE_UUID_IS_EMPTY = RoleException("ROLE_UUID_IS_EMPTY", "The role must be provided")
 val USER_UUID_IS_EMPTY = RoleException("USER_UUID_IS_EMPTY", "The user must be provided")
 
+val MODULE_WITH_ROLE_ATTACH = RoleException("MODULE_WITH_ROLE_ATTACH", "This module have roles attached")
+val ROLE_WITH_PERMISSION_ATTACH = RoleException("ROLE_WITH_PERMISSION_ATTACH", "This role have permissions attached")
+
 class RoleException(code: String, message: String) : DefaultError(code, message)

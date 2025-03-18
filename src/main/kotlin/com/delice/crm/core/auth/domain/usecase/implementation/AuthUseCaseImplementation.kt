@@ -9,27 +9,34 @@ import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
 import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.config.service.TokenService
+import com.delice.crm.core.roles.domain.entities.Role
+import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.user.domain.entities.User
+import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.domain.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.util.UUID
 
 @Service
 class AuthUseCaseImplementation(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val authentication: AuthenticationManager
 ) : AuthUseCase {
     @Autowired
     private lateinit var tokenService: TokenService
 
-    companion object{
+    @Autowired
+    private lateinit var authentication: AuthenticationManager
+
+    companion object {
         private var logger = LoggerFactory.getLogger(AuthUseCaseImplementation::class.java)
     }
 
@@ -63,6 +70,41 @@ class AuthUseCaseImplementation(
                 )
             }
 
+            if (register.state.isNullOrBlank()) {
+                return RegisterResponse(
+                    user = null,
+                    error = STATE_MUST_BE_PROVIDED
+                )
+            }
+
+            if (register.city.isNullOrBlank()) {
+                return RegisterResponse(
+                    user = null,
+                    error = CITY_MUST_BE_PROVIDED
+                )
+            }
+
+            if (register.dateOfBirth === null) {
+                return RegisterResponse(
+                    user = null,
+                    error = DATE_OF_BIRTH_MUST_BE_PROVIDED
+                )
+            }
+
+            if (!register.dateOfBirth.isBefore(LocalDate.now().minusYears(14))) {
+                return RegisterResponse(
+                    user = null,
+                    error = DATE_OF_BIRTH_INVALID
+                )
+            }
+
+            if (register.zipCode.isNullOrBlank()) {
+                return RegisterResponse(
+                    user = null,
+                    error = ZIP_CODE_MUST_BE_PROVIDED
+                )
+            }
+
             if (userRepository.getUserByDocument(register.document) != null) {
                 return RegisterResponse(
                     user = null,
@@ -88,7 +130,13 @@ class AuthUseCaseImplementation(
                 avatar = register.avatar,
                 status = register.status,
                 name = register.name,
-                surname = register.surname
+                surname = register.surname,
+                document = register.document,
+                zipCode = register.zipCode,
+                city = register.city,
+                phone = register.phone,
+                state = register.state,
+                dateOfBirth = register.dateOfBirth,
             )
 
             val userResponse = authRepository.registerUser(user)
@@ -97,7 +145,7 @@ class AuthUseCaseImplementation(
                 user = userResponse,
                 error = null
             )
-        }catch (e:Exception){
+        } catch (e: Exception) {
             logger.error("AUTH_MODULE_REGISTER", e)
 
             return RegisterResponse(
@@ -131,7 +179,7 @@ class AuthUseCaseImplementation(
             val token = tokenService.generate(user.getUserData())
 
             return LoginResponse(token = token, error = null)
-        }catch (e:Exception){
+        } catch (e: Exception) {
             logger.error("AUTH_MODULE_LOGIN", e)
 
             return LoginResponse(
@@ -142,6 +190,11 @@ class AuthUseCaseImplementation(
     }
 
     override fun getGrantedAuthorities(user: User): List<GrantedAuthority> {
-        TODO("Not yet implemented")
+        try {
+            return authRepository.getGrantedAuthorities(user)
+        } catch (e: Exception) {
+            logger.error("AUTH_MODULE_GET_AUTHORITY", e)
+            return emptyList()
+        }
     }
 }
