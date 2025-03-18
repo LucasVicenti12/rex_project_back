@@ -51,6 +51,14 @@ class UserRepositoryImplementation : UserRepository {
         avatar = binaryToString(it[UserDatabase.avatar]),
         status = enumFromTypeValue<UserStatus, Int>(it[UserDatabase.status]),
         name = it[UserDatabase.name],
-        surname = it[UserDatabase.surname]
+        surname = it[UserDatabase.surname],
+        document = it[UserDatabase.document],
+        phone = it[UserDatabase.phone],
+        dateOfBirth = it[UserDatabase.dateOfBirth],
+        state = it[UserDatabase.state],
+        city = it[UserDatabase.city],
+        zipCode = it[UserDatabase.zipCode],
+        createdAt = it[UserDatabase.createdAt],
+        modifiedAt = it[UserDatabase.modifiedAt],
     )
 }

@@ -1,8 +1,7 @@
 package com.delice.crm.core.user.domain.entities
 
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class User(
@@ -16,19 +15,11 @@ data class User(
     val status: UserStatus? = UserStatus.ACTIVE,
     val avatar: String? = "",
     val document: String? = "",
-): UserDetails {
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return if(this.userType === UserType.OWNER || this.userType === UserType.DEV){
-            mutableListOf(
-                SimpleGrantedAuthority("ROLE_OWNER"),
-                SimpleGrantedAuthority("ROLE_EMPLOYEE")
-            )
-        }else{
-            mutableListOf(SimpleGrantedAuthority("ROLE_EMPLOYEE"))
-        }
-    }
-
-    override fun getPassword(): String = this.pass.toString()
-
-    override fun getUsername(): String = this.login.toString()
-}
+    val phone: String? = "",
+    val dateOfBirth: LocalDate? = LocalDate.now(),
+    val state: String? = "",
+    val city: String? = "",
+    val zipCode: String? = "",
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
+    val modifiedAt: LocalDateTime? = LocalDateTime.now(),
+)

@@ -12,7 +12,7 @@ class AuthorizationService(
 ): UserDetailsService {
     override fun loadUserByUsername(username: String): UserDetails? {
         return authRepository.findUserByLogin(username)?.run {
-            SystemUser(this)
+            SystemUser(this, authRepository.getGrantedAuthorities(this))
         }
     }
 }

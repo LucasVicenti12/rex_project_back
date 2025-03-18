@@ -60,10 +60,11 @@ class AuthWebService(
     }
 
     @RequestMapping("/logout", method = [RequestMethod.POST, RequestMethod.GET])
-    fun logout(): ResponseEntity<String> {
+    fun logout(): ResponseEntity<Unit> {
         return ResponseEntity
-            .ok()
+            .status(HttpStatus.FOUND)
             .header(HttpHeaders.SET_COOKIE, tokenService.getCleanCookie().toString())
-            .body("LOGGED OUT SUCCESSFULLY")
+            .header(HttpHeaders.LOCATION, "/web/login")
+            .build()
     }
 }
