@@ -13,10 +13,12 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 class AuthRepositoryImplementation(
@@ -96,5 +98,13 @@ class AuthRepositoryImplementation(
         val roles = rolesRepository.getRolesPerUser(user.uuid!!)!!
 
         return roles.map { SimpleGrantedAuthority(it.code) }
+    }
+
+    override fun changePassword(userUUID: UUID, newPassword: String) {
+        transaction {
+            UserDatabase.update({UserDatabase.uuid eq userUUID}) {
+                it[password] = newPassword
+            }
+        }
     }
 }

@@ -1,25 +1,23 @@
 package com.delice.crm.core.auth.domain.usecase.implementation
 
+import com.delice.crm.core.auth.domain.entities.ChangePassword
 import com.delice.crm.core.auth.domain.entities.Login
 import com.delice.crm.core.auth.domain.entities.Register
 import com.delice.crm.core.auth.domain.exceptions.*
 import com.delice.crm.core.auth.domain.repository.AuthRepository
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
+import com.delice.crm.core.auth.domain.usecase.response.ChangePasswordResponse
 import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
 import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.config.service.TokenService
-import com.delice.crm.core.roles.domain.entities.Role
-import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.user.domain.entities.User
-import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.domain.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -196,5 +194,32 @@ class AuthUseCaseImplementation(
             logger.error("AUTH_MODULE_GET_AUTHORITY", e)
             return emptyList()
         }
+    }
+
+    override fun changePassword(userUUID: UUID, change: ChangePassword): ChangePasswordResponse = try{
+        when{
+            userUUID.toString().isBlank() -> {
+                ChangePasswordResponse(error = USER_UUID_IS_EMPTY)
+            }
+            change.currentPassword.isNullOrBlank() -> {
+                ChangePasswordResponse(error = CURRENT_PASSWORD_MUST_BE_PROVIDED)
+            }
+            change.newPassword.isNullOrBlank() -> {
+                ChangePasswordResponse(error = NEW_PASSWORD_MUST_BE_PROVIDED)
+            }
+            change.newPassword != change.currentPassword -> {
+                ChangePasswordResponse(error = PASSWORDS_DON_T_MATCH)
+            }
+            else -> {
+                val encryptedPass = BCryptPasswordEncoder().encode(change.newPassword)
+
+                authRepository.changePassword(userUUID, encryptedPass)
+
+                ChangePasswordResponse(message = "The password is change with successful")
+            }
+        }
+    }catch (e: Exception){
+        logger.error("AUTH_MODULE_CHANGE_PASSWORD", e)
+        ChangePasswordResponse(error = AUTH_UNEXPECTED)
     }
 }
