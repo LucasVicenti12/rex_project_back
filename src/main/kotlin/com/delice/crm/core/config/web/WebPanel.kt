@@ -10,7 +10,7 @@ class WebPanel {
         return "index"
     }
 
-    @RequestMapping("/web/**")
+    @RequestMapping("/app/**")
     fun index(): String {
         return "forward:/index.html"
     }

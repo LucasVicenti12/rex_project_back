@@ -44,8 +44,8 @@ class ServerConfig {
             it
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/register").permitAll()
-                .requestMatchers("/web/login").permitAll()
-                .requestMatchers("/web/register").permitAll()
+                .requestMatchers("/app/login").permitAll()
+                .requestMatchers("/app/register").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
@@ -70,7 +70,7 @@ class ServerConfig {
     fun webSecurityCustomizer(): WebSecurityCustomizer? {
         return WebSecurityCustomizer { web: WebSecurity ->
             web.ignoring().requestMatchers(
-                "/assets/**", "/favicon.ico", "/manifest.json", "/index.html", "/swagger-ui.html"
+                "/assets/**", "/params/**", "/favicon.ico", "/manifest.json", "/index.html", "/swagger-ui.html"
             )
         }
     }
