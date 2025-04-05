@@ -11,7 +11,7 @@ val exposedVersion = "0.60.0"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -45,6 +45,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-spring-boot-starter:$exposedVersion")
 
     implementation("com.auth0:java-jwt:4.5.0")
+
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 }
 
 kotlin {

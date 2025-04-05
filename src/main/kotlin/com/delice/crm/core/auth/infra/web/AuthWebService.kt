@@ -66,7 +66,7 @@ class AuthWebService(
         return ResponseEntity
             .status(HttpStatus.FOUND)
             .header(HttpHeaders.SET_COOKIE, tokenService.getCleanCookie().toString())
-            .header(HttpHeaders.LOCATION, "/web/login")
+            .header(HttpHeaders.LOCATION, "/app/login")
             .build()
     }
 
