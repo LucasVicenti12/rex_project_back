@@ -43,9 +43,9 @@ class ServerConfig {
         .authorizeHttpRequests {
             it
                 .requestMatchers("/auth/login").permitAll()
-                .requestMatchers("/auth/register").permitAll()
+                .requestMatchers("/auth/forgotPassword").permitAll()
+                .requestMatchers("/auth/resetPassword").permitAll()
                 .requestMatchers("/app/login").permitAll()
-                .requestMatchers("/app/register").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()

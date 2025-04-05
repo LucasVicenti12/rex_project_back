@@ -15,5 +15,9 @@ val CITY_MUST_BE_PROVIDED = AuthException("CITY_MUST_BE_PROVIDED", "The city of 
 val STATE_MUST_BE_PROVIDED = AuthException("STATE_MUST_BE_PROVIDED", "The state of user must be provided")
 val ZIP_CODE_MUST_BE_PROVIDED = AuthException("ZIP_CODE_MUST_BE_PROVIDED", "The zip code of user must be provided")
 val AUTH_USER_NOT_FOUND = AuthException("AUTH_USER_NOT_FOUND", "User not found")
+val PASSWORDS_DONT_MATCH = AuthException("PASSWORDS_DONT_MATCH", "The passwords don't match")
+val CONFIRM_PASSWORD_MUST_BE_PROVIDED = AuthException("CONFIRM_PASSWORD_MUST_BE_PROVIDED", "The confirm password must be provided")
+val TOKEN_MUST_BE_PROVIDED = AuthException("TOKEN_MUST_BE_PROVIDED", "The token must be provided")
+val INVALID_TOKEN = AuthException("INVALID_TOKEN", "The token is invalid")
 
 class AuthException(code: String, message: String) : DefaultError(code, message)

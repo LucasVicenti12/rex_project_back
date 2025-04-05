@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -40,6 +41,24 @@ class UserRepositoryImplementation : UserRepository {
             page = page,
             total = total,
         )
+    }
+
+    override fun getUserByEmail(email: String): User? = transaction {
+        UserDatabase.selectAll()
+            .where { UserDatabase.email eq email }.map {
+                convertResultRowToUser(it)
+            }
+            .firstOrNull()
+    }
+
+    override fun changePassword(userUUID: UUID, newPassword: String): User? = transaction {
+        UserDatabase.update({
+            UserDatabase.uuid eq userUUID
+        }) {
+            it[password] = newPassword
+        }
+
+        return@transaction getUserByUUID(userUUID)
     }
 
     private fun convertResultRowToUser(it: ResultRow): User = User(

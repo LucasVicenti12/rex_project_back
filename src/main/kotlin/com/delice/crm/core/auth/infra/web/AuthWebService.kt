@@ -2,22 +2,16 @@ package com.delice.crm.core.auth.infra.web
 
 import com.delice.crm.core.auth.domain.entities.Login
 import com.delice.crm.core.auth.domain.entities.Register
+import com.delice.crm.core.auth.domain.entities.ResetPassword
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
-import com.delice.crm.core.auth.domain.usecase.response.AuthenticatedResponse
-import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
-import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
+import com.delice.crm.core.auth.domain.usecase.response.*
 import com.delice.crm.core.config.service.TokenService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/auth")
@@ -71,7 +65,7 @@ class AuthWebService(
     }
 
     @GetMapping("/authenticated")
-    fun getAuthenticated(request: HttpServletRequest): ResponseEntity<AuthenticatedResponse>{
+    fun getAuthenticated(request: HttpServletRequest): ResponseEntity<AuthenticatedResponse> {
         val token = tokenService.recoverToken(request)
         val login = tokenService.validate(token)
         val user = authUseCase.findUserByLogin(login)
@@ -81,6 +75,71 @@ class AuthWebService(
         }
 
         val response = authUseCase.getAuthenticated(user.uuid!!)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/forgotPassword")
+    fun forgotPassword(
+        @RequestParam(
+            value = "email",
+            required = true
+        ) email: String
+    ): ResponseEntity<ForgotPasswordResponse> {
+        val response = authUseCase.forgotPassword(email)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/changePassword")
+    fun resetPassword(
+        @RequestBody resetPassword: ResetPassword,
+        request: HttpServletRequest
+    ): ResponseEntity<ChangePasswordResponse> {
+        val token = tokenService.recoverToken(request)
+        val login = tokenService.validate(token)
+        val user = authUseCase.findUserByLogin(login) ?: return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(null)
+
+        val response = authUseCase.resetPassword(user.uuid!!, resetPassword)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/resetPassword")
+    fun resetPasswordWithToken(
+        @RequestParam(
+            value = "token",
+            required = true
+        ) token: String,
+        @RequestBody resetPassword: ResetPassword
+    ): ResponseEntity<ChangePasswordResponse> {
+        val response = authUseCase.resetPasswordWithToken(resetPassword, token)
 
         if (response.error != null) {
             return ResponseEntity

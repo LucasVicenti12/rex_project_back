@@ -2,14 +2,15 @@ package com.delice.crm.core.auth.domain.usecase.implementation
 
 import com.delice.crm.core.auth.domain.entities.Login
 import com.delice.crm.core.auth.domain.entities.Register
+import com.delice.crm.core.auth.domain.entities.ResetPassword
 import com.delice.crm.core.auth.domain.exceptions.*
 import com.delice.crm.core.auth.domain.repository.AuthRepository
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
-import com.delice.crm.core.auth.domain.usecase.response.AuthenticatedResponse
-import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
-import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
+import com.delice.crm.core.auth.domain.usecase.response.*
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.config.service.TokenService
+import com.delice.crm.core.mail.entities.Mail
+import com.delice.crm.core.mail.queue.MailQueue
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.repository.UserRepository
@@ -22,13 +23,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
-import com.delice.crm.core.roles.domain.entities.Module as CRMModule;
 
 @Service
 class AuthUseCaseImplementation(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val rolesRepository: RolesRepository
+    private val rolesRepository: RolesRepository,
+    private val mailQueue: MailQueue
 ) : AuthUseCase {
     @Autowired
     private lateinit var tokenService: TokenService
@@ -199,7 +200,7 @@ class AuthUseCaseImplementation(
     }
 
     override fun getAuthenticated(useUUID: UUID): AuthenticatedResponse {
-        try{
+        try {
             val user = userRepository.getUserByUUID(useUUID)
                 ?: return AuthenticatedResponse(
                     error = AUTH_USER_NOT_FOUND
@@ -211,7 +212,7 @@ class AuthUseCaseImplementation(
                 user = user,
                 modules = modules
             )
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             logger.error("AUTH_MODULE_GET_AUTHENTICATED", e)
             return AuthenticatedResponse(
                 error = AUTH_UNEXPECTED
@@ -220,4 +221,76 @@ class AuthUseCaseImplementation(
     }
 
     override fun findUserByLogin(login: String): User? = authRepository.findUserByLogin(login)
+
+    override fun forgotPassword(email: String): ForgotPasswordResponse {
+        val user = userRepository.getUserByEmail(email) ?: return ForgotPasswordResponse(error = AUTH_USER_NOT_FOUND)
+
+        val token = tokenService.generate(user)
+
+        mailQueue.addMail(
+            Mail(
+                subject = "Forgot Password request",
+                to = user.email!!,
+                content = "http://localhost:5173/app/forgotPassword?token=${token}",
+            )
+        )
+
+        return ForgotPasswordResponse(error = null)
+    }
+
+    override fun resetPassword(userUUID: UUID, resetPassword: ResetPassword): ChangePasswordResponse {
+        try {
+            when {
+                resetPassword.newPassword.isEmpty() -> {
+                    return ChangePasswordResponse(error = PASSWORD_MUST_BE_PROVIDED)
+                }
+
+                resetPassword.confirmPassword.isEmpty() -> {
+                    return ChangePasswordResponse(error = CONFIRM_PASSWORD_MUST_BE_PROVIDED)
+                }
+
+                resetPassword.newPassword != resetPassword.confirmPassword -> {
+                    return ChangePasswordResponse(error = PASSWORDS_DONT_MATCH)
+                }
+
+                else -> {
+                    val encryptedPassword = BCryptPasswordEncoder().encode(resetPassword.newPassword)
+
+                    val user = userRepository.changePassword(userUUID, encryptedPassword)
+
+                    return if (user != null) {
+                        ChangePasswordResponse(ok = true)
+                    } else {
+                        ChangePasswordResponse(ok = false)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("AUTH_MODULE_RESET_PASSWORD", e)
+            return ChangePasswordResponse(error = AUTH_UNEXPECTED)
+        }
+    }
+
+    override fun resetPasswordWithToken(
+        resetPassword: ResetPassword,
+        token: String
+    ): ChangePasswordResponse {
+        try {
+            if (token.isEmpty()) {
+                return ChangePasswordResponse(error = TOKEN_MUST_BE_PROVIDED)
+            }
+
+            val login = tokenService.validate(token)
+            val user = authRepository.findUserByLogin(login)
+
+            return if (user != null) {
+                resetPassword(user.uuid!!, resetPassword)
+            } else {
+                ChangePasswordResponse(error = INVALID_TOKEN)
+            }
+        } catch (e: Exception) {
+            logger.error("AUTH_MODULE_RESET_PASSWORD_WITH_TOKEN", e)
+            return ChangePasswordResponse(error = AUTH_UNEXPECTED)
+        }
+    }
 }
