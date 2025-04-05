@@ -1,5 +1,6 @@
 package com.delice.crm.core.roles.domain.repository
 
+import com.delice.crm.core.roles.domain.entities.DataModule
 import com.delice.crm.core.roles.domain.entities.Role
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -14,6 +15,7 @@ interface RolesRepository {
     fun getModuleByUUID(moduleUUID: UUID): Module?
     fun getModuleByCode(code: String): Module?
     fun getRolesPerUser(userUUID: UUID): List<Role>?
+    fun getModuleRolesByUserUUID(userUUID: UUID): List<DataModule>?
     fun getOwnerRoles(): List<Role>?
     fun createRole(role: Role): Role?
     fun deleteRole(roleUUID: UUID)

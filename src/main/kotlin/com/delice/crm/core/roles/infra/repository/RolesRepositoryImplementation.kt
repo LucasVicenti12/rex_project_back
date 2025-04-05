@@ -1,8 +1,6 @@
 package com.delice.crm.core.roles.infra.repository
 
-import com.delice.crm.core.roles.domain.entities.Module
-import com.delice.crm.core.roles.domain.entities.Role
-import com.delice.crm.core.roles.domain.entities.RoleType
+import com.delice.crm.core.roles.domain.entities.*
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.roles.infra.database.ModuleDatabase
 import com.delice.crm.core.roles.infra.database.PermissionDatabase
@@ -60,7 +58,7 @@ class RolesRepositoryImplementation : RolesRepository {
             .map { enumFromTypeValue<UserType, String>(it[UserDatabase.userType]) }
             .first()
 
-        when(userType) {
+        when (userType) {
             UserType.DEV -> getRoles()
             UserType.OWNER -> getOwnerRoles()
             else -> {
@@ -70,6 +68,32 @@ class RolesRepositoryImplementation : RolesRepository {
                     .map { convertResultRowToRole(it) }
             }
         }!!
+    }
+
+    override fun getModuleRolesByUserUUID(userUUID: UUID): List<DataModule>? = transaction {
+        val roles = getRolesPerUser(userUUID)
+
+        if (roles.isEmpty()) {
+            return@transaction emptyList()
+        }
+
+        val modules = roles.map { it.moduleUUID }.groupBy { it }.map { it.key }
+
+        if (modules.isEmpty()) {
+            return@transaction emptyList()
+        }
+
+        return@transaction modules.map {
+            DataModule(
+                code = getModuleByUUID(it!!)!!.code,
+                roles = roles.map { role ->
+                    DataRole(
+                        code = role.code,
+                        label = role.label
+                    )
+                }
+            )
+        }
     }
 
     override fun getOwnerRoles(): List<Role>? = transaction {

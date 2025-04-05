@@ -7,3 +7,8 @@ class Module (
     val label: String? = "",
     val code: String? = "",
 )
+
+data class DataModule(
+    val code: String? = null,
+    val roles: List<DataRole>? = emptyList()
+)

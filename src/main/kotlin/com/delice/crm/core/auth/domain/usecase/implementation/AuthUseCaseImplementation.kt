@@ -201,24 +201,14 @@ class AuthUseCaseImplementation(
     override fun getAuthenticated(useUUID: UUID): AuthenticatedResponse {
         try{
             val user = userRepository.getUserByUUID(useUUID)
-            val roles = rolesRepository.getRolesPerUser(useUUID)
-            val modules: MutableList<CRMModule> = mutableListOf()
-
-            if(user == null){
-                return AuthenticatedResponse(
+                ?: return AuthenticatedResponse(
                     error = AUTH_USER_NOT_FOUND
                 )
-            }
 
-            roles?.forEach {
-                modules.add(
-                    rolesRepository.getModuleByUUID(it.moduleUUID!!)!!
-                )
-            }
+            val modules = rolesRepository.getModuleRolesByUserUUID(user.uuid!!)
 
             return AuthenticatedResponse(
                 user = user,
-                roles = roles,
                 modules = modules
             )
         }catch (e: Exception) {

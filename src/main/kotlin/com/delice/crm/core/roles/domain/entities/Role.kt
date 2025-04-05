@@ -9,3 +9,8 @@ class Role (
     val roleType: RoleType? = RoleType.USER,
     val moduleUUID: UUID? = null,
 )
+
+data class DataRole(
+    val code: String? = null,
+    val label: String? = null,
+)
