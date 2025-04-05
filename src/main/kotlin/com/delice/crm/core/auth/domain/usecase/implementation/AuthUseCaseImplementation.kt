@@ -5,30 +5,30 @@ import com.delice.crm.core.auth.domain.entities.Register
 import com.delice.crm.core.auth.domain.exceptions.*
 import com.delice.crm.core.auth.domain.repository.AuthRepository
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
+import com.delice.crm.core.auth.domain.usecase.response.AuthenticatedResponse
 import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
 import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.config.service.TokenService
-import com.delice.crm.core.roles.domain.entities.Role
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.user.domain.entities.User
-import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.domain.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.UUID
+import com.delice.crm.core.roles.domain.entities.Module as CRMModule;
 
 @Service
 class AuthUseCaseImplementation(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val rolesRepository: RolesRepository
 ) : AuthUseCase {
     @Autowired
     private lateinit var tokenService: TokenService
@@ -197,4 +197,37 @@ class AuthUseCaseImplementation(
             return emptyList()
         }
     }
+
+    override fun getAuthenticated(useUUID: UUID): AuthenticatedResponse {
+        try{
+            val user = userRepository.getUserByUUID(useUUID)
+            val roles = rolesRepository.getRolesPerUser(useUUID)
+            val modules: MutableList<CRMModule> = mutableListOf()
+
+            if(user == null){
+                return AuthenticatedResponse(
+                    error = AUTH_USER_NOT_FOUND
+                )
+            }
+
+            roles?.forEach {
+                modules.add(
+                    rolesRepository.getModuleByUUID(it.moduleUUID!!)!!
+                )
+            }
+
+            return AuthenticatedResponse(
+                user = user,
+                roles = roles,
+                modules = modules
+            )
+        }catch (e: Exception) {
+            logger.error("AUTH_MODULE_GET_AUTHENTICATED", e)
+            return AuthenticatedResponse(
+                error = AUTH_UNEXPECTED
+            )
+        }
+    }
+
+    override fun findUserByLogin(login: String): User? = authRepository.findUserByLogin(login)
 }

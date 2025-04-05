@@ -3,14 +3,16 @@ package com.delice.crm.core.auth.infra.web
 import com.delice.crm.core.auth.domain.entities.Login
 import com.delice.crm.core.auth.domain.entities.Register
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
+import com.delice.crm.core.auth.domain.usecase.response.AuthenticatedResponse
 import com.delice.crm.core.auth.domain.usecase.response.LoginResponse
 import com.delice.crm.core.auth.domain.usecase.response.RegisterResponse
 import com.delice.crm.core.config.service.TokenService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -66,5 +68,28 @@ class AuthWebService(
             .header(HttpHeaders.SET_COOKIE, tokenService.getCleanCookie().toString())
             .header(HttpHeaders.LOCATION, "/web/login")
             .build()
+    }
+
+    @GetMapping("/authenticated")
+    fun getAuthenticated(request: HttpServletRequest): ResponseEntity<AuthenticatedResponse>{
+        val token = tokenService.recoverToken(request)
+        val login = tokenService.validate(token)
+        val user = authUseCase.findUserByLogin(login)
+
+        if (user === null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)
+        }
+
+        val response = authUseCase.getAuthenticated(user.uuid!!)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
     }
 }

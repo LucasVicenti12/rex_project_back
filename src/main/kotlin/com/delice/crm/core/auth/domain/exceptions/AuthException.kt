@@ -14,5 +14,6 @@ val DATE_OF_BIRTH_INVALID = AuthException("DATE_OF_BIRTH_INVALID", "The date of 
 val CITY_MUST_BE_PROVIDED = AuthException("CITY_MUST_BE_PROVIDED", "The city of user must be provided")
 val STATE_MUST_BE_PROVIDED = AuthException("STATE_MUST_BE_PROVIDED", "The state of user must be provided")
 val ZIP_CODE_MUST_BE_PROVIDED = AuthException("ZIP_CODE_MUST_BE_PROVIDED", "The zip code of user must be provided")
+val AUTH_USER_NOT_FOUND = AuthException("AUTH_USER_NOT_FOUND", "User not found")
 
 class AuthException(code: String, message: String) : DefaultError(code, message)
