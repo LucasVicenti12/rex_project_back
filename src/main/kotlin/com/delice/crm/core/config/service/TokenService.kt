@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTCreationException
 import com.auth0.jwt.exceptions.JWTVerificationException
+import com.delice.crm.core.config.entities.TokenType
 import com.delice.crm.core.user.domain.entities.User
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
@@ -24,12 +25,17 @@ class TokenService {
     @Value("\${system.security.jwt.issuer}")
     lateinit var issuer: String
 
-    fun generate(user: User): String {
+    fun generate(user: User, tokenType: TokenType): String {
         return try {
+            val expires = when (tokenType) {
+                TokenType.AUTH_REQUEST -> generateAuthRequestExpiration()
+                TokenType.RESET_REQUEST -> generateResetRequestExpiration()
+            }
+
             JWT.create()
                 .withIssuer(issuer)
                 .withSubject(user.login)
-                .withExpiresAt(generateExpiration())
+                .withExpiresAt(expires)
                 .sign(
                     Algorithm.HMAC256(secretKey)
                 )
@@ -73,9 +79,16 @@ class TokenService {
         return token
     }
 
-    private fun generateExpiration(): Instant = LocalDateTime
+    private fun generateAuthRequestExpiration(): Instant = LocalDateTime
         .now()
         .plusHours(2)
+        .toInstant(
+            ZoneOffset.of("-03:00")
+        )
+
+    private fun generateResetRequestExpiration(): Instant = LocalDateTime
+        .now()
+        .plusMinutes(3)
         .toInstant(
             ZoneOffset.of("-03:00")
         )

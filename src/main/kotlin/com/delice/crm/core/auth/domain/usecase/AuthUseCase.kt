@@ -14,7 +14,7 @@ interface AuthUseCase {
     fun getGrantedAuthorities(user: User): List<GrantedAuthority>
     fun getAuthenticated(useUUID: UUID): AuthenticatedResponse
     fun findUserByLogin(login: String): User?
-    fun forgotPassword(email: String): ForgotPasswordResponse
+    fun forgotPassword(email: String, host: String): ForgotPasswordResponse
     fun resetPassword(userUUID: UUID, resetPassword: ResetPassword): ChangePasswordResponse
     fun resetPasswordWithToken(resetPassword: ResetPassword, token: String): ChangePasswordResponse
 }

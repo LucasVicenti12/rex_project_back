@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @RestController
 @RequestMapping("/auth")
@@ -92,9 +93,12 @@ class AuthWebService(
         @RequestParam(
             value = "email",
             required = true
-        ) email: String
+        ) email: String,
+        request: HttpServletRequest
     ): ResponseEntity<ForgotPasswordResponse> {
-        val response = authUseCase.forgotPassword(email)
+        val host = "${request.scheme}://${request.getHeader("Host")}"
+
+        val response = authUseCase.forgotPassword(email, host)
 
         if (response.error != null) {
             return ResponseEntity

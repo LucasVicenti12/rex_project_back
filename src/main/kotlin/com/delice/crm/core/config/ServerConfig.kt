@@ -45,7 +45,7 @@ class ServerConfig {
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/forgotPassword").permitAll()
                 .requestMatchers("/auth/resetPassword").permitAll()
-                .requestMatchers("/app/login").permitAll()
+                .requestMatchers("/app/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
@@ -56,7 +56,7 @@ class ServerConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:5173", "http://10.0.11.143:5173")
+        configuration.allowedOrigins = listOf("http://localhost:5175", "http://10.0.11.143:5173")
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true

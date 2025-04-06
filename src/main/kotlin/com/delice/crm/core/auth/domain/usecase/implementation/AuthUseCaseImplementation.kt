@@ -8,6 +8,7 @@ import com.delice.crm.core.auth.domain.repository.AuthRepository
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
 import com.delice.crm.core.auth.domain.usecase.response.*
 import com.delice.crm.core.config.entities.SystemUser
+import com.delice.crm.core.config.entities.TokenType
 import com.delice.crm.core.config.service.TokenService
 import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.queue.MailQueue
@@ -177,7 +178,7 @@ class AuthUseCaseImplementation(
             val auth = authentication.authenticate(userName)
             val user = auth.principal as SystemUser
 
-            val token = tokenService.generate(user.getUserData())
+            val token = tokenService.generate(user.getUserData(), TokenType.AUTH_REQUEST)
 
             return LoginResponse(token = token, error = null)
         } catch (e: Exception) {
@@ -222,16 +223,16 @@ class AuthUseCaseImplementation(
 
     override fun findUserByLogin(login: String): User? = authRepository.findUserByLogin(login)
 
-    override fun forgotPassword(email: String): ForgotPasswordResponse {
+    override fun forgotPassword(email: String, host: String): ForgotPasswordResponse {
         val user = userRepository.getUserByEmail(email) ?: return ForgotPasswordResponse(error = AUTH_USER_NOT_FOUND)
 
-        val token = tokenService.generate(user)
+        val token = tokenService.generate(user, TokenType.RESET_REQUEST)
 
         mailQueue.addMail(
             Mail(
                 subject = "Forgot Password request",
                 to = user.email!!,
-                content = "http://localhost:5173/app/forgotPassword?token=${token}",
+                content = "$host/app/resetPassword?token=$token",
             )
         )
 
