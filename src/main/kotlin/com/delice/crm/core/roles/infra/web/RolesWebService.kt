@@ -203,4 +203,25 @@ class RolesWebService(
             .ok()
             .body(response)
     }
+
+    @GetMapping("/getModuleByUUID/{uuid}")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    fun getModuleByUUID(
+        @PathVariable(
+            name = "uuid",
+            required = true
+        ) moduleUUID: UUID
+    ): ResponseEntity<ModuleResponse> {
+        val response = rolesUseCase.getModuleByUUID(moduleUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
 }

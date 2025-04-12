@@ -7,6 +7,7 @@ object ModuleDatabase: Table("modules"){
     var uuid = uuid("uuid").uniqueIndex()
     var code = varchar("code", 50).uniqueIndex()
     var label = varchar("label", 255)
+    var path = varchar("path", 20)
 }
 
 object RoleDatabase: Table("roles") {

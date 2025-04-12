@@ -165,4 +165,14 @@ class RolesUseCaseImplementation(
         logger.error("ROLES_MODULE_ATTACH_ROLE_TO_USER", e)
         RoleListResponse(roles = null, error = ROLE_UNEXPECTED_ERROR)
     }
+
+    override fun getModuleByUUID(uuid: UUID): ModuleResponse {
+        val module = rolesRepository.getModuleByUUID(uuid)
+
+        return if(module === null){
+            ModuleResponse(error = MODULE_NOT_FOUND)
+        }else{
+            ModuleResponse(module = module)
+        }
+    }
 }

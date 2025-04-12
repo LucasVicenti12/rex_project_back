@@ -84,8 +84,11 @@ class RolesRepositoryImplementation : RolesRepository {
         }
 
         return@transaction modules.map {
+            val module = getModuleByUUID(it!!)!!
+
             DataModule(
-                code = getModuleByUUID(it!!)!!.code,
+                code = module.code,
+                path = module.path,
                 roles = roles.map { role ->
                     DataRole(
                         code = role.code,
@@ -129,6 +132,7 @@ class RolesRepositoryImplementation : RolesRepository {
             it[uuid] = UUID.randomUUID()
             it[code] = module.code!!
             it[label] = module.label!!
+            it[path] = module.path!!
         }.resultedValues!!.map {
             convertResultRowToModule(it)
         }.firstOrNull()
@@ -175,5 +179,6 @@ class RolesRepositoryImplementation : RolesRepository {
         uuid = it[ModuleDatabase.uuid],
         code = it[ModuleDatabase.code],
         label = it[ModuleDatabase.label],
+        path = it[ModuleDatabase.path]
     )
 }

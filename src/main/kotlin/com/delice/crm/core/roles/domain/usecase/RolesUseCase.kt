@@ -16,4 +16,5 @@ interface RolesUseCase {
     fun createModule(module: Module): ModuleResponse
     fun deleteModule(moduleUUID: UUID): ModuleDeleteResponse
     fun attachRole(userUUID: UUID, roles: List<UUID>): RoleListResponse
+    fun getModuleByUUID(uuid: UUID): ModuleResponse
 }
