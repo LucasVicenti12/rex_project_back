@@ -71,6 +71,10 @@ class RolesUseCaseImplementation(
                 RoleResponse(role = null, error = ROLE_MODULE_UUID_IS_EMPTY)
             }
 
+            role.code.split(" ").size > 1 -> {
+                RoleResponse(error = ROLE_WITH_INVALID_CODE)
+            }
+
             rolesRepository.getRoleByCode(role.code) != null -> {
                 RoleResponse(role = null, error = ROLE_ALREADY_EXISTS)
             }
@@ -113,8 +117,12 @@ class RolesUseCaseImplementation(
                 ModuleResponse(module = null, error = MODULE_LABEL_IS_EMPTY)
             }
 
-            rolesRepository.getModuleByCode(module.code!!) != null -> {
+            (rolesRepository.getModuleByCode(module.code) != null && module.uuid === null) -> {
                 ModuleResponse(module = null, error = MODULE_ALREADY_EXISTS)
+            }
+
+            module.uuid !== null -> {
+                ModuleResponse(module = rolesRepository.editModule(module), error = null)
             }
 
             else -> {
@@ -142,7 +150,7 @@ class RolesUseCaseImplementation(
     }
 
     override fun attachRole(userUUID: UUID, roles: List<UUID>): RoleListResponse = try {
-        when{
+        when {
             roles.isEmpty() -> {
                 RoleListResponse(roles = null, error = ROLE_UUID_IS_EMPTY)
             }
@@ -169,10 +177,28 @@ class RolesUseCaseImplementation(
     override fun getModuleByUUID(uuid: UUID): ModuleResponse {
         val module = rolesRepository.getModuleByUUID(uuid)
 
-        return if(module === null){
+        return if (module === null) {
             ModuleResponse(error = MODULE_NOT_FOUND)
-        }else{
+        } else {
             ModuleResponse(module = module)
+        }
+    }
+
+    override fun getModuleWithRolesByUUID(uuid: UUID): ModuleWithRolesResponse {
+        val module = rolesRepository.getModuleByUUID(uuid)
+        val roles = rolesRepository.getRolesByModuleUUID(uuid)
+
+        return when {
+            module === null -> {
+                ModuleWithRolesResponse(error = MODULE_NOT_FOUND)
+            }
+
+            else -> {
+                ModuleWithRolesResponse(
+                    module = module,
+                    roles = roles,
+                )
+            }
         }
     }
 }

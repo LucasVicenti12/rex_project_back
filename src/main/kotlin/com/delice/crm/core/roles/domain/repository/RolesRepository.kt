@@ -20,8 +20,10 @@ interface RolesRepository {
     fun createRole(role: Role): Role?
     fun deleteRole(roleUUID: UUID)
     fun createModule(module: Module): Module?
+    fun editModule(module: Module): Module?
     fun deleteModule(moduleUUID: UUID)
     fun attachRole(userUUID: UUID, roles: List<UUID>): List<Role>?
     fun verifyModuleWithRole(moduleUUID: UUID): Boolean
     fun verifyUserWithRole(roleUUID: UUID): Boolean
+    fun getRolesByModuleUUID(uuid: UUID): List<Role>?
 }

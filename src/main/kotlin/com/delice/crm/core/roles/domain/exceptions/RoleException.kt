@@ -10,6 +10,7 @@ val ROLE_ALREADY_EXISTS = RoleException("ROLE_ALREADY_EXISTS", "This role alread
 val ROLE_CODE_IS_EMPTY = RoleException("ROLE_CODE_IS_EMPTY", "The role code must be provided")
 val ROLE_LABEL_IS_EMPTY = RoleException("ROLE_LABEL_IS_EMPTY", "The role label must be provided")
 val ROLE_MODULE_UUID_IS_EMPTY = RoleException("ROLE_MODULE_UUID_IS_EMPTY", "The role module UUID must be provided")
+val ROLE_WITH_INVALID_CODE = RoleException("ROLE_WITH_INVALID_CODE", "The code is invalid for this role")
 
 val MODULE_NOT_FOUND = RoleException("MODULE_NOT_FOUND", "This module not found")
 val MODULES_IS_EMPTY = RoleException("MODULES_IS_EMPTY", "There no modules available")

@@ -138,6 +138,18 @@ class RolesRepositoryImplementation : RolesRepository {
         }.firstOrNull()
     }
 
+    override fun editModule(module: Module): Module? {
+        return transaction {
+            ModuleDatabase.update({ ModuleDatabase.uuid eq module.uuid!! }) {
+                it[code] = module.code!!
+                it[label] = module.label!!
+                it[path] = module.path!!
+            }
+
+            return@transaction getModuleByUUID(module.uuid!!)
+        }
+    }
+
     override fun deleteModule(moduleUUID: UUID) {
         transaction {
             ModuleDatabase.deleteWhere { uuid eq moduleUUID }
@@ -165,6 +177,14 @@ class RolesRepositoryImplementation : RolesRepository {
 
     override fun verifyUserWithRole(roleUUID: UUID): Boolean = transaction {
         PermissionDatabase.selectAll().where { PermissionDatabase.roleUUID eq roleUUID }.count() > 0
+    }
+
+    override fun getRolesByModuleUUID(uuid: UUID): List<Role>? = transaction {
+        RoleDatabase.selectAll().where {
+            RoleDatabase.moduleUUID eq uuid
+        }.map {
+            convertResultRowToRole(it)
+        }
     }
 
     private fun convertResultRowToRole(it: ResultRow): Role = Role(
