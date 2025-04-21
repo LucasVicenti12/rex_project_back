@@ -41,8 +41,8 @@ class UserUseCaseImplementation(
         )
     }
 
-    override fun getUserPagination(page: Int, count: Int): UserPaginationResponse = try {
-        val pagination = userRepository.getUserPagination(page, count)
+    override fun getUserPagination(page: Int, count: Int, params: Map<String, Any?>): UserPaginationResponse = try {
+        val pagination = userRepository.getUserPagination(page, count, params)
 
         UserPaginationResponse(
             users = pagination,

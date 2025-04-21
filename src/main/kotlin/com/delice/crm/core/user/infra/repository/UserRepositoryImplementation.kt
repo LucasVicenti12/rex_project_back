@@ -5,6 +5,7 @@ import com.delice.crm.core.user.domain.entities.UserStatus
 import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.user.infra.database.UserDatabase
+import com.delice.crm.core.user.infra.database.UserFilter
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.binaryToString
 import com.delice.crm.core.utils.pagination.Pagination
@@ -30,11 +31,19 @@ class UserRepositoryImplementation : UserRepository {
         }.firstOrNull()
     }
 
-    override fun getUserPagination(page: Int, count: Int): Pagination<User>? = transaction {
-        val total = UserDatabase.selectAll().count().toInt()
-        val items = UserDatabase.selectAll().orderBy(UserDatabase.name).limit(count).offset(page.toLong()).map {
-            convertResultRowToUser(it)
-        }
+    override fun getUserPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<User>? = transaction {
+        val query = UserDatabase
+            .selectAll()
+            .where(UserFilter(params).toFilter(UserDatabase))
+
+        val total = query.count().toInt()
+        val items = query
+            .orderBy(UserDatabase.name)
+            .limit(count)
+            .offset(page.toLong())
+            .map {
+                convertResultRowToUser(it)
+            }
 
         Pagination(
             items = items,

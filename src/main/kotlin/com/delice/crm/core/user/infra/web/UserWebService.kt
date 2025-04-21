@@ -3,6 +3,8 @@ package com.delice.crm.core.user.infra.web
 import com.delice.crm.core.user.domain.usecase.UserUseCase
 import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
+import com.delice.crm.core.utils.filter.parametersToMap
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -46,8 +48,11 @@ class UserWebService(
             value = "count",
             required = true
         ) count: Int,
+        request: HttpServletRequest
     ): ResponseEntity<UserPaginationResponse> {
-        val response = userUseCase.getUserPagination(page, count)
+        val params = request.queryString.parametersToMap()
+
+        val response = userUseCase.getUserPagination(page, count, params)
 
         if(response.error != null){
             return ResponseEntity
