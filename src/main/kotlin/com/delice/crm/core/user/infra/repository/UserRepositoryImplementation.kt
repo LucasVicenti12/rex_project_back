@@ -16,6 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.ceil
 
 @Service
 class UserRepositoryImplementation : UserRepository {
@@ -36,7 +37,7 @@ class UserRepositoryImplementation : UserRepository {
             .selectAll()
             .where(UserFilter(params).toFilter(UserDatabase))
 
-        val total = query.count().toInt()
+        val total = ceil(query.count().toDouble() / count).toInt()
         val items = query
             .orderBy(UserDatabase.name)
             .limit(count)
