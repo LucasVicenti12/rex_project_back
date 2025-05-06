@@ -38,10 +38,11 @@ class UserRepositoryImplementation : UserRepository {
             .where(UserFilter(params).toFilter(UserDatabase))
 
         val total = ceil(query.count().toDouble() / count).toInt()
+
         val items = query
             .orderBy(UserDatabase.name)
             .limit(count)
-            .offset(page.toLong())
+            .offset((page * count).toLong())
             .map {
                 convertResultRowToUser(it)
             }
