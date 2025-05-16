@@ -28,6 +28,7 @@ object UserDatabase : Table("users") {
     var dateOfBirth = date("date_of_birth")
     var state = char("state", 2)
     var city = varchar("city", 60)
+    var address = varchar("address", 150)
     var zipCode = varchar("zip_code", 8).nullable()
     var createdAt = datetime("created_at")
     var modifiedAt = datetime("modified_at")

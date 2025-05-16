@@ -29,13 +29,15 @@ class SecurityFilter : OncePerRequestFilter() {
 
         if (token.isNotBlank()) {
             val login = tokenService.validate(token)
-            val user = authRepository.findUserByLogin(login).run {
-                SystemUser(this!!, authRepository.getGrantedAuthorities(this))
+            val user = authRepository.findUserByLogin(login)?.run {
+                SystemUser(this, authRepository.getGrantedAuthorities(this))
             }
 
-            val authentication = UsernamePasswordAuthenticationToken(user, null, user.authorities)
+            if(user != null){
+                val authentication = UsernamePasswordAuthenticationToken(user, null, user.authorities)
 
-            SecurityContextHolder.getContext().authentication = authentication
+                SecurityContextHolder.getContext().authentication = authentication
+            }
         }
 
         filterChain.doFilter(request, response)

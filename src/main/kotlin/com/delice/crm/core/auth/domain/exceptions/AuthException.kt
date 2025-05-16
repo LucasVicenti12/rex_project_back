@@ -14,6 +14,7 @@ val DATE_OF_BIRTH_INVALID = AuthException("DATE_OF_BIRTH_INVALID", "The date of 
 val CITY_MUST_BE_PROVIDED = AuthException("CITY_MUST_BE_PROVIDED", "The city of user must be provided")
 val STATE_MUST_BE_PROVIDED = AuthException("STATE_MUST_BE_PROVIDED", "The state of user must be provided")
 val ZIP_CODE_MUST_BE_PROVIDED = AuthException("ZIP_CODE_MUST_BE_PROVIDED", "The zip code of user must be provided")
+val ADDRESS_MUST_BE_PROVIDED = AuthException("ADDRESS_MUST_BE_PROVIDED", "The address of user must be provided")
 val AUTH_USER_NOT_FOUND = AuthException("AUTH_USER_NOT_FOUND", "User not found")
 val PASSWORDS_DONT_MATCH = AuthException("PASSWORDS_DONT_MATCH", "The passwords don't match")
 val CONFIRM_PASSWORD_MUST_BE_PROVIDED = AuthException("CONFIRM_PASSWORD_MUST_BE_PROVIDED", "The confirm password must be provided")

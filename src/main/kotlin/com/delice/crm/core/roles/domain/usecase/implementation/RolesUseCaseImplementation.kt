@@ -151,10 +151,6 @@ class RolesUseCaseImplementation(
 
     override fun attachRole(userUUID: UUID, roles: List<UUID>): RoleListResponse = try {
         when {
-            roles.isEmpty() -> {
-                RoleListResponse(roles = null, error = ROLE_UUID_IS_EMPTY)
-            }
-
             userUUID.toString().isEmpty() -> {
                 RoleListResponse(roles = null, error = USER_UUID_IS_EMPTY)
             }

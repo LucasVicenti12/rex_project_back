@@ -12,7 +12,7 @@ data class User(
     val surname: String? = "",
     val email: String? = "",
     val userType: UserType? = UserType.EMPLOYEE,
-    val status: UserStatus? = UserStatus.ACTIVE,
+    val status: UserStatus? = UserStatus.FIRST_ACCESS,
     val avatar: String? = "",
     val document: String? = "",
     val phone: String? = "",
@@ -20,6 +20,7 @@ data class User(
     val state: String? = "",
     val city: String? = "",
     val zipCode: String? = "",
+    val address: String? = "",
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
 )

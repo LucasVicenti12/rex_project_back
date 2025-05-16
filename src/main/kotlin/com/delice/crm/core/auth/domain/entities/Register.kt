@@ -11,7 +11,7 @@ class Register(
     val surname: String? = "",
     val email: String? = "",
     val userType: UserType? = UserType.EMPLOYEE,
-    val status: UserStatus? = UserStatus.ACTIVE,
+    val status: UserStatus? = UserStatus.FIRST_ACCESS,
     val avatar: String? = "",
     val document: String? = "",
     val phone: String? = "",
@@ -19,4 +19,5 @@ class Register(
     val state: String? = "",
     val city: String? = "",
     val zipCode: String? = "",
+    val address: String? = "",
 )

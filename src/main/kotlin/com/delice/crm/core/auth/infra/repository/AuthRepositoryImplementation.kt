@@ -8,7 +8,7 @@ import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.binaryToString
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
@@ -25,7 +25,9 @@ class AuthRepositoryImplementation(
     override fun findUserByLogin(login: String): User? = transaction {
         UserDatabase
             .selectAll()
-            .where(UserDatabase.login eq login).map {
+            .where {
+                (UserDatabase.login eq login) and (UserDatabase.status neq UserStatus.INACTIVE.code)
+            }.map {
                 User(
                     uuid = it[UserDatabase.uuid],
                     login = it[UserDatabase.login],
@@ -67,6 +69,7 @@ class AuthRepositoryImplementation(
             it[state] = user.state!!
             it[city] = user.city!!
             it[zipCode] = user.zipCode!!
+            it[address] = user.address!!
             it[createdAt] = LocalDateTime.now()
             it[modifiedAt] = LocalDateTime.now()
         }.resultedValues?.map {
@@ -93,6 +96,8 @@ class AuthRepositoryImplementation(
     }
 
     override fun getGrantedAuthorities(user: User): List<GrantedAuthority> {
+        if (user.status === UserStatus.FIRST_ACCESS) return emptyList()
+
         val roles = rolesRepository.getRolesPerUser(user.uuid!!)!!
 
         return roles.map { SimpleGrantedAuthority(it.code) }

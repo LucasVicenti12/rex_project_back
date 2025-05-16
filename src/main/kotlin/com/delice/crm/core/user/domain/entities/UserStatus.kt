@@ -4,5 +4,6 @@ import com.delice.crm.core.utils.enums.HasCode
 
 enum class UserStatus(override val code: Int) : HasCode {
     ACTIVE(0),
-    INACTIVE(1);
+    INACTIVE(1),
+    FIRST_ACCESS(2);
 }

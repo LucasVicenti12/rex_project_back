@@ -12,9 +12,11 @@ import com.delice.crm.core.utils.pagination.Pagination
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.ceil
 
@@ -69,7 +71,36 @@ class UserRepositoryImplementation : UserRepository {
             it[password] = newPassword
         }
 
-        return@transaction getUserByUUID(userUUID)
+        val user = getUserByUUID(userUUID)
+
+        if (user != null && user.status === UserStatus.FIRST_ACCESS) {
+            UserDatabase.update({
+                UserDatabase.uuid eq userUUID
+            }) {
+                it[status] = UserStatus.ACTIVE.code
+            }
+        }
+
+        return@transaction user
+    }
+
+    override fun changeUser(user: User): User? = transaction {
+        UserDatabase.update({ UserDatabase.uuid eq user.uuid!! }) {
+            it[userType] = user.userType!!.type
+            it[email] = user.email!!
+            if (user.avatar != null) {
+                it[avatar] = ExposedBlob(user.avatar.toByteArray())
+            }
+            it[status] = user.status!!.code
+            it[phone] = user.phone
+            it[state] = user.state!!
+            it[city] = user.city!!
+            it[zipCode] = user.zipCode!!
+            it[address] = user.address!!
+            it[modifiedAt] = LocalDateTime.now()
+        }
+
+        return@transaction getUserByUUID(user.uuid!!)
     }
 
     private fun convertResultRowToUser(it: ResultRow): User = User(
@@ -88,6 +119,7 @@ class UserRepositoryImplementation : UserRepository {
         state = it[UserDatabase.state],
         city = it[UserDatabase.city],
         zipCode = it[UserDatabase.zipCode],
+        address = it[UserDatabase.address],
         createdAt = it[UserDatabase.createdAt],
         modifiedAt = it[UserDatabase.modifiedAt],
     )

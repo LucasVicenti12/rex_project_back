@@ -12,4 +12,5 @@ interface UserRepository {
     fun getUserPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<User>?
     fun getUserByEmail(email: String): User?
     fun changePassword(userUUID: UUID, newPassword: String): User?
+    fun changeUser(user: User): User?
 }

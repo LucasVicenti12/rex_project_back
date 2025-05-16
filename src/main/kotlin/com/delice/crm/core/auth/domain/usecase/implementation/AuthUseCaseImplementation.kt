@@ -14,6 +14,7 @@ import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.queue.MailQueue
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.user.domain.entities.User
+import com.delice.crm.core.user.domain.entities.UserStatus
 import com.delice.crm.core.user.domain.repository.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -104,6 +105,13 @@ class AuthUseCaseImplementation(
                 return RegisterResponse(
                     user = null,
                     error = ZIP_CODE_MUST_BE_PROVIDED
+                )
+            }
+
+            if (register.address.isNullOrBlank()) {
+                return RegisterResponse(
+                    user = null,
+                    error = ADDRESS_MUST_BE_PROVIDED
                 )
             }
 
@@ -207,7 +215,9 @@ class AuthUseCaseImplementation(
                     error = AUTH_USER_NOT_FOUND
                 )
 
-            val modules = rolesRepository.getModuleRolesByUserUUID(user.uuid!!)
+            val modules =
+                if (user.status === UserStatus.FIRST_ACCESS) emptyList()
+                else rolesRepository.getModuleRolesByUserUUID(user.uuid!!)
 
             return AuthenticatedResponse(
                 user = user,
