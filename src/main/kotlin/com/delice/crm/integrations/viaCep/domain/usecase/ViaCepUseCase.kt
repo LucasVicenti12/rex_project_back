@@ -1,8 +1,7 @@
 package com.delice.crm.integrations.viaCep.domain.usecase
 
-import com.delice.crm.integrations.viaCep.domain.entities.ViaCepAddress
+import com.delice.crm.integrations.viaCep.domain.usecase.response.ViaCepAddressResponse
 
 interface ViaCepUseCase {
-    fun getAddressInViaCepBase(zipCode: Int): ViaCepAddress?
-    fun getQueryAddressInViaCepBase(address: String): List<ViaCepAddress>?
+    fun getAddressInViaCepBase(zipCode: String): ViaCepAddressResponse
 }

@@ -31,7 +31,7 @@ class RolesWebService(
     private lateinit var tokenService: TokenService
 
     @GetMapping("/allRoles")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getRoles(): ResponseEntity<RoleListResponse> {
         val response = rolesUseCase.getRoles()
 
@@ -47,7 +47,7 @@ class RolesWebService(
     }
 
     @GetMapping("/allModules")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getModules(): ResponseEntity<ModuleListResponse> {
         val response = rolesUseCase.getModules()
 
@@ -63,7 +63,7 @@ class RolesWebService(
     }
 
     @GetMapping("/rolesPerUser")
-//    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
+    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
     fun getRolesPerUser(
         @RequestParam(
             value = "uuid",
@@ -109,7 +109,7 @@ class RolesWebService(
     }
 
     @PostMapping("/createRole")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun createRole(@RequestBody role: Role): ResponseEntity<RoleResponse> {
         val response = rolesUseCase.createRole(role)
 
@@ -125,7 +125,7 @@ class RolesWebService(
     }
 
     @DeleteMapping("/deleteRole/{uuid}")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun deleteRole(
         @PathVariable(
             name = "uuid",
@@ -146,7 +146,7 @@ class RolesWebService(
     }
 
     @PostMapping("/createModule")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun createModule(@RequestBody module: Module): ResponseEntity<ModuleResponse> {
         val response = rolesUseCase.createModule(module)
 
@@ -162,7 +162,7 @@ class RolesWebService(
     }
 
     @DeleteMapping("/deleteModule/{uuid}")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun deleteModule(
         @PathVariable(
             name = "uuid",
@@ -183,7 +183,7 @@ class RolesWebService(
     }
 
     @PostMapping("/attach/{uuid}")
-//    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
+    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
     fun attachRole(
         @PathVariable(
             name = "uuid",
@@ -205,7 +205,7 @@ class RolesWebService(
     }
 
     @GetMapping("/getModuleByUUID/{uuid}")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getModuleByUUID(
         @PathVariable(
             name = "uuid",
@@ -226,7 +226,7 @@ class RolesWebService(
     }
 
     @GetMapping("/getRoleByModuleUUID/{uuid}")
-//    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getRoleByModuleUUID(
         @PathVariable(
             name = "uuid",
