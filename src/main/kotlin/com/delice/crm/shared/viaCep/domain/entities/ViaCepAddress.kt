@@ -1,4 +1,4 @@
-package com.delice.crm.integrations.viaCep.domain.entities
+package com.delice.crm.shared.viaCep.domain.entities
 
 class ViaCepAddress (
     val zipCode: String? = "",

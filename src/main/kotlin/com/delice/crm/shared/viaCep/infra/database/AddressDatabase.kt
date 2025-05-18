@@ -1,4 +1,4 @@
-package com.delice.crm.integrations.viaCep.infra.database
+package com.delice.crm.shared.viaCep.infra.database
 
 import org.jetbrains.exposed.sql.Table
 

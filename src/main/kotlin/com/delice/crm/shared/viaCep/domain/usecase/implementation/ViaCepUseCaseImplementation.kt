@@ -1,13 +1,12 @@
-package com.delice.crm.integrations.viaCep.domain.usecase.implementation
+package com.delice.crm.shared.viaCep.domain.usecase.implementation
 
 import com.delice.crm.core.utils.extensions.removeAlphaChars
-import com.delice.crm.core.utils.extensions.removeSpecialChars
-import com.delice.crm.integrations.viaCep.domain.exceptions.ADDRESS_NOT_FOUND
-import com.delice.crm.integrations.viaCep.domain.exceptions.ADDRESS_UNEXPECTED_ERROR
-import com.delice.crm.integrations.viaCep.domain.exceptions.INVALID_ZIP_CODE
-import com.delice.crm.integrations.viaCep.domain.repository.ViaCepRepository
-import com.delice.crm.integrations.viaCep.domain.usecase.ViaCepUseCase
-import com.delice.crm.integrations.viaCep.domain.usecase.response.ViaCepAddressResponse
+import com.delice.crm.shared.viaCep.domain.exceptions.ADDRESS_NOT_FOUND
+import com.delice.crm.shared.viaCep.domain.exceptions.ADDRESS_UNEXPECTED_ERROR
+import com.delice.crm.shared.viaCep.domain.exceptions.INVALID_ZIP_CODE
+import com.delice.crm.shared.viaCep.domain.repository.ViaCepRepository
+import com.delice.crm.shared.viaCep.domain.usecase.ViaCepUseCase
+import com.delice.crm.shared.viaCep.domain.usecase.response.ViaCepAddressResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

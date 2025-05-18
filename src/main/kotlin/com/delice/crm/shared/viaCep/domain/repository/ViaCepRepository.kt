@@ -1,6 +1,6 @@
-package com.delice.crm.integrations.viaCep.domain.repository
+package com.delice.crm.shared.viaCep.domain.repository
 
-import com.delice.crm.integrations.viaCep.domain.entities.ViaCepAddress
+import com.delice.crm.shared.viaCep.domain.entities.ViaCepAddress
 
 interface ViaCepRepository {
     fun getAddressInBase(zipCode: String): ViaCepAddress?
