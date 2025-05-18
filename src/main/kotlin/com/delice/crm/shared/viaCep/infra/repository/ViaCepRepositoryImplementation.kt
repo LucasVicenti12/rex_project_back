@@ -1,9 +1,9 @@
-package com.delice.crm.integrations.viaCep.infra.repository
+package com.delice.crm.shared.viaCep.infra.repository
 
-import com.delice.crm.integrations.viaCep.domain.entities.ViaCepAddress
-import com.delice.crm.integrations.viaCep.domain.entities.ViaCepResponse
-import com.delice.crm.integrations.viaCep.domain.repository.ViaCepRepository
-import com.delice.crm.integrations.viaCep.infra.database.AddressDatabase
+import com.delice.crm.shared.viaCep.domain.entities.ViaCepAddress
+import com.delice.crm.shared.viaCep.domain.entities.ViaCepResponse
+import com.delice.crm.shared.viaCep.domain.repository.ViaCepRepository
+import com.delice.crm.shared.viaCep.infra.database.AddressDatabase
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll

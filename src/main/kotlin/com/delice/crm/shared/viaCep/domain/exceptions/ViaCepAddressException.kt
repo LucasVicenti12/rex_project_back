@@ -1,4 +1,4 @@
-package com.delice.crm.integrations.viaCep.domain.exceptions
+package com.delice.crm.shared.viaCep.domain.exceptions
 
 import com.delice.crm.core.utils.exception.DefaultError
 

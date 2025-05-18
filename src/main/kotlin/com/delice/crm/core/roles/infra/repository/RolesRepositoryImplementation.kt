@@ -89,7 +89,7 @@ class RolesRepositoryImplementation : RolesRepository {
             DataModule(
                 code = module.code,
                 path = module.path,
-                roles = roles.map { role ->
+                roles = roles.filter { role -> role.moduleUUID == module.uuid }.map { role ->
                     DataRole(
                         code = role.code,
                         label = role.label

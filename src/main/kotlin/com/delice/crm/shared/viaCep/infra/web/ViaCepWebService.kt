@@ -1,7 +1,7 @@
-package com.delice.crm.integrations.viaCep.infra.web
+package com.delice.crm.shared.viaCep.infra.web
 
-import com.delice.crm.integrations.viaCep.domain.usecase.ViaCepUseCase
-import com.delice.crm.integrations.viaCep.domain.usecase.response.ViaCepAddressResponse
+import com.delice.crm.shared.viaCep.domain.usecase.ViaCepUseCase
+import com.delice.crm.shared.viaCep.domain.usecase.response.ViaCepAddressResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
