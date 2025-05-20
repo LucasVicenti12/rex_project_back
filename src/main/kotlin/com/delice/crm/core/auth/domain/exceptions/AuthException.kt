@@ -3,6 +3,7 @@ package com.delice.crm.core.auth.domain.exceptions
 import com.delice.crm.core.utils.exception.DefaultError
 
 val AUTH_UNEXPECTED = AuthException("AUTH_UNEXPECTED", "An unexpected error occurred")
+val INVALID_CREDENTIALS = AuthException("INVALID_CREDENTIALS", "Invalid login or password")
 val LOGIN_MUST_BE_PROVIDED = AuthException("LOGIN_MUST_BE_PROVIDED", "The login must be provided")
 val PASSWORD_MUST_BE_PROVIDED = AuthException("PASSWORD_MUST_BE_PROVIDED", "The password must be provided")
 val NAME_MUST_BE_PROVIDED = AuthException("NAME_MUST_BE_PROVIDED", "The name or surname must be provided")
