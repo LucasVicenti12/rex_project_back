@@ -32,6 +32,8 @@ object UserDatabase : Table("users") {
     var zipCode = varchar("zip_code", 8).nullable()
     var createdAt = datetime("created_at")
     var modifiedAt = datetime("modified_at")
+
+    override val primaryKey = PrimaryKey(uuid, name = "pk_customer")
 }
 
 data class UserFilter(

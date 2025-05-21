@@ -40,7 +40,7 @@ class ViaCepUseCaseImplementation(
 
             return ViaCepAddressResponse(address = address)
         } catch (e: Exception) {
-            logger.error("USER_MODULE_GET_BY_UUID", e)
+            logger.error("VIA_CEP_QUERY", e)
             return ViaCepAddressResponse(error = ADDRESS_UNEXPECTED_ERROR)
         }
     }

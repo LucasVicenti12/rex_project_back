@@ -3,6 +3,7 @@ package com.delice.crm.shared.viaCep.domain.entities
 class ViaCepAddress (
     val zipCode: String? = "",
     val address: String? = "",
+    val district: String? = "",
     val city: String? = "",
     val state: String? = ""
 )

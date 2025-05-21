@@ -22,6 +22,7 @@ class ViaCepRepositoryImplementation : ViaCepRepository {
                 ViaCepAddress(
                     zipCode = it[AddressDatabase.zipCode],
                     address = it[AddressDatabase.address],
+                    district = it[AddressDatabase.district],
                     city = it[AddressDatabase.city],
                     state = it[AddressDatabase.state],
                 )
@@ -45,7 +46,8 @@ class ViaCepRepositoryImplementation : ViaCepRepository {
 
         return ViaCepAddress(
             zipCode = zipCode,
-            address = "${viaCepResponse.logradouro} - ${viaCepResponse.bairro}",
+            address = viaCepResponse.logradouro,
+            district = viaCepResponse.bairro,
             city = viaCepResponse.localidade,
             state = viaCepResponse.uf,
         )
@@ -58,6 +60,7 @@ class ViaCepRepositoryImplementation : ViaCepRepository {
                 it[zipCode] = address.zipCode!!
                 it[city] = address.city!!
                 it[state] = address.state!!
+                it[district] = address.district!!
                 it[AddressDatabase.address] = address.address!!
             }
         }
