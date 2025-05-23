@@ -1,7 +1,7 @@
 package com.delice.crm.modules.customer.domain.entities
 
 import com.delice.crm.core.utils.contact.Contact
-import com.delice.crm.shared.economicActivities.domain.entities.EconomicActivity
+import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import java.time.LocalDateTime
 import java.util.UUID
 

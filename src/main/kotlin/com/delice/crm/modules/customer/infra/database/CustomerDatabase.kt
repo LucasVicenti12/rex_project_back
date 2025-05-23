@@ -2,7 +2,7 @@ package com.delice.crm.modules.customer.infra.database
 
 
 import com.delice.crm.core.user.infra.database.UserDatabase
-import com.delice.crm.shared.economicActivities.infra.database.EconomicActivityDatabase
+import com.delice.crm.api.economicActivities.infra.database.EconomicActivityDatabase
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.datetime
 
@@ -28,13 +28,13 @@ object CustomerDatabase : Table("customer") {
     override val primaryKey = PrimaryKey(uuid, name = "pk_customer")
 }
 
-object CustomerEconomicActivities : Table("customer_economic_activities") {
+object CustomerEconomicActivitiesDatabase : Table("customer_economic_activities") {
     var uuid = uuid("uuid").uniqueIndex()
     var customerUUID = uuid("customer_uuid") references CustomerDatabase.uuid
     var economicActivityUUID = uuid("economic_activity_uuid") references EconomicActivityDatabase.uuid
 }
 
-object CustomerContacts : Table("customer_contacts") {
+object CustomerContactsDatabase : Table("customer_contacts") {
     var uuid = uuid("uuid").uniqueIndex()
     var contactType = varchar("contact_type", 10)
     var label = text("label")
