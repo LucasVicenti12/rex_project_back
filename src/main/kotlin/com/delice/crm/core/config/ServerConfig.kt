@@ -1,5 +1,6 @@
 package com.delice.crm.core.config
 
+import com.delice.crm.core.config.handlers.AccessDenied
 import com.delice.crm.core.config.service.SecurityFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -15,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
@@ -26,6 +28,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class ServerConfig {
     @Autowired
     private lateinit var securityFilter: SecurityFilter
+
+    @Autowired
+    private lateinit var accessDeniedHandler: AccessDenied
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
@@ -42,6 +47,7 @@ class ServerConfig {
         }
         .authorizeHttpRequests {
             it
+                .requestMatchers("/auth/register").permitAll()
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/forgotPassword").permitAll()
                 .requestMatchers("/auth/resetPassword").permitAll()
@@ -49,6 +55,9 @@ class ServerConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
+        }
+        .exceptionHandling{
+            it.accessDeniedHandler(accessDeniedHandler)
         }
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter::class.java)
         .build()

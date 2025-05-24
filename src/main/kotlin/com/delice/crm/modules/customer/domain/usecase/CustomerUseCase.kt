@@ -9,10 +9,10 @@ import com.delice.crm.modules.customer.domain.usecase.response.CustomerResponse
 import java.util.*
 
 interface CustomerUseCase {
-    fun registerCustomer(customer: Customer): CustomerResponse
-    fun queryPreInfoCustomerByDocument(document: String): CustomerResponse
-    fun approvalCustomer(status: CustomerStatus, customerUUID: UUID): ApprovalCustomerResponse
+    fun registerCustomer(customer: Customer, userUUID: UUID): CustomerResponse
+    fun updateCustomer(customer: Customer, userUUID: UUID): CustomerResponse
+    fun approvalCustomer(status: CustomerStatus, customerUUID: UUID, userUUID: UUID): ApprovalCustomerResponse
     fun listEconomicActivitiesByCustomerUUID(customerUUID: UUID): CustomerEconomicActivities
-    fun getCustomerByUUID(customer: Customer): CustomerResponse
+    fun getCustomerByUUID(customerUUID: UUID): CustomerResponse
     fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): CustomerPaginationResponse
 }

@@ -22,7 +22,7 @@ class EconomicActivityUseCaseImplementation(
         try {
             val query = code.removeSpecialChars()
 
-            if (query.isBlank() || query.length < 5) {
+            if (query.isBlank() || query.length != 5) {
                 return EconomicActivityResponse(error = INVALID_ECONOMIC_ACTIVITY)
             }
 

@@ -1,6 +1,9 @@
 package com.delice.crm.api.economicActivities.domain.entities
 
+import java.util.UUID
+
 class EconomicActivity (
+    val uuid: UUID,
     val code: String,
     val description: String,
     val group: EconomicActivityAttribute,

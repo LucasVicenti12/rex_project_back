@@ -3,7 +3,13 @@ package com.delice.crm.modules.customer.infra.database
 
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.api.economicActivities.infra.database.EconomicActivityDatabase
+import com.delice.crm.core.utils.extensions.removeSpecialChars
+import com.delice.crm.core.utils.filter.ExposedFilter
+import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object CustomerDatabase : Table("customer") {
@@ -40,4 +46,78 @@ object CustomerContactsDatabase : Table("customer_contacts") {
     var label = text("label")
     var isPrincipal = bool("is_principal")
     var customerUUID = uuid("customer_uuid") references CustomerDatabase.uuid
+}
+
+data class CustomerFilter(
+    val parameters: Map<String, Any?>
+) : ExposedFilter<CustomerDatabase> {
+    override fun toFilter(table: CustomerDatabase): Op<Boolean> {
+        var op: Op<Boolean> = Op.TRUE
+
+        if (parameters.isEmpty()) {
+            return op
+        }
+
+        parameters["companyName"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.companyName like "%$it%")
+            }
+        }
+
+        parameters["tradingName"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.tradingName like "%$it%")
+            }
+        }
+
+        parameters["personName"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.personName like "%$it%")
+            }
+        }
+
+        parameters["document"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.document like "%${it.removeSpecialChars()}%")
+            }
+        }
+
+        parameters["state"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.state like "%$it%")
+            }
+        }
+
+        parameters["address"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.address like "%$it%")
+            }
+        }
+
+        parameters["city"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.city like "%$it%")
+            }
+        }
+
+        parameters["zipCode"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.zipCode like "%${it.removeSpecialChars()}%")
+            }
+        }
+
+        parameters["complement"]?.let {
+            if (it is String && it.isNotBlank()) {
+                op = op.and(table.complement like "%$it%")
+            }
+        }
+
+        parameters["status"]?.let {
+            if (it is Int) {
+                op = op.and(table.status eq it)
+            }
+        }
+
+        return op
+    }
 }

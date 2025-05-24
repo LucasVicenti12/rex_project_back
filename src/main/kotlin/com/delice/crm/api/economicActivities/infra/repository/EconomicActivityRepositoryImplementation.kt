@@ -20,6 +20,7 @@ class EconomicActivityRepositoryImplementation : EconomicActivityRepository {
             EconomicActivityDatabase.code eq code
         ).map {
             EconomicActivity(
+                uuid = it[EconomicActivityDatabase.uuid],
                 code = it[EconomicActivityDatabase.code],
                 description = it[EconomicActivityDatabase.description],
                 group = EconomicActivityAttribute(
@@ -55,6 +56,7 @@ class EconomicActivityRepositoryImplementation : EconomicActivityRepository {
         }
 
         return EconomicActivity(
+            uuid = UUID.randomUUID(),
             code = code,
             description = economicActivityResponse.descricao,
             group = EconomicActivityAttribute(
@@ -75,7 +77,7 @@ class EconomicActivityRepositoryImplementation : EconomicActivityRepository {
     override fun saveEconomicActivityInBase(activity: EconomicActivity) {
         transaction {
             EconomicActivityDatabase.insert {
-                it[uuid] = UUID.randomUUID()
+                it[uuid] = activity.uuid
                 it[code] = activity.code
                 it[description] = activity.description
                 it[groupCode] = activity.group.code

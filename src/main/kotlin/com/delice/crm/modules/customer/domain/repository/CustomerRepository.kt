@@ -7,11 +7,11 @@ import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import java.util.UUID
 
 interface CustomerRepository {
-    fun registerCustomer(customer: Customer): Customer?
-    fun queryPreInfoCustomerByDocumentInBase(document: String): Customer?
-    fun approvalCustomer(status: CustomerStatus, customerUUID: UUID)
+    fun registerCustomer(customer: Customer, userUUID: UUID): Customer?
+    fun updateCustomer(customer: Customer, userUUID: UUID): Customer?
+    fun approvalCustomer(status: CustomerStatus, customerUUID: UUID, userUUID: UUID)
     fun listEconomicActivitiesByCustomerUUID(customerUUID: UUID): List<EconomicActivity>?
-    fun getCustomerByUUID(customer: Customer): Customer?
-    fun getCustomerByDocument(customer: Customer): Customer?
+    fun getCustomerByUUID(customerUUID: UUID): Customer?
+    fun getCustomerByDocument(document: String): Customer?
     fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Customer>?
 }

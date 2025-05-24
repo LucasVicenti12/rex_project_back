@@ -8,6 +8,7 @@ val TRADING_NAME_IS_EMPTY = CustomerExceptions("TRADING_NAME_IS_EMPTY", "The tra
 val PERSON_NAME_IS_EMPTY = CustomerExceptions("PERSON_NAME_IS_EMPTY", "The person's name must be provided")
 val DOCUMENT_MUST_PROVIDED = CustomerExceptions("DOCUMENT_MUST_PROVIDED", "The document must be provided")
 val CUSTOMER_ALREADY_EXISTS = CustomerExceptions("CUSTOMER_ALREADY_EXISTS", "Company whit this document already exists")
+val CUSTOMER_NOT_FOUND = CustomerExceptions("CUSTOMER_NOT_FOUND", "Customer not found")
 val CUSTOMER_CONTACTS_IS_EMPTY = CustomerExceptions("CUSTOMER_CONTACTS_IS_EMPTY", "At least one contact must be provided")
 val CUSTOMER_STATE_IS_EMPTY = CustomerExceptions("CUSTOMER_STATE_IS_EMPTY", "The state must be provided")
 val CUSTOMER_CITY_IS_EMPTY = CustomerExceptions("CUSTOMER_CITY_IS_EMPTY", "The city must be provided")
