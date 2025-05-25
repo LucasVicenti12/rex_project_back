@@ -10,6 +10,7 @@ import com.delice.crm.api.economicActivities.infra.database.EconomicActivityData
 import com.delice.crm.core.utils.contact.Contact
 import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
 import com.delice.crm.modules.customer.infra.database.CustomerContactsDatabase
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.customer.infra.database.CustomerEconomicActivitiesDatabase
@@ -209,6 +210,18 @@ class CustomerRepositoryImplementation() : CustomerRepository {
                 total = total,
             )
         }
+
+    override fun listSimpleCustomer(): List<SimpleCustomer>? = transaction {
+        CustomerDatabase.select(CustomerDatabase.uuid, CustomerDatabase.companyName, CustomerDatabase.document)
+            .where(CustomerDatabase.status eq CustomerStatus.FIT.code)
+            .map {
+                SimpleCustomer(
+                    uuid = it[CustomerDatabase.uuid],
+                    companyName = it[CustomerDatabase.companyName],
+                    document = it[CustomerDatabase.document],
+                )
+            }
+    }
 
     private fun getContactsByCustomerUUID(customerUUID: UUID): List<Contact> = transaction {
         CustomerContactsDatabase

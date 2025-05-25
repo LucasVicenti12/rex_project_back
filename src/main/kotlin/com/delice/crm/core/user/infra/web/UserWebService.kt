@@ -2,6 +2,7 @@ package com.delice.crm.core.user.infra.web
 
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.usecase.UserUseCase
+import com.delice.crm.core.user.domain.usecase.response.SimpleUsersResponse
 import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
 import com.delice.crm.core.utils.filter.parametersToMap
@@ -30,7 +31,7 @@ class UserWebService(
     ): ResponseEntity<UserResponse> {
         val response = userUseCase.getUserByUUID(uuid)
 
-        if(response.error != null){
+        if (response.error != null) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response)
@@ -57,7 +58,7 @@ class UserWebService(
 
         val response = userUseCase.getUserPagination(page, count, params)
 
-        if(response.error != null){
+        if (response.error != null) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response)
@@ -74,7 +75,22 @@ class UserWebService(
     ): ResponseEntity<UserResponse> {
         val response = userUseCase.changeUser(user)
 
-        if(response.error != null){
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/simple")
+    fun listSimpleUsers(): ResponseEntity<SimpleUsersResponse> {
+        val response = userUseCase.listSimpleUsers()
+
+        if (response.error != null) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response)

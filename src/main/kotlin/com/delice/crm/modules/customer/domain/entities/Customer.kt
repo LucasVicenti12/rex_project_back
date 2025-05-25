@@ -27,3 +27,9 @@ class Customer(
     val createdBy: UUID? = null,
     val modifiedBy: UUID? = null,
 )
+
+data class SimpleCustomer(
+    val uuid: UUID,
+    val companyName: String,
+    val document: String,
+)

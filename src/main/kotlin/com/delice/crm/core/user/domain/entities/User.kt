@@ -24,3 +24,9 @@ data class User(
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
 )
+
+data class SimpleUser(
+    val uuid: UUID,
+    val login: String,
+    val userName: String,
+)

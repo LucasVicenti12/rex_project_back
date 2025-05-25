@@ -4,6 +4,7 @@ import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.exceptions.*
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.user.domain.usecase.UserUseCase
+import com.delice.crm.core.user.domain.usecase.response.SimpleUsersResponse
 import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
 import org.slf4j.LoggerFactory
@@ -110,6 +111,19 @@ class UserUseCaseImplementation(
 
         UserResponse(
             user = null,
+            error = USER_UNEXPECTED
+        )
+    }
+
+    override fun listSimpleUsers(): SimpleUsersResponse = try {
+        SimpleUsersResponse(
+            users = userRepository.listSimpleUsers()
+        )
+    } catch (e: Exception) {
+        logger.error("LIST_SIMPLE_USERS", e)
+
+        SimpleUsersResponse(
+            users = null,
             error = USER_UNEXPECTED
         )
     }

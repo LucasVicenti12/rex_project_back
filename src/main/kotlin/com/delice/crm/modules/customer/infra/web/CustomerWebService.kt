@@ -6,10 +6,7 @@ import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
-import com.delice.crm.modules.customer.domain.usecase.response.ApprovalCustomerResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerEconomicActivities
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerPaginationResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerResponse
+import com.delice.crm.modules.customer.domain.usecase.response.*
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -149,6 +146,21 @@ class CustomerWebService(
         val params = request.queryString.parametersToMap()
 
         val response = customerUseCase.getCustomerPagination(page, count, params)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/simple")
+    fun listSimpleCustomer(): ResponseEntity<SimpleCustomersResponse>{
+        val response = customerUseCase.listSimpleCustomer()
 
         if (response.error != null) {
             return ResponseEntity

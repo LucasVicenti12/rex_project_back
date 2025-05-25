@@ -39,7 +39,7 @@ class WalletUseCaseImplementation(
             else -> {
                 var error: WalletExceptions? = null
 
-                wallet.customers.forEach {
+                wallet.customers!!.forEach {
                     val customer = customerRepository.getCustomerByUUID(it.uuid!!)
 
                     if (customer == null) {
@@ -81,7 +81,7 @@ class WalletUseCaseImplementation(
             else -> {
                 var error: WalletExceptions? = null
 
-                wallet.customers.forEach {
+                wallet.customers!!.forEach {
                     val customer = customerRepository.getCustomerByUUID(it.uuid!!)
 
                     if (customer == null) {

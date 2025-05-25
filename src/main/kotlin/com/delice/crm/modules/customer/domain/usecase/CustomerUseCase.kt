@@ -2,10 +2,7 @@ package com.delice.crm.modules.customer.domain.usecase
 
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
-import com.delice.crm.modules.customer.domain.usecase.response.ApprovalCustomerResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerEconomicActivities
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerPaginationResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerResponse
+import com.delice.crm.modules.customer.domain.usecase.response.*
 import java.util.*
 
 interface CustomerUseCase {
@@ -15,4 +12,5 @@ interface CustomerUseCase {
     fun listEconomicActivitiesByCustomerUUID(customerUUID: UUID): CustomerEconomicActivities
     fun getCustomerByUUID(customerUUID: UUID): CustomerResponse
     fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): CustomerPaginationResponse
+    fun listSimpleCustomer(): SimpleCustomersResponse
 }

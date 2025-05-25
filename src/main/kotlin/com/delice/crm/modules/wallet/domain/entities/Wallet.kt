@@ -9,7 +9,7 @@ class Wallet(
     val uuid: UUID? = null,
     val label: String? = null,
     var accountable: User? = null,
-    var customers: List<Customer>? = null,
+    var customers: List<Customer>? = emptyList(),
     val observation: String? = "",
     val status: WalletStatus? = null,
     val createdAt: LocalDateTime? = LocalDateTime.now(),

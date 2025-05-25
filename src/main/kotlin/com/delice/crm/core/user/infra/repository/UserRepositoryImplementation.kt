@@ -1,5 +1,6 @@
 package com.delice.crm.core.user.infra.repository
 
+import com.delice.crm.core.user.domain.entities.SimpleUser
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.entities.UserStatus
 import com.delice.crm.core.user.domain.entities.UserType
@@ -11,6 +12,7 @@ import com.delice.crm.core.utils.function.binaryToString
 import com.delice.crm.core.utils.pagination.Pagination
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -101,6 +103,18 @@ class UserRepositoryImplementation : UserRepository {
         }
 
         return@transaction getUserByUUID(user.uuid!!)
+    }
+
+    override fun listSimpleUsers(): List<SimpleUser>? = transaction {
+        UserDatabase.select(UserDatabase.uuid, UserDatabase.login, UserDatabase.name, UserDatabase.surname)
+            .where(UserDatabase.status neq UserStatus.INACTIVE.code)
+            .map {
+                SimpleUser(
+                    uuid = it[UserDatabase.uuid],
+                    login = it[UserDatabase.login],
+                    userName = "${it[UserDatabase.name]} ${it[UserDatabase.surname]}",
+                )
+            }
     }
 
     private fun convertResultRowToUser(it: ResultRow): User = User(

@@ -7,10 +7,7 @@ import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.exceptions.*
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
-import com.delice.crm.modules.customer.domain.usecase.response.ApprovalCustomerResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerEconomicActivities
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerPaginationResponse
-import com.delice.crm.modules.customer.domain.usecase.response.CustomerResponse
+import com.delice.crm.modules.customer.domain.usecase.response.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -115,6 +112,18 @@ class CustomerUseCaseImplementation(
         } catch (e: Exception) {
             logger.error("ERROR_GET_BY_UUID_CUSTOMER", e)
             CustomerPaginationResponse(error = CUSTOMER_UNEXPECTED)
+        }
+    }
+
+    override fun listSimpleCustomer(): SimpleCustomersResponse {
+        return try {
+            return SimpleCustomersResponse(
+                customers = customerRepository.listSimpleCustomer(),
+                error = null
+            )
+        } catch (e: Exception) {
+            logger.error("ERROR_GET_SIMPLE_CUSTOMER", e)
+            SimpleCustomersResponse(error = CUSTOMER_UNEXPECTED)
         }
     }
 
