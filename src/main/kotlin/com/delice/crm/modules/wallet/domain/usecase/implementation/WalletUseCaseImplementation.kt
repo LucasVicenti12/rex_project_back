@@ -46,6 +46,13 @@ class WalletUseCaseImplementation(
                         error = WALLET_CUSTOMER_NOT_FOUND
                         return@forEach
                     }
+
+                    val attached = walletRepository.getCustomerWallet(customer.uuid!!, null)
+
+                    if(attached != null) {
+                        error = WALLET_CUSTOMER_ALREADY_ATTACHED
+                        return@forEach
+                    }
                 }
 
                 if (error != null) {
@@ -86,6 +93,13 @@ class WalletUseCaseImplementation(
 
                     if (customer == null) {
                         error = WALLET_CUSTOMER_NOT_FOUND
+                        return@forEach
+                    }
+
+                    val attached = walletRepository.getCustomerWallet(customer.uuid!!, wallet.uuid)
+
+                    if(attached != null) {
+                        error = WALLET_CUSTOMER_ALREADY_ATTACHED
                         return@forEach
                     }
                 }

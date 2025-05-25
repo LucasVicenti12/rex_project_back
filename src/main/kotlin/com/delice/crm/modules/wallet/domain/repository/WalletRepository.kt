@@ -9,5 +9,6 @@ interface WalletRepository {
     fun updateWallet(wallet: Wallet, userUUID: UUID): Wallet?
     fun getWalletByUUID(walletUUID: UUID): Wallet?
     fun getUserWalletByUUID(userUUID: UUID): Wallet?
+    fun getCustomerWallet(customerUUID: UUID, walletUUID: UUID?): Wallet?
     fun getWalletPagination(count: Int, page: Int, params: Map<String, Any?>): Pagination<Wallet>
 }

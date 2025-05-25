@@ -12,6 +12,7 @@ import com.delice.crm.modules.wallet.infra.database.WalletDatabase
 import com.delice.crm.modules.wallet.infra.database.WalletFilter
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -82,6 +83,24 @@ class WalletRepositoryImplementation(
 
     override fun getUserWalletByUUID(userUUID: UUID): Wallet? = transaction {
         WalletDatabase.selectAll().where(WalletDatabase.accountable eq userUUID).map {
+            resultRowToWallet(it)
+        }.firstOrNull()
+    }
+
+    override fun getCustomerWallet(customerUUID: UUID, walletUUID: UUID?): Wallet? = transaction {
+        val query = WalletDatabase
+            .join(
+                otherTable = WalletCustomersDatabase,
+                joinType = JoinType.INNER,
+                onColumn = WalletCustomersDatabase.customerUUID eq customerUUID,
+            )
+            .selectAll()
+
+        if (walletUUID != null) {
+            query.where(WalletCustomersDatabase.walletUUID neq walletUUID)
+        }
+
+        query.map {
             resultRowToWallet(it)
         }.firstOrNull()
     }
