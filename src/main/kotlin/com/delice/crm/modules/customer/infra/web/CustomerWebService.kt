@@ -77,7 +77,7 @@ class CustomerWebService(
 
     @PostMapping("/approval/{customerUUID}")
     fun approvalCustomer(
-        @RequestParam(name = "status", required = true) status: CustomerStatus,
+        @RequestParam(value = "status", required = true) status: CustomerStatus,
         @PathVariable(name = "customerUUID", required = true) customerUUID: UUID,
         request: HttpServletRequest
     ): ResponseEntity<ApprovalCustomerResponse> {
@@ -119,7 +119,7 @@ class CustomerWebService(
 
     @GetMapping("/getCustomerByUIUD")
     fun getCustomerByUUID(
-        @RequestParam(name = "uuid", required = true) customerUUID: UUID
+        @RequestParam(value = "uuid", required = true) customerUUID: UUID
     ): ResponseEntity<CustomerResponse> {
         val response = customerUseCase.getCustomerByUUID(customerUUID)
 

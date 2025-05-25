@@ -27,8 +27,6 @@ class CustomerRepositoryImplementation() : CustomerRepository {
     override fun registerCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
         val customerUUID = UUID.randomUUID()
 
-        customer.uuid = customerUUID
-
         CustomerDatabase.insert {
             it[document] = customer.document!!
             it[tradingName] = customer.tradingName!!
