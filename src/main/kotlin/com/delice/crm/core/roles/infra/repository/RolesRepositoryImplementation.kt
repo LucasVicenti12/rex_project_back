@@ -77,26 +77,7 @@ class RolesRepositoryImplementation : RolesRepository {
             return@transaction emptyList()
         }
 
-        val modules = roles.map { it.moduleUUID }.groupBy { it }.map { it.key }
-
-        if (modules.isEmpty()) {
-            return@transaction emptyList()
-        }
-
-        return@transaction modules.map {
-            val module = getModuleByUUID(it!!)!!
-
-            DataModule(
-                code = module.code,
-                path = module.path,
-                roles = roles.filter { role -> role.moduleUUID == module.uuid }.map { role ->
-                    DataRole(
-                        code = role.code,
-                        label = role.label
-                    )
-                }
-            )
-        }
+        return@transaction groupRoleByModule(roles)
     }
 
     override fun getOwnerRoles(): List<Role>? = transaction {
@@ -184,6 +165,38 @@ class RolesRepositoryImplementation : RolesRepository {
             RoleDatabase.moduleUUID eq uuid
         }.map {
             convertResultRowToRole(it)
+        }
+    }
+
+    override fun getAllRolesByModule(): List<DataModule>? = transaction {
+        val roles = getRoles() ?: return@transaction emptyList()
+
+        return@transaction groupRoleByModule(roles)
+    }
+
+    private fun groupRoleByModule(roles: List<Role>): List<DataModule>{
+        val modules = roles.map { it.moduleUUID }.groupBy { it }.map { it.key }
+
+        if (modules.isEmpty()) {
+            return emptyList()
+        }
+
+        return modules.map {
+            val module = getModuleByUUID(it!!)!!
+
+            DataModule(
+                uuid = module.uuid,
+                label = module.label,
+                code = module.code,
+                path = module.path,
+                roles = roles.filter { role -> role.moduleUUID == module.uuid }.map { role ->
+                    DataRole(
+                        uuid = role.uuid,
+                        code = role.code,
+                        label = role.label
+                    )
+                }
+            )
         }
     }
 

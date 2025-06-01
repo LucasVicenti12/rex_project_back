@@ -10,6 +10,8 @@ class Module (
 )
 
 data class DataModule(
+    val uuid: UUID? = null,
+    val label: String? = null,
     val code: String? = null,
     val path: String? = null,
     val roles: List<DataRole>? = emptyList()

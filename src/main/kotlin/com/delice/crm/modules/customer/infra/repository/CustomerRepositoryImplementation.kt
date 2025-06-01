@@ -111,7 +111,7 @@ class CustomerRepositoryImplementation() : CustomerRepository {
                     it[contactType] = contact.contactType!!.type
                     it[label] = contact.label!!
                     it[isPrincipal] = contact.isPrincipal
-                    it[customerUUID] = customerUUID
+                    it[customerUUID] = customer.uuid!!
                 }
             }
         }
@@ -132,7 +132,7 @@ class CustomerRepositoryImplementation() : CustomerRepository {
             .join(
                 otherTable = EconomicActivityDatabase,
                 joinType = JoinType.INNER,
-                onColumn = EconomicActivityDatabase.uuid eq CustomerEconomicActivitiesDatabase.economicActivityUUID
+                additionalConstraint = { EconomicActivityDatabase.uuid eq CustomerEconomicActivitiesDatabase.economicActivityUUID }
             )
             .select(
                 EconomicActivityDatabase.uuid,

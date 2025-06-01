@@ -18,4 +18,5 @@ interface RolesUseCase {
     fun attachRole(userUUID: UUID, roles: List<UUID>): RoleListResponse
     fun getModuleByUUID(uuid: UUID): ModuleResponse
     fun getModuleWithRolesByUUID(uuid: UUID): ModuleWithRolesResponse
+    fun getAllRolesByModule(): RoleByModuleResponse
 }

@@ -32,8 +32,8 @@ class RolesWebService(
 
     @GetMapping("/allRoles")
     @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
-    fun getRoles(): ResponseEntity<RoleListResponse> {
-        val response = rolesUseCase.getRoles()
+    fun getRoles(): ResponseEntity<RoleByModuleResponse> {
+        val response = rolesUseCase.getAllRolesByModule()
 
         if (response.error != null) {
             return ResponseEntity

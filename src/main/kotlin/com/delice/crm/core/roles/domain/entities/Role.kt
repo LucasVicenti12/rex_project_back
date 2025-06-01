@@ -11,6 +11,7 @@ class Role (
 )
 
 data class DataRole(
+    val uuid: UUID? = null,
     val code: String? = null,
     val label: String? = null,
 )

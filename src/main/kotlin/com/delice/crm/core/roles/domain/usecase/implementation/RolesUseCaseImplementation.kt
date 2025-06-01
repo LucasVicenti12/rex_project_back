@@ -197,4 +197,13 @@ class RolesUseCaseImplementation(
             }
         }
     }
+
+    override fun getAllRolesByModule(): RoleByModuleResponse = try {
+        RoleByModuleResponse(
+            modules = rolesRepository.getAllRolesByModule()
+        )
+    }catch (e: Exception){
+        logger.error("ROLES_MODULE", e)
+        RoleByModuleResponse(modules = null, error = ROLE_UNEXPECTED_ERROR)
+    }
 }

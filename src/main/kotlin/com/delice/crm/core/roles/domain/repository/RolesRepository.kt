@@ -26,4 +26,5 @@ interface RolesRepository {
     fun verifyModuleWithRole(moduleUUID: UUID): Boolean
     fun verifyUserWithRole(roleUUID: UUID): Boolean
     fun getRolesByModuleUUID(uuid: UUID): List<Role>?
+    fun getAllRolesByModule(): List<DataModule>?
 }
