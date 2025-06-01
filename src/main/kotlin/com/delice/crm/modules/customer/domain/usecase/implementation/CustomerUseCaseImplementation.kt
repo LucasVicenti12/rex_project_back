@@ -65,7 +65,7 @@ class CustomerUseCaseImplementation(
                 return ApprovalCustomerResponse(error = CUSTOMER_NOT_FOUND)
             }
 
-            approvalCustomer(status, customerUUID, userUUID)
+            customerRepository.approvalCustomer(status, customerUUID, userUUID)
 
             return ApprovalCustomerResponse(ok = true)
         } catch (e: Exception) {
