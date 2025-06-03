@@ -9,6 +9,8 @@ import com.delice.crm.api.preCustomer.domain.repository.PreCustomerRepository
 import com.delice.crm.api.preCustomer.infra.database.PreCustomerContactsDatabase
 import com.delice.crm.api.preCustomer.infra.database.PreCustomerDatabase
 import com.delice.crm.api.preCustomer.infra.database.PreCustomerEconomicActivitiesDatabase
+import com.delice.crm.core.utils.extensions.removeAlphaChars
+import com.delice.crm.core.utils.extensions.removeSpecialChars
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -82,8 +84,14 @@ class PreCustomerRepositoryImplementation : PreCustomerRepository {
         }
 
         val partner = preCustomerAPIResponse.qsa.get(index = 0)
-        val personName = partner.nome_representante_legal ?: partner.nome_socio ?: ""
-        val addressNumber = preCustomerAPIResponse.numero.toInt()
+        val personName = if (partner.nome_representante_legal.isNullOrEmpty()) partner.nome_socio
+            ?: "" else partner.nome_representante_legal
+        val numberString = preCustomerAPIResponse.numero.removeAlphaChars()
+
+        var addressNumber = 0
+        if (numberString != "") {
+            addressNumber = numberString.toInt()
+        }
 
         val contacts = ArrayList<Contact>()
 
@@ -155,6 +163,14 @@ class PreCustomerRepositoryImplementation : PreCustomerRepository {
         transaction {
             val customerUUID = UUID.randomUUID()
 
+            var tempComplement = ""
+
+            tempComplement = if (preCustomer.complement!!.length > 60) {
+                preCustomer.complement!!.substring(0, 60)
+            } else {
+                preCustomer.complement!!
+            }
+
             PreCustomerDatabase.insert {
                 it[uuid] = customerUUID
                 it[companyName] = preCustomer.companyName!!
@@ -165,7 +181,7 @@ class PreCustomerRepositoryImplementation : PreCustomerRepository {
                 it[city] = preCustomer.city!!
                 it[address] = preCustomer.address!!
                 it[zipCode] = preCustomer.zipCode!!
-                it[complement] = preCustomer.complement!!
+                it[complement] = tempComplement
                 it[addressNumber] = preCustomer.addressNumber!!
             }
 
@@ -182,7 +198,7 @@ class PreCustomerRepositoryImplementation : PreCustomerRepository {
             if (!preCustomer.contacts.isNullOrEmpty()) {
                 preCustomer.contacts!!.forEach { contact ->
                     PreCustomerContactsDatabase.insert {
-                        it[uuid] = customerUUID
+                        it[uuid] = UUID.randomUUID()
                         it[contactType] = contact.contactType!!.type
                         it[label] = contact.label!!
                         it[isPrincipal] = contact.isPrincipal

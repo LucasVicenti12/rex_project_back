@@ -13,7 +13,7 @@ class PreCustomer(
     val zipCode: String? = "",
     val city: String? = "",
     val address: String? = "",
-    val complement: String? = "",
+    var complement: String? = "",
     val addressNumber: Int? = 0,
     var economicActivitiesCodes: List<String>? = listOf(),
     var contacts: List<Contact>? = listOf(),

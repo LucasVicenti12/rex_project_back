@@ -28,6 +28,12 @@ class CustomerRepositoryImplementation() : CustomerRepository {
     override fun registerCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
         val customerUUID = UUID.randomUUID()
 
+        var tempComplement = ""
+
+        if (customer.complement!!.length > 60) {
+            tempComplement = customer.complement.substring(0, 60)
+        }
+
         CustomerDatabase.insert {
             it[document] = customer.document!!
             it[tradingName] = customer.tradingName!!
@@ -37,7 +43,7 @@ class CustomerRepositoryImplementation() : CustomerRepository {
             it[city] = customer.city!!
             it[address] = customer.address!!
             it[zipCode] = customer.zipCode!!
-            it[complement] = customer.complement!!
+            it[complement] = tempComplement
             it[addressNumber] = customer.addressNumber!!
             it[observation] = customer.observation!!
             it[status] = customer.status!!.code
@@ -74,6 +80,14 @@ class CustomerRepositoryImplementation() : CustomerRepository {
     }
 
     override fun updateCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
+        var tempComplement = ""
+
+        tempComplement = if (customer.complement!!.length > 60) {
+            customer.complement.substring(0, 60)
+        } else {
+            customer.complement
+        }
+
         CustomerDatabase.update({ CustomerDatabase.uuid eq customer.uuid!! }) {
             it[tradingName] = customer.tradingName!!
             it[companyName] = customer.companyName!!
@@ -82,7 +96,7 @@ class CustomerRepositoryImplementation() : CustomerRepository {
             it[city] = customer.city!!
             it[address] = customer.address!!
             it[zipCode] = customer.zipCode!!
-            it[complement] = customer.complement!!
+            it[complement] = tempComplement
             it[addressNumber] = customer.addressNumber!!
             it[observation] = customer.observation!!
             it[status] = customer.status!!.code
