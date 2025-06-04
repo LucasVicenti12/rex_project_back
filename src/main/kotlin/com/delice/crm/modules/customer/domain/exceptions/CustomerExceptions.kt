@@ -17,5 +17,6 @@ val CUSTOMER_ADDRESS_IS_EMPTY = CustomerExceptions("CUSTOMER_ADDRESS_IS_EMPTY", 
 val CUSTOMER_COMPLEMENT_IS_EMPTY = CustomerExceptions("CUSTOMER_COMPLEMENT_IS_EMPTY", "The address must be provided")
 val CUSTOMER_ADDRESS_NUMBER_IS_EMPTY = CustomerExceptions("CUSTOMER_ADDRESS_NUMBER_IS_EMPTY", "The address number must be provided")
 val CUSTOMER_ECONOMIC_ACTIVITIES_IS_EMPTY = CustomerExceptions("CUSTOMER_ECONOMIC_ACTIVITIES_IS_EMPTY", "The economic activities be provided")
+val CUSTOMER_IN_WALLET = CustomerExceptions("CUSTOMER_IN_WALLET", "The customer can't be change because it's attached in a wallet")
 
 class CustomerExceptions(code: String, message: String) : DefaultError(code, message)

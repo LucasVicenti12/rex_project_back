@@ -8,6 +8,7 @@ import com.delice.crm.modules.customer.domain.exceptions.*
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
 import com.delice.crm.modules.customer.domain.usecase.response.*
+import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -15,6 +16,7 @@ import java.util.*
 @Service
 class CustomerUseCaseImplementation(
     private val customerRepository: CustomerRepository,
+    private val walletRepository: WalletRepository,
     private val economicActivityUseCase: EconomicActivityUseCase
 ) : CustomerUseCase {
     companion object {
@@ -63,6 +65,12 @@ class CustomerUseCaseImplementation(
         return try {
             if (customerRepository.getCustomerByUUID(customerUUID) == null) {
                 return ApprovalCustomerResponse(error = CUSTOMER_NOT_FOUND)
+            }
+
+            val wallet = walletRepository.getCustomerWallet(customerUUID, null)
+
+            if(wallet != null) {
+                return ApprovalCustomerResponse(error = CUSTOMER_IN_WALLET)
             }
 
             customerRepository.approvalCustomer(status, customerUUID, userUUID)
