@@ -35,8 +35,8 @@ class WalletRepositoryImplementation(
             it[createdAt] = LocalDateTime.now()
             it[modifiedAt] = LocalDateTime.now()
             it[accountable] = wallet.accountable!!.uuid!!
-            it[createdBy] = wallet.createdBy!!
-            it[modifiedBy] = wallet.modifiedBy!!
+            it[createdBy] = userUUID
+            it[modifiedBy] = userUUID
         }
 
         wallet.customers!!.forEach { customer ->
@@ -51,6 +51,16 @@ class WalletRepositoryImplementation(
     }
 
     override fun updateWallet(wallet: Wallet, userUUID: UUID): Wallet? = transaction {
+        WalletCustomersDatabase.deleteWhere { walletUUID eq wallet.uuid!! }
+
+        wallet.customers!!.forEach { customer ->
+            WalletCustomersDatabase.insert {
+                it[uuid] = UUID.randomUUID()
+                it[walletUUID] = wallet.uuid!!
+                it[customerUUID] = customer.uuid!!
+            }
+        }
+
         WalletDatabase.update({
             WalletDatabase.uuid eq wallet.uuid!!
         }) {
@@ -59,17 +69,7 @@ class WalletRepositoryImplementation(
             it[status] = wallet.status!!.code
             it[modifiedAt] = LocalDateTime.now()
             it[accountable] = wallet.accountable!!.uuid!!
-            it[modifiedBy] = wallet.modifiedBy!!
-        }
-
-        WalletCustomersDatabase.deleteWhere { walletUUID eq wallet.uuid!! }
-
-        wallet.customers!!.forEach { customer ->
-            WalletCustomersDatabase.insert {
-                it[uuid] = UUID.randomUUID()
-                it[walletUUID] = walletUUID
-                it[customerUUID] = customer.uuid!!
-            }
+            it[modifiedBy] = userUUID
         }
 
         getWalletByUUID(wallet.uuid!!)
@@ -92,7 +92,7 @@ class WalletRepositoryImplementation(
             .join(
                 otherTable = WalletCustomersDatabase,
                 joinType = JoinType.INNER,
-                onColumn = WalletCustomersDatabase.customerUUID eq customerUUID,
+                additionalConstraint = { WalletCustomersDatabase.customerUUID eq customerUUID },
             )
             .selectAll()
 

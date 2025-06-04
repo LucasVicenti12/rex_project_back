@@ -11,7 +11,7 @@ class Wallet(
     var accountable: User? = null,
     var customers: List<Customer>? = emptyList(),
     val observation: String? = "",
-    val status: WalletStatus? = null,
+    val status: WalletStatus? = WalletStatus.ACTIVE,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
     val createdBy: UUID? = null,

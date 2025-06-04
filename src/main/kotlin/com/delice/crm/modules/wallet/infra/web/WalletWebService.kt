@@ -1,12 +1,14 @@
 package com.delice.crm.modules.wallet.infra.web
 
+import com.delice.crm.core.auth.domain.usecase.AuthUseCase
+import com.delice.crm.core.config.service.TokenService
 import com.delice.crm.core.utils.filter.parametersToMap
-import com.delice.crm.core.utils.function.getUserRequest
 import com.delice.crm.modules.wallet.domain.entities.Wallet
 import com.delice.crm.modules.wallet.domain.usecase.WalletUseCase
 import com.delice.crm.modules.wallet.domain.usecase.response.WalletPaginationResponse
 import com.delice.crm.modules.wallet.domain.usecase.response.WalletResponse
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,6 +19,12 @@ import java.util.*
 class WalletWebService(
     private val walletUseCase: WalletUseCase
 ) {
+    @Autowired
+    private lateinit var authUseCase: AuthUseCase
+
+    @Autowired
+    private lateinit var tokenService: TokenService
+
     @PostMapping("/create")
     fun createWallet(
         @RequestBody wallet: Wallet,
@@ -106,5 +114,13 @@ class WalletWebService(
         return ResponseEntity
             .ok()
             .body(response)
+    }
+
+    private fun getUserRequest(request: HttpServletRequest): UUID? {
+        val token = tokenService.recoverToken(request)
+        val login = tokenService.validate(token)
+        val user = authUseCase.findUserByLogin(login) ?: return null
+
+        return user.uuid
     }
 }

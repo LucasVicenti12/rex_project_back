@@ -12,7 +12,7 @@ private lateinit var authUseCase: AuthUseCase
 @Autowired
 private lateinit var tokenService: TokenService
 
-fun getUserRequest(request: HttpServletRequest): UUID? {
+fun getUserRequestAA(request: HttpServletRequest): UUID? {
     val token = tokenService.recoverToken(request)
     val login = tokenService.validate(token)
     val user = authUseCase.findUserByLogin(login) ?: return null
