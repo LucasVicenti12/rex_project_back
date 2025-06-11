@@ -4,6 +4,7 @@ import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.exceptions.*
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.user.domain.usecase.UserUseCase
+import com.delice.crm.core.user.domain.usecase.response.ChangeAvatarResponse
 import com.delice.crm.core.user.domain.usecase.response.SimpleUsersResponse
 import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
@@ -126,5 +127,16 @@ class UserUseCaseImplementation(
             users = null,
             error = USER_UNEXPECTED
         )
+    }
+
+    override fun changeUserAvatar(userUUID: UUID, imageBase64: String): ChangeAvatarResponse {
+        try{
+            userRepository.getUserByUUID(userUUID) ?: return ChangeAvatarResponse(error = USER_NOT_FOUND)
+            userRepository.changeUserAvatar(userUUID, imageBase64)
+            return ChangeAvatarResponse(ok = true)
+        } catch (e: Exception) {
+            logger.error("CHANGE_AVATAR_USER", e)
+            return ChangeAvatarResponse(error = USER_UNEXPECTED)
+        }
     }
 }

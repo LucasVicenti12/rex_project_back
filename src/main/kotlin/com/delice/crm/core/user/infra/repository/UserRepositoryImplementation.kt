@@ -117,6 +117,14 @@ class UserRepositoryImplementation : UserRepository {
             }
     }
 
+    override fun changeUserAvatar(userUuid: UUID, imageBase64: String) {
+        transaction {
+            UserDatabase.update ({UserDatabase.uuid eq userUuid}){
+                it[avatar] = ExposedBlob(imageBase64.toByteArray())
+            }
+        }
+    }
+
     private fun convertResultRowToUser(it: ResultRow): User = User(
         uuid = it[UserDatabase.uuid],
         login = it[UserDatabase.login],

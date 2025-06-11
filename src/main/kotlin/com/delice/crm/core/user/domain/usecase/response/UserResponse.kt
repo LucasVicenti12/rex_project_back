@@ -19,3 +19,8 @@ data class SimpleUsersResponse(
     val users: List<SimpleUser>? = emptyList(),
     val error: UserException? = null,
 )
+
+data class ChangeAvatarResponse(
+    val ok: Boolean? = null,
+    val error: UserException? = null
+)
