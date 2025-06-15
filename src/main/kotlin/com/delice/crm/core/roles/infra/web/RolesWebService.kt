@@ -1,13 +1,11 @@
 package com.delice.crm.core.roles.infra.web
 
-import com.delice.crm.core.auth.domain.repository.AuthRepository
-import com.delice.crm.core.config.service.TokenService
 import com.delice.crm.core.roles.domain.entities.Module
 import com.delice.crm.core.roles.domain.entities.Role
 import com.delice.crm.core.roles.domain.usecase.RolesUseCase
 import com.delice.crm.core.roles.domain.usecase.response.*
+import com.delice.crm.core.utils.function.getCurrentUser
 import jakarta.servlet.http.HttpServletRequest
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -25,11 +23,7 @@ import java.util.*
 @RequestMapping("/roles")
 class RolesWebService(
     private val rolesUseCase: RolesUseCase,
-    private val authRepository: AuthRepository
 ) {
-    @Autowired
-    private lateinit var tokenService: TokenService
-
     @GetMapping("/allRoles")
     @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getRoles(): ResponseEntity<RoleByModuleResponse> {
@@ -87,15 +81,9 @@ class RolesWebService(
     fun getMyRoles(
         request: HttpServletRequest
     ): ResponseEntity<RoleListResponse> {
-        val token = tokenService.recoverToken(request)
-        val login = tokenService.validate(token)
-        val user = authRepository.findUserByLogin(login)
+        val user = getCurrentUser()
 
-        if (user === null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)
-        }
-
-        val response = rolesUseCase.getRolesPerUser(user.uuid!!)
+        val response = rolesUseCase.getRolesPerUser(user.uuid)
 
         if (response.error != null) {
             return ResponseEntity

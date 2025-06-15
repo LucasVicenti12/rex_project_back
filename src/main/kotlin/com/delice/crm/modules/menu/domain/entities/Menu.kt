@@ -5,11 +5,12 @@ import java.util.UUID
 
 data class Menu (
     val query: String,
-    val result: List<MenuOption>
+    val totalResults: Int,
+    val result: List<MenuOption>,
 )
 
 data class MenuOption(
-    val type: MenuOptionType,
+    val type: String,
     val values: List<MenuOptionValue>
 )
 

@@ -19,6 +19,10 @@ class SystemUser(
 ) {
     fun getUserData(): User = user.copy(pass = null)
 
+    fun getRoles(): List<String> {
+        return authorities.map { it.authority }
+    }
+
     val uuid: UUID
         get() = user.uuid!!
 }

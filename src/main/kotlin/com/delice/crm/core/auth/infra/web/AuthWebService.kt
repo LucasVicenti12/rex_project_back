@@ -6,6 +6,7 @@ import com.delice.crm.core.auth.domain.entities.ResetPassword
 import com.delice.crm.core.auth.domain.usecase.AuthUseCase
 import com.delice.crm.core.auth.domain.usecase.response.*
 import com.delice.crm.core.config.service.TokenService
+import com.delice.crm.core.utils.function.getCurrentUser
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -65,16 +66,10 @@ class AuthWebService(
     }
 
     @GetMapping("/authenticated")
-    fun getAuthenticated(request: HttpServletRequest): ResponseEntity<AuthenticatedResponse> {
-        val token = tokenService.recoverToken(request)
-        val login = tokenService.validate(token)
-        val user = authUseCase.findUserByLogin(login)
+    fun getAuthenticated(): ResponseEntity<AuthenticatedResponse> {
+        val user = getCurrentUser()
 
-        if (user === null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null)
-        }
-
-        val response = authUseCase.getAuthenticated(user.uuid!!)
+        val response = authUseCase.getAuthenticated(user.uuid)
 
         if (response.error != null) {
             return ResponseEntity
@@ -111,17 +106,10 @@ class AuthWebService(
     }
 
     @PostMapping("/changePassword")
-    fun resetPassword(
-        @RequestBody resetPassword: ResetPassword,
-        request: HttpServletRequest
-    ): ResponseEntity<ChangePasswordResponse> {
-        val token = tokenService.recoverToken(request)
-        val login = tokenService.validate(token)
-        val user = authUseCase.findUserByLogin(login) ?: return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(null)
+    fun resetPassword(@RequestBody resetPassword: ResetPassword): ResponseEntity<ChangePasswordResponse> {
+        val user = getCurrentUser()
 
-        val response = authUseCase.resetPassword(user.uuid!!, resetPassword)
+        val response = authUseCase.resetPassword(user.uuid, resetPassword)
 
         if (response.error != null) {
             return ResponseEntity
