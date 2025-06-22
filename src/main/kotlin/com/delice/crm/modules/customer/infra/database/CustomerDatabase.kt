@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.stringLiteral
 
 object CustomerDatabase : Table("customer") {
     var uuid = uuid("uuid").uniqueIndex()
@@ -60,7 +61,7 @@ data class CustomerFilter(
 
         parameters["companyName"]?.let {
             if (it is String && it.isNotBlank()) {
-                op = op.and(table.companyName like "%$it%")
+                op = op.and(table.companyName like stringLiteral("%$it%"))
             }
         }
 

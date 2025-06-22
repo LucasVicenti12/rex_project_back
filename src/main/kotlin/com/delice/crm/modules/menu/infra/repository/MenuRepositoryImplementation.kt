@@ -1,11 +1,11 @@
 package com.delice.crm.modules.menu.infra.repository
 
 import com.delice.crm.core.config.entities.SystemUser
+import com.delice.crm.core.roles.domain.entities.CrmModule
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.menu.domain.entities.Menu
 import com.delice.crm.modules.menu.domain.entities.MenuOption
-import com.delice.crm.modules.menu.domain.entities.MenuOptionType
 import com.delice.crm.modules.menu.domain.entities.MenuOptionValue
 import com.delice.crm.modules.menu.domain.repository.MenuRepository
 import com.delice.crm.modules.product.infra.database.ProductDatabase
@@ -41,7 +41,7 @@ class MenuRepositoryImplementation : MenuRepository {
             if(customers.isNotEmpty()){
                 options.add(
                     MenuOption(
-                        type = MenuOptionType.Customer.type,
+                        type = CrmModule.Customer.type,
                         values = customers
                     )
                 )
@@ -63,7 +63,7 @@ class MenuRepositoryImplementation : MenuRepository {
             if(users.isNotEmpty()){
                 options.add(
                     MenuOption(
-                        type = MenuOptionType.User.type,
+                        type = CrmModule.User.type,
                         values = users
                     )
                 )
@@ -85,7 +85,7 @@ class MenuRepositoryImplementation : MenuRepository {
             if(wallets.isNotEmpty()){
                 options.add(
                     MenuOption(
-                        type = MenuOptionType.Wallet.type,
+                        type = CrmModule.Wallet.type,
                         values = wallets
                     )
                 )
@@ -107,7 +107,7 @@ class MenuRepositoryImplementation : MenuRepository {
             if(products.isNotEmpty()){
                 options.add(
                     MenuOption(
-                        type = MenuOptionType.Product.type,
+                        type = CrmModule.Product.type,
                         values = products
                     )
                 )

@@ -1,9 +1,11 @@
 package com.delice.crm.modules.product.domain.usecase.implementation
 
 import com.delice.crm.modules.product.domain.entities.Product
+import com.delice.crm.modules.product.domain.entities.ProductMedia
 import com.delice.crm.modules.product.domain.exceptions.*
 import com.delice.crm.modules.product.domain.repository.ProductRepository
 import com.delice.crm.modules.product.domain.usecase.ProductUseCase
+import com.delice.crm.modules.product.domain.usecase.response.ProductMediaResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductPaginationResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductResponse
 import org.slf4j.LoggerFactory
@@ -62,6 +64,24 @@ class ProductUseCaseImplementation(
     } catch (e: Exception) {
         logger.error("UPDATE_PRODUCT", e)
         ProductResponse(error = PRODUCT_UNEXPECTED_ERROR)
+    }
+
+    override fun saveProductMedia(media: List<ProductMedia>, productUUID: UUID): ProductMediaResponse {
+        try {
+            productRepository.getProductByUUID(productUUID)?: return ProductMediaResponse(error = PRODUCT_NOT_FOUND)
+
+            val hasMorePrincipal = media.count { it.isPrincipal == true }
+
+            if(hasMorePrincipal == 0) return ProductMediaResponse(error = PRODUCT_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL)
+
+            if(hasMorePrincipal > 1) return ProductMediaResponse(error = PRODUCT_MEDIA_MUST_BE_PRINCIPAL)
+
+            productRepository.saveProductMedia(media, productUUID)
+            return ProductMediaResponse(media = media)
+        } catch (e: Exception) {
+            logger.error("SAVE_PRODUCT_MEDIA", e)
+            return ProductMediaResponse(error = PRODUCT_UNEXPECTED_ERROR)
+        }
     }
 
     override fun getProductByUUID(uuid: UUID): ProductResponse = try {

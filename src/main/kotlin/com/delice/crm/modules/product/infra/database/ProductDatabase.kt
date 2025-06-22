@@ -12,10 +12,20 @@ object ProductDatabase : Table("product") {
     val code = varchar("code", 30).uniqueIndex()
     val name = varchar("name", 60)
     val description = text("description")
-    val image = blob("image").nullable()
     val price = double("price")
     val weight = double("weight")
     val status = integer("status")
+    val createdAt = date("created_at")
+    val modifiedAt = date("modified_at")
+
+    override val primaryKey = PrimaryKey(uuid, name = "pk_product_uuid")
+}
+
+object ProductMediaDatabase : Table("product_media") {
+    val uuid = uuid("uuid").uniqueIndex()
+    val productUUID = uuid("product_uuid") references ProductDatabase.uuid
+    val image = blob("image")
+    val isPrincipal = bool("is_principal")
     val createdAt = date("created_at")
     val modifiedAt = date("modified_at")
 }

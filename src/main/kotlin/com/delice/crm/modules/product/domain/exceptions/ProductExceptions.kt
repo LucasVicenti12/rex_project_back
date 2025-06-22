@@ -10,4 +10,7 @@ val PRODUCT_ALREADY_EXISTS = ProductExceptions("PRODUCT_ALREADY_EXISTS", "Produc
 val PRODUCT_PRICE_IS_EMPTY = ProductExceptions("PRODUCT_PRICE_IS_EMPTY", "Product price is empty")
 val PRODUCT_WEIGHT_IS_EMPTY = ProductExceptions("PRODUCT_WEIGHT_IS_EMPTY", "Product weight is empty")
 
+val PRODUCT_MEDIA_MUST_BE_PRINCIPAL = ProductExceptions("PRODUCT_MEDIA_MUST_BE_PRINCIPAL", "Only one product media can be principal")
+val PRODUCT_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL = ProductExceptions("PRODUCT_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL", "At least one product media must be principal")
+
 class ProductExceptions(code: String, message: String): DefaultError(code = code, message = message)

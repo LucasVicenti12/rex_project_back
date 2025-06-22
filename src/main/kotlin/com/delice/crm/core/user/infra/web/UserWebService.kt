@@ -1,5 +1,6 @@
 package com.delice.crm.core.user.infra.web
 
+import com.delice.crm.core.user.domain.entities.ChangeAvatar
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.usecase.UserUseCase
 import com.delice.crm.core.user.domain.usecase.response.ChangeAvatarResponse
@@ -99,9 +100,9 @@ class UserWebService(
     }
 
     @PutMapping("/changeAvatar")
-    fun changeAvatar(@RequestBody imageBase64: String): ResponseEntity<ChangeAvatarResponse> {
+    fun changeAvatar(@RequestBody changeAvatar: ChangeAvatar): ResponseEntity<ChangeAvatarResponse> {
         val user = getCurrentUser()
-        val response = userUseCase.changeUserAvatar(user.uuid, imageBase64)
+        val response = userUseCase.changeUserAvatar(user.uuid, changeAvatar.avatar)
         if (response.error != null) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

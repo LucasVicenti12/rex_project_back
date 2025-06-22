@@ -30,3 +30,7 @@ data class SimpleUser(
     val login: String,
     val userName: String,
 )
+
+class ChangeAvatar(
+    val avatar: String
+)

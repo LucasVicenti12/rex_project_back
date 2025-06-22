@@ -90,9 +90,6 @@ class UserRepositoryImplementation : UserRepository {
         UserDatabase.update({ UserDatabase.uuid eq user.uuid!! }) {
             it[userType] = user.userType!!.type
             it[email] = user.email!!
-            if (user.avatar != null) {
-                it[avatar] = ExposedBlob(user.avatar.toByteArray())
-            }
             it[status] = user.status!!.code
             it[phone] = user.phone
             it[state] = user.state!!

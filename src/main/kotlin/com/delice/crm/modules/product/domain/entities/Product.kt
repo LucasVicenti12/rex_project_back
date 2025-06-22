@@ -8,10 +8,18 @@ class Product (
     val name: String? = null,
     val code: String? = null,
     val description: String? = null,
-    val image: String? = null,
+    var images: List<ProductMedia>? = emptyList(),
     val price: Double? = 0.0,
     val weight: Double? = 0.0,
     val status: ProductStatus? = ProductStatus.ACTIVE,
     val createdAt: LocalDate? = LocalDate.now(),
     val modifiedAt: LocalDate? = LocalDate.now(),
+)
+
+class ProductMedia(
+    val uuid: UUID? = null,
+    val image: String? = null,
+    val isPrincipal: Boolean? = false,
+    val createdAt: LocalDate? = null,
+    val modifiedAt: LocalDate? = null
 )
