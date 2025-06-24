@@ -2,6 +2,7 @@ package com.delice.crm.modules.product.infra.database
 
 import com.delice.crm.core.utils.filter.ExposedFilter
 import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
@@ -49,6 +50,20 @@ data class ProductFilter(
         parameters["name"]?.let {
             if (it is String && it.isNotBlank()) {
                 op = op.and(table.name like "%$it%")
+            }
+        }
+
+        parameters["weight"]?.let {
+            var weightValue = it.toString().toDoubleOrNull()
+            if (weightValue != null) {
+                op = op.and(table.weight eq weightValue)
+            }
+        }
+
+        parameters["price"]?.let {
+            var priceValue = it.toString().toDoubleOrNull()
+            if (priceValue != null) {
+                op = op.and(table.price eq priceValue)
             }
         }
 
