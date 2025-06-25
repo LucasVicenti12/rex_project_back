@@ -59,7 +59,7 @@ data class WalletFilter(
                 val userUUID = UserDatabase
                     .select(UserDatabase.uuid)
                     .where {
-                        (UserDatabase.name like "%$it%") or (UserDatabase.surname like "%$it") or (UserDatabase.login like "%$it")
+                        (UserDatabase.name like "%$it%") or (UserDatabase.surname like "%$it%") or (UserDatabase.login like "%$it%")
                     }.map { r ->
                         r[UserDatabase.uuid]
                     }
