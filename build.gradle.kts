@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.delice"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 val exposedVersion = "0.60.0"
 
 java {

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.InternalAuthenticationServiceException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -192,6 +193,13 @@ class AuthUseCaseImplementation(
             return LoginResponse(token = token, error = null)
         } catch (e: Exception) {
             if(e is BadCredentialsException) {
+                return LoginResponse(
+                    token = null,
+                    error = INVALID_CREDENTIALS
+                )
+            }
+
+            if(e is InternalAuthenticationServiceException){
                 return LoginResponse(
                     token = null,
                     error = INVALID_CREDENTIALS

@@ -49,19 +49,20 @@ data class ProductFilter(
 
         parameters["name"]?.let {
             if (it is String && it.isNotBlank()) {
+                println(it)
                 op = op.and(table.name like "%$it%")
             }
         }
 
         parameters["weight"]?.let {
-            var weightValue = it.toString().toDoubleOrNull()
+            val weightValue = it.toString().toDoubleOrNull()
             if (weightValue != null) {
                 op = op.and(table.weight eq weightValue)
             }
         }
 
         parameters["price"]?.let {
-            var priceValue = it.toString().toDoubleOrNull()
+            val priceValue = it.toString().toDoubleOrNull()
             if (priceValue != null) {
                 op = op.and(table.price eq priceValue)
             }
