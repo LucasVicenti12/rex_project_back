@@ -12,6 +12,7 @@ import com.delice.crm.core.utils.function.getCurrentUser
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -21,6 +22,7 @@ class UserWebService(
     private val userUseCase: UserUseCase
 ) {
     @GetMapping("/getByUUID")
+    @PreAuthorize("hasAnyAuthority('READ_USER', 'ALL_USER')")
     fun getUserByUUID(
         @RequestParam(
             value = "uuid",
@@ -41,6 +43,7 @@ class UserWebService(
     }
 
     @GetMapping("/getPagination")
+    @PreAuthorize("hasAnyAuthority('READ_USER', 'ALL_USER')")
     fun getUserByUUID(
         @RequestParam(
             value = "page",
@@ -68,6 +71,7 @@ class UserWebService(
     }
 
     @PostMapping("/update")
+    @PreAuthorize("hasAnyAuthority('CREATE_USER', 'ALL_USER')")
     fun getUserByUUID(
         @RequestBody user: User
     ): ResponseEntity<UserResponse> {

@@ -10,6 +10,7 @@ import com.delice.crm.modules.product.domain.usecase.response.ProductResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -19,6 +20,7 @@ class ProductWebService(
     private val productUseCase: ProductUseCase
 ) {
     @PostMapping("/create")
+    @PreAuthorize("hasAnyAuthority('CREATE_PRODUCT', 'ALL_PRODUCT')")
     fun createProduct(
         @RequestBody product: Product
     ): ResponseEntity<ProductResponse> {
@@ -36,6 +38,7 @@ class ProductWebService(
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasAnyAuthority('CREATE_PRODUCT', 'ALL_PRODUCT')")
     fun updateProduct(
         @RequestBody product: Product
     ): ResponseEntity<ProductResponse> {
@@ -53,6 +56,7 @@ class ProductWebService(
     }
 
     @GetMapping("/getByUUID")
+    @PreAuthorize("hasAnyAuthority('READ_PRODUCT', 'ALL_PRODUCT')")
     fun getProductByUUID(
         @RequestParam(
             value = "uuid",
@@ -73,6 +77,7 @@ class ProductWebService(
     }
 
     @GetMapping("/getPagination")
+    @PreAuthorize("hasAnyAuthority('READ_PRODUCT', 'ALL_PRODUCT')")
     fun getProductPagination(
         @RequestParam(
             value = "page",
@@ -100,6 +105,7 @@ class ProductWebService(
     }
 
     @PostMapping("/productMedia/save/{productUUID}")
+    @PreAuthorize("hasAnyAuthority('CREATE_PRODUCT', 'ALL_PRODUCT')")
     fun saveProductMedia(
         @RequestBody media: List<ProductMedia>,
         @PathVariable(

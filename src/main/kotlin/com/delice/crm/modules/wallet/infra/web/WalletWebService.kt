@@ -9,6 +9,7 @@ import com.delice.crm.modules.wallet.domain.usecase.response.WalletResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -18,6 +19,7 @@ class WalletWebService(
     private val walletUseCase: WalletUseCase
 ) {
     @PostMapping("/create")
+    @PreAuthorize("hasAnyAuthority('CREATE_WALLET', 'ALL_WALLET')")
     fun createWallet(
         @RequestBody wallet: Wallet,
         request: HttpServletRequest
@@ -38,6 +40,7 @@ class WalletWebService(
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasAnyAuthority('CREATE_WALLET', 'ALL_WALLET')")
     fun updateWallet(
         @RequestBody wallet: Wallet,
         request: HttpServletRequest
@@ -58,6 +61,7 @@ class WalletWebService(
     }
 
     @GetMapping("/getByUUID")
+    @PreAuthorize("hasAnyAuthority('READ_WALLET', 'ALL_WALLET')")
     fun getWalletByUUID(
         @RequestParam(
             value = "uuid",
@@ -78,6 +82,7 @@ class WalletWebService(
     }
 
     @GetMapping("/getPagination")
+    @PreAuthorize("hasAnyAuthority('READ_WALLET', 'ALL_WALLET')")
     fun getWalletPagination(
         @RequestParam(
             value = "page",

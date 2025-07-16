@@ -18,7 +18,7 @@ class AccessDenied : AccessDeniedHandler {
         response.status = HttpStatus.UNAUTHORIZED.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.writer.write(
-            "{\"message\": \"Access denied\", \"details\": \"${accessDeniedException?.message}\"}"
+            "{\"error\": {\"code\": \"NO_PERMISSION\",\"message\": \"Access denied\", \"details\": \"${accessDeniedException?.message}\"}}"
         )
     }
 }

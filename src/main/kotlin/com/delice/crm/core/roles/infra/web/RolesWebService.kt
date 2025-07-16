@@ -25,7 +25,7 @@ class RolesWebService(
     private val rolesUseCase: RolesUseCase,
 ) {
     @GetMapping("/allRoles")
-    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES', 'ALL_USER')")
     fun getRoles(): ResponseEntity<RoleByModuleResponse> {
         val response = rolesUseCase.getAllRolesByModule()
 
@@ -57,7 +57,7 @@ class RolesWebService(
     }
 
     @GetMapping("/rolesPerUser")
-    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
+    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES', 'ALL_USER')")
     fun getRolesPerUser(
         @RequestParam(
             value = "uuid",
@@ -171,7 +171,7 @@ class RolesWebService(
     }
 
     @PostMapping("/attach/{uuid}")
-    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES')")
+    @PreAuthorize("hasAnyAuthority('ATTACH_ROLES', 'ALL_USER')")
     fun attachRole(
         @PathVariable(
             name = "uuid",

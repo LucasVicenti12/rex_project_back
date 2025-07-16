@@ -3,13 +3,17 @@ package com.delice.crm.modules.menu.infra.repository
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.roles.domain.entities.CrmModule
 import com.delice.crm.core.user.infra.database.UserDatabase
+import com.delice.crm.modules.customer.domain.entities.Customer
+import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
+import com.delice.crm.modules.menu.domain.entities.Benchmark
 import com.delice.crm.modules.menu.domain.entities.Menu
 import com.delice.crm.modules.menu.domain.entities.MenuOption
 import com.delice.crm.modules.menu.domain.entities.MenuOptionValue
 import com.delice.crm.modules.menu.domain.repository.MenuRepository
 import com.delice.crm.modules.product.infra.database.ProductDatabase
 import com.delice.crm.modules.wallet.infra.database.WalletDatabase
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.stringLiteral
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
@@ -38,7 +42,7 @@ class MenuRepositoryImplementation : MenuRepository {
                 )
             }
 
-            if(customers.isNotEmpty()){
+            if (customers.isNotEmpty()) {
                 options.add(
                     MenuOption(
                         type = CrmModule.Customer.type,
@@ -60,7 +64,7 @@ class MenuRepositoryImplementation : MenuRepository {
                 )
             }
 
-            if(users.isNotEmpty()){
+            if (users.isNotEmpty()) {
                 options.add(
                     MenuOption(
                         type = CrmModule.User.type,
@@ -82,7 +86,7 @@ class MenuRepositoryImplementation : MenuRepository {
                 )
             }
 
-            if(wallets.isNotEmpty()){
+            if (wallets.isNotEmpty()) {
                 options.add(
                     MenuOption(
                         type = CrmModule.Wallet.type,
@@ -104,7 +108,7 @@ class MenuRepositoryImplementation : MenuRepository {
                 )
             }
 
-            if(products.isNotEmpty()){
+            if (products.isNotEmpty()) {
                 options.add(
                     MenuOption(
                         type = CrmModule.Product.type,
@@ -121,5 +125,17 @@ class MenuRepositoryImplementation : MenuRepository {
             totalResults = totalResults,
             result = options
         )
+    }
+
+    override fun getHomeResume(): Benchmark? = transaction {
+        val approvedCustomers = CustomerDatabase.selectAll().where {
+            CustomerDatabase.status eq CustomerStatus.FIT.code
+        }.count().toInt()
+
+        val pendingCustomers = CustomerDatabase.selectAll().where {
+            CustomerDatabase.status eq CustomerStatus.PENDING.code
+        }.count().toInt()
+
+        return@transaction null
     }
 }
