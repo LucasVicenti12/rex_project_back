@@ -2,6 +2,7 @@ package com.delice.crm.modules.wallet.domain.entities
 
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.modules.customer.domain.entities.Customer
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -16,4 +17,10 @@ class Wallet(
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
     val createdBy: UUID? = null,
     val modifiedBy: UUID? = null,
+)
+
+@Serializable
+data class SerializableWallet(
+    var uuid: String? = null,
+    var label: String? = null,
 )

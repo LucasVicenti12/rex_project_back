@@ -9,5 +9,6 @@ val WALLET_CUSTOMER_NOT_FOUND = WalletExceptions("WALLET_CUSTOMER_NOT_FOUND", "C
 val WALLET_CUSTOMER_IS_EMPTY = WalletExceptions("WALLET_CUSTOMER_IS_EMPTY", "At least one customer must be provided")
 val WALLET_LABEL_IS_EMPTY = WalletExceptions("WALLET_LABEL_IS_EMPTY", "The wallet label must be provided")
 val WALLET_CUSTOMER_ALREADY_ATTACHED = WalletExceptions("WALLET_CUSTOMER_ALREADY_ATTACHED", "This customer already attached in another wallet")
+val WALLET_CUSTOMER_DUPLICATE = WalletExceptions("WALLET_CUSTOMER_DUPLICATE", "The customer was selected more than once")
 
 class WalletExceptions(code: String, message: String) : DefaultError(code, message)

@@ -3,15 +3,13 @@ package com.delice.crm.modules.menu.infra.repository
 import com.delice.crm.core.config.entities.SystemUser
 import com.delice.crm.core.roles.domain.entities.CrmModule
 import com.delice.crm.core.user.infra.database.UserDatabase
-import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
-import com.delice.crm.modules.menu.domain.entities.Benchmark
-import com.delice.crm.modules.menu.domain.entities.Menu
-import com.delice.crm.modules.menu.domain.entities.MenuOption
-import com.delice.crm.modules.menu.domain.entities.MenuOptionValue
+import com.delice.crm.modules.menu.domain.entities.*
 import com.delice.crm.modules.menu.domain.repository.MenuRepository
+import com.delice.crm.modules.product.domain.entities.ProductStatus
 import com.delice.crm.modules.product.infra.database.ProductDatabase
+import com.delice.crm.modules.wallet.domain.entities.WalletStatus
 import com.delice.crm.modules.wallet.infra.database.WalletDatabase
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.stringLiteral
@@ -136,6 +134,33 @@ class MenuRepositoryImplementation : MenuRepository {
             CustomerDatabase.status eq CustomerStatus.PENDING.code
         }.count().toInt()
 
-        return@transaction null
+        val activeProducts = ProductDatabase.selectAll().where {
+            ProductDatabase.status eq ProductStatus.ACTIVE.code
+        }.count().toInt()
+
+        val activeWallet = WalletDatabase.selectAll().where {
+            WalletDatabase.status eq WalletStatus.ACTIVE.code
+        }.count().toInt()
+
+        return@transaction Benchmark(
+            resume = listOf(
+                BenchmarkTotalValue(
+                    code = BenchmarkCode.PENDING_CUSTOMER.type,
+                    count = pendingCustomers,
+                ),
+                BenchmarkTotalValue(
+                    code = BenchmarkCode.APPROVED_CUSTOMER.type,
+                    count = approvedCustomers,
+                ),
+                BenchmarkTotalValue(
+                    code = BenchmarkCode.ACTIVE_PRODUCT.type,
+                    count = activeProducts,
+                ),
+                BenchmarkTotalValue(
+                    code = BenchmarkCode.ACTIVE_WALLET.type,
+                    count = activeWallet,
+                ),
+            )
+        )
     }
 }

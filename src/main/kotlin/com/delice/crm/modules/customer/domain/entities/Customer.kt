@@ -2,6 +2,7 @@ package com.delice.crm.modules.customer.domain.entities
 
 import com.delice.crm.core.utils.contact.Contact
 import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -32,4 +33,10 @@ data class SimpleCustomer(
     val uuid: UUID,
     val companyName: String,
     val document: String,
+)
+
+@Serializable
+data class SerializableCustomer(
+    var uuid: String? = null,
+    var companyName: String? = null,
 )

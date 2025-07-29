@@ -2,6 +2,7 @@ package com.delice.crm.modules.menu.infra.webservice
 
 import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.modules.menu.domain.usecase.MenuUseCase
+import com.delice.crm.modules.menu.domain.usecase.response.BenchmarkResponse
 import com.delice.crm.modules.menu.domain.usecase.response.MenuResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,6 +26,21 @@ class MenuWebService(
         val user = getCurrentUser()
 
         val response = menuUseCase.queryMenuOptions(query, user)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/home")
+    fun getHomeResume(): ResponseEntity<BenchmarkResponse> {
+        val response = menuUseCase.getHomeResume()
 
         if (response.error != null) {
             return ResponseEntity

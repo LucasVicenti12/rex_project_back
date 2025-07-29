@@ -22,5 +22,6 @@ enum class CrmModule(override val type: String) : HasType {
     Wallet("WALLET"),
     Customer("CUSTOMER"),
     User("USER_MODULE"),
-    Product("PRODUCT")
+    Product("PRODUCT"),
+    Kanban("KANBAN"),
 }
