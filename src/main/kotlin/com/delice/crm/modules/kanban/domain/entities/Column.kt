@@ -2,6 +2,7 @@ package com.delice.crm.modules.kanban.domain.entities
 
 import com.delice.crm.core.utils.enums.HasCode
 import com.delice.crm.core.utils.enums.HasType
+import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -12,6 +13,7 @@ class Column(
     var title: String? = null,
     var description: String? = null,
     var allowedColumns: List<UUID>? = listOf(),
+    var rules: List<ColumnRule>? = listOf(),
     var status: ColumnStatus? = ColumnStatus.ACTIVE,
     var type: ColumnType? = ColumnType.NONE,
     var withWarnings: Boolean = false,
@@ -20,6 +22,33 @@ class Column(
     var index: Int? = 0,
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
+)
+
+class ColumnRule(
+    var uuid: UUID? = null,
+    var columnUUID: UUID? = null,
+    var title: String? = null,
+    var type: ColumnRuleType? = null,
+    var metadata: ColumnRuleMetadata? = null,
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
+    val modifiedAt: LocalDateTime? = LocalDateTime.now(),
+)
+
+enum class ColumnRuleType(override val type: String): HasType{
+    SEND_EMAIL("SEND_EMAIL"),
+    NOTIFY_USER("NOTIFY_USER"),
+    ADD_TAG("ADD_TAG"),
+    OPEN_CARD("OPEN_CARD"),
+    VALIDATE_CUSTOMER("VALIDATE_CUSTOMER"),
+    VALIDATE_CUSTOMER_WALLET("VALIDATE_CUSTOMER_WALLET"),
+    APPROVE_CUSTOMER("APPROVE_CUSTOMER");
+}
+
+@Serializable
+class ColumnRuleMetadata(
+    var emails: List<String>? = listOf(),
+    var notifyUsers: List<String>? = listOf(),
+    var tag: String? = null,
 )
 
 enum class ColumnStatus(override val code: Int) : HasCode {

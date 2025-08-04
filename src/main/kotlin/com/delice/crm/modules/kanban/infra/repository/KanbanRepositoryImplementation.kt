@@ -6,6 +6,7 @@ import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.entities.Column
+import com.delice.crm.modules.kanban.domain.entities.ColumnRule
 import com.delice.crm.modules.kanban.domain.entities.ColumnType
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.infra.database.*
@@ -64,6 +65,8 @@ class KanbanRepositoryImplementation(
     override fun registerColumn(column: Column): Column? = transaction {
         val uuid = UUID.randomUUID()
 
+        val lastIndex = getColumnLastIndex() ?: 0
+
         ColumnDatabase.insert {
             it[ColumnDatabase.uuid] = uuid
             it[code] = column.code!!
@@ -71,7 +74,7 @@ class KanbanRepositoryImplementation(
             it[title] = column.title!!
             it[description] = column.description
             it[status] = column.status!!.code
-            it[index] = column.index!!
+            it[index] = lastIndex
             it[type] = column.type!!.type
             it[createdAt] = LocalDateTime.now()
             it[modifiedAt] = LocalDateTime.now()
@@ -89,6 +92,7 @@ class KanbanRepositoryImplementation(
             it[TagDatabase.uuid] = uuid
             it[boardUUID] = tag.boardUUID!!
             it[color] = tag.color!!
+            it[title] = tag.title!!
             it[description] = tag.description!!
             it[status] = tag.status!!.code
             it[createdAt] = LocalDateTime.now()
@@ -130,7 +134,6 @@ class KanbanRepositoryImplementation(
             it[title] = column.title!!
             it[description] = column.description
             it[status] = column.status!!.code
-            it[index] = column.index!!
             it[type] = column.type!!.type
             it[modifiedAt] = LocalDateTime.now()
         }
@@ -143,6 +146,7 @@ class KanbanRepositoryImplementation(
     override fun updateTag(tag: Tag): Tag? = transaction {
         TagDatabase.update({ TagDatabase.uuid eq tag.uuid!! }) {
             it[color] = tag.color!!
+            it[title] = tag.title!!
             it[description] = tag.description!!
             it[status] = tag.status!!.code
             it[modifiedAt] = LocalDateTime.now()
@@ -155,6 +159,11 @@ class KanbanRepositoryImplementation(
         val board = BoardDatabase.selectAll().where { BoardDatabase.uuid eq uuid }.map {
             resultRowToBoard(it)
         }.firstOrNull()
+
+        if (board != null) {
+            board.columns = getColumnsByBoardUUID(board.uuid!!)
+            board.tags = getTagsByBoardUUID(board.uuid!!)
+        }
 
         return@transaction board
     }
@@ -214,7 +223,9 @@ class KanbanRepositoryImplementation(
     }
 
     override fun getCardsByBoardUUID(uuid: UUID): List<Card>? = transaction {
-        val cards = CardDatabase.selectAll().where { CardDatabase.boardUUID eq uuid }.map {
+        val cards = CardDatabase.selectAll().where {
+            CardDatabase.boardUUID eq uuid and (CardDatabase.status eq CardStatus.ACTIVE.code)
+        }.map {
             val card = resultRowToCard(it)
 
             if (card.metadata != null) {
@@ -252,15 +263,27 @@ class KanbanRepositoryImplementation(
     }
 
     override fun getColumnsByBoardUUID(uuid: UUID): List<Column>? = transaction {
-        val column = ColumnDatabase.selectAll().where { ColumnDatabase.boardUUID eq uuid }.map {
-            resultRowToColumn(it)
+        val column = ColumnDatabase.selectAll().where {
+            ColumnDatabase.boardUUID eq uuid and (ColumnDatabase.status eq ColumnStatus.ACTIVE.code)
+        }.orderBy(
+            column = ColumnDatabase.index,
+            order = SortOrder.ASC
+        ).map {
+            val column = resultRowToColumn(it)
+
+            column.rules = getRulesByColumnUUID(column.uuid!!)
+            column.allowedColumns = getAllowedColumns(column.uuid!!)
+
+            column
         }
 
         return@transaction column
     }
 
     override fun getTagsByBoardUUID(uuid: UUID): List<Tag>? = transaction {
-        val tag = TagDatabase.selectAll().where { TagDatabase.boardUUID eq uuid }.map {
+        val tag = TagDatabase.selectAll().where {
+            TagDatabase.boardUUID eq uuid and (TagDatabase.status eq TagStatus.ACTIVE.code)
+        }.map {
             resultRowToTag(it)
         }
 
@@ -288,7 +311,69 @@ class KanbanRepositoryImplementation(
             )
         }
 
-    private fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>) {
+    override fun deleteTagByUUID(tagUUID: UUID) {
+        transaction {
+            TagDatabase.update({ TagDatabase.uuid eq tagUUID }) {
+                it[status] = TagStatus.INACTIVE.code
+            }
+        }
+    }
+
+    override fun deleteColumnByUUID(columnUUID: UUID) {
+        transaction {
+            ColumnDatabase.update({ ColumnDatabase.uuid eq columnUUID }) {
+                it[status] = ColumnStatus.INACTIVE.code
+            }
+        }
+    }
+
+    override fun reorderColumns(columns: List<Column>): List<Column>? = transaction {
+        val columnsResponse = mutableListOf<Column>()
+
+        columns.forEach { column ->
+            ColumnDatabase.update({ ColumnDatabase.uuid eq column.uuid!! }) {
+                it[index] = column.index!!
+            }
+
+            val columnResponse = getColumnByUUID(column.uuid!!)
+
+            if (columnResponse != null) {
+                columnsResponse.add(columnResponse)
+            }
+        }
+
+        return@transaction columnsResponse
+    }
+
+    override fun saveColumnRule(columnRule: ColumnRule): ColumnRule? = transaction {
+        val uuid = UUID.randomUUID()
+
+        ColumnRuleDatabase.insert {
+            it[ColumnRuleDatabase.uuid] = uuid
+            it[columnUUID] = columnRule.columnUUID!!
+            it[title] = columnRule.title!!
+            it[type] = columnRule.type!!.type
+            it[metadata] = columnRule.metadata
+            it[TagDatabase.createdAt] = LocalDateTime.now()
+            it[TagDatabase.modifiedAt] = LocalDateTime.now()
+        }
+
+        return@transaction getColumnRuleByUUID(uuid)
+    }
+
+    override fun getColumnRuleByUUID(columnRuleUUID: UUID): ColumnRule? = transaction {
+        ColumnRuleDatabase.selectAll().where { ColumnRuleDatabase.uuid eq columnRuleUUID }.map {
+            resultRowToColumnRule(it)
+        }.firstOrNull()
+    }
+
+    override fun getRulesByColumnUUID(columnUUID: UUID): List<ColumnRule>? = transaction {
+        ColumnRuleDatabase.selectAll().where { ColumnRuleDatabase.columnUUID eq columnUUID }.map {
+            resultRowToColumnRule(it)
+        }
+    }
+
+    override fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>) {
         transaction {
             ColumnAllowedDatabase.deleteWhere {
                 ColumnAllowedDatabase.columnUUID eq columnUUID
@@ -303,7 +388,32 @@ class KanbanRepositoryImplementation(
                     it[allowedColumnUUID] = column
                 }
             }
+
+            val selfColumnUUID = UUID.randomUUID()
+
+            ColumnAllowedDatabase.insert {
+                it[uuid] = selfColumnUUID
+                it[ColumnAllowedDatabase.columnUUID] = columnUUID
+                it[allowedColumnUUID] = columnUUID
+            }
         }
+    }
+
+    private fun getAllowedColumns(columnUUID: UUID): List<UUID> = transaction {
+        ColumnAllowedDatabase.select(ColumnAllowedDatabase.allowedColumnUUID).where {
+            ColumnAllowedDatabase.columnUUID eq columnUUID
+        }.map {
+            it[ColumnAllowedDatabase.allowedColumnUUID]
+        }
+    }
+
+    private fun getColumnLastIndex(): Int? = transaction {
+        ColumnDatabase.select(ColumnDatabase.index).where {
+            ColumnDatabase.status eq ColumnStatus.ACTIVE.code
+        }.orderBy(ColumnDatabase.index, SortOrder.DESC)
+            .limit(count = 1)
+            .map { it[ColumnDatabase.index] }
+            .firstOrNull()
     }
 
     private fun resultRowToBoard(it: ResultRow): Board = Board(
@@ -345,10 +455,21 @@ class KanbanRepositoryImplementation(
     private fun resultRowToTag(it: ResultRow): Tag = Tag(
         uuid = it[TagDatabase.uuid],
         boardUUID = it[TagDatabase.boardUUID],
+        title = it[TagDatabase.title],
         color = it[TagDatabase.color],
         description = it[TagDatabase.description],
         status = enumFromTypeValue<TagStatus, Int>(it[TagDatabase.status]),
         createdAt = it[TagDatabase.createdAt],
         modifiedAt = it[TagDatabase.modifiedAt],
+    )
+
+    private fun resultRowToColumnRule(it: ResultRow): ColumnRule = ColumnRule(
+        uuid = it[ColumnRuleDatabase.uuid],
+        columnUUID = it[ColumnRuleDatabase.columnUUID],
+        title = it[ColumnRuleDatabase.title],
+        type = enumFromTypeValue<ColumnRuleType, String>(it[ColumnRuleDatabase.type]),
+        metadata = it[ColumnRuleDatabase.metadata],
+        createdAt = it[ColumnRuleDatabase.createdAt],
+        modifiedAt = it[ColumnRuleDatabase.modifiedAt],
     )
 }

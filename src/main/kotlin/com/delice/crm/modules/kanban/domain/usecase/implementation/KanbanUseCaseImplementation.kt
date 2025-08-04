@@ -1,9 +1,7 @@
 package com.delice.crm.modules.kanban.domain.usecase.implementation
 
-import com.delice.crm.modules.kanban.domain.entities.Board
-import com.delice.crm.modules.kanban.domain.entities.Card
-import com.delice.crm.modules.kanban.domain.entities.Column
-import com.delice.crm.modules.kanban.domain.entities.Tag
+import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.exceptions.*
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
@@ -14,7 +12,8 @@ import java.util.*
 
 @Service
 class KanbanUseCaseImplementation(
-    private val kanbanRepository: KanbanRepository
+    private val kanbanRepository: KanbanRepository,
+    private val userRepository: UserRepository
 ) : KanbanUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(KanbanUseCaseImplementation::class.java)
@@ -216,6 +215,93 @@ class KanbanUseCaseImplementation(
         BoardPaginationResponse(error = KANBAN_UNEXPECTED)
     }
 
+    override fun deleteTagByUUID(tagUUID: UUID): MessageBoardResponse = try {
+        val tag = kanbanRepository.getTagByUUID(tagUUID)
+
+        if (tag == null) {
+            MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
+        } else {
+            kanbanRepository.deleteTagByUUID(tagUUID)
+            MessageBoardResponse(message = "Tag deleted with success")
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_DELETE_TAG_BY_UUID", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun deleteColumnByUUID(columnUUID: UUID): MessageBoardResponse = try {
+        val tag = kanbanRepository.getColumnByUUID(columnUUID)
+
+        if (tag == null) {
+            MessageBoardResponse(error = KANBAN_COLUMN_NOT_FOUND)
+        } else {
+            kanbanRepository.deleteColumnByUUID(columnUUID)
+            MessageBoardResponse(message = "Column deleted with success")
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_DELETE_COLUMN_BY_UUID", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun reorderColumns(columns: List<Column>): ColumnListResponse = try {
+        when {
+            columns.map { it.index }.toSet().size != columns.size -> {
+                ColumnListResponse(error = KANBAN_COLUMN_INDEX_REPEATED)
+            }
+
+            else -> {
+                ColumnListResponse(
+                    columns = kanbanRepository.reorderColumns(columns)
+                )
+            }
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_REORDER_COLUMNS", e)
+        ColumnListResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun saveColumnRule(columnRule: ColumnRule): ColumnRuleResponse = try {
+        validateColumnRule(columnRule).let {
+            when {
+                it != null -> {
+                    ColumnRuleResponse(error = it)
+                }
+
+                else -> {
+                    ColumnRuleResponse(
+                        columnRule = kanbanRepository.saveColumnRule(columnRule)
+                    )
+                }
+            }
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_SAVE_COLUMN_RULE", e)
+        ColumnRuleResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>): MessageBoardResponse = try {
+        validateAllowedColumns(allowed).let {
+            when {
+                it != null -> {
+                    MessageBoardResponse(error = it)
+                }
+
+                kanbanRepository.getColumnByUUID(columnUUID) == null -> {
+                    MessageBoardResponse(error = KANBAN_COLUMN_NOT_FOUND)
+                }
+
+                else -> {
+                    kanbanRepository.saveAllowedColumns(columnUUID, allowed)
+
+                    MessageBoardResponse(message = "Allowed columns saved with success")
+                }
+            }
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_SAVE_ALLOWED_COLUMNS", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
     private fun validateBoard(board: Board): KanbanExceptions? = when {
         board.code.isNullOrBlank() -> {
             KANBAN_CODE_IS_EMPTY
@@ -301,8 +387,106 @@ class KanbanUseCaseImplementation(
             KANBAN_TAG_BOARD_UUID_IS_EMPTY
         }
 
+        tag.title.isNullOrBlank() -> {
+            KANBAN_TITLE_IS_EMPTY
+        }
+
         else -> {
             null
+        }
+    }
+
+    private fun validateColumnRule(columnRule: ColumnRule): KanbanExceptions? {
+        var validate = when {
+            columnRule.type == null -> {
+                KANBAN_COLUMN_RULE_TYPE_IS_EMPTY
+            }
+
+            columnRule.title.isNullOrBlank() -> {
+                KANBAN_TITLE_IS_EMPTY
+            }
+
+            else -> {
+                null
+            }
+        }
+
+        if (validate != null) {
+            return validate
+        }
+
+        when (columnRule.type) {
+            ColumnRuleType.SEND_EMAIL -> {
+                if (columnRule.metadata == null) {
+                    validate = KANBAN_COLUMN_RULE_DATA_INVALID
+                } else {
+                    if (columnRule.metadata!!.emails.isNullOrEmpty()) {
+                        validate = KANBAN_COLUMN_RULE_EMAIL_IS_EMPTY
+                    }
+                }
+            }
+
+            ColumnRuleType.NOTIFY_USER -> {
+                if (columnRule.metadata == null) {
+                    validate = KANBAN_COLUMN_RULE_DATA_INVALID
+                } else {
+                    if (columnRule.metadata!!.notifyUsers.isNullOrEmpty()) {
+                        validate = KANBAN_COLUMN_RULE_USER_IS_EMPTY
+                    } else {
+                        columnRule.metadata!!.notifyUsers!!.forEach {
+                            val user = userRepository.getUserByUUID(UUID.fromString(it))
+
+                            if (user == null) {
+                                validate = KANBAN_USER_NOT_FOUND
+                            }
+                        }
+                    }
+                }
+            }
+
+            ColumnRuleType.ADD_TAG -> {
+                if (columnRule.metadata == null) {
+                    validate = KANBAN_COLUMN_RULE_DATA_INVALID
+                } else {
+                    if (columnRule.metadata!!.tag.isNullOrBlank()) {
+                        validate = KANBAN_COLUMN_RULE_TAG_IS_EMPTY
+                    } else {
+                        val tag = kanbanRepository.getTagByUUID(UUID.fromString(columnRule.metadata!!.tag))
+
+                        if (tag == null) {
+                            validate = KANBAN_TAG_NOT_FOUND
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                if (columnRule.metadata != null) {
+                    validate = KANBAN_COLUMN_RULE_DATA_INVALID
+                }
+            }
+        }
+
+        return validate
+    }
+
+    private fun validateAllowedColumns(columns: List<UUID>): KanbanExceptions? = when {
+        columns.isEmpty() -> {
+            KANBAN_ALLOWED_COLUMNS_IS_EMPTY
+        }
+
+        else -> {
+            var validate: KanbanExceptions? = null
+
+            columns.forEach {
+                val column = kanbanRepository.getColumnByUUID(it)
+
+                if (column == null) {
+                    validate = KANBAN_COLUMN_NOT_FOUND
+                }
+            }
+
+            validate
         }
     }
 }

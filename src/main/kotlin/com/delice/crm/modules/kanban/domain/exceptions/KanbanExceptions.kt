@@ -25,5 +25,16 @@ val KANBAN_BOARD_NOT_FOUND = KanbanExceptions("KANBAN_BOARD_NOT_FOUND", "The boa
 val KANBAN_CARD_NOT_FOUND = KanbanExceptions("KANBAN_CARD_NOT_FOUND", "The card not found")
 val KANBAN_COLUMN_NOT_FOUND = KanbanExceptions("KANBAN_COLUMN_NOT_FOUND", "The column not found")
 val KANBAN_TAG_NOT_FOUND = KanbanExceptions("KANBAN_TAG_NOT_FOUND", "The tag not found")
+val KANBAN_USER_NOT_FOUND = KanbanExceptions("KANBAN_USER_NOT_FOUND", "The user not found")
+
+val KANBAN_COLUMN_INDEX_REPEATED = KanbanExceptions("KANBAN_COLUMN_INDEX_REPEATED", "The index cannot be repeated in order")
+
+val KANBAN_COLUMN_RULE_TYPE_IS_EMPTY = KanbanExceptions("KANBAN_COLUMN_RULE_TYPE_IS_EMPTY", "The type is empty")
+val KANBAN_COLUMN_RULE_TAG_IS_EMPTY = KanbanExceptions("KANBAN_COLUMN_RULE_TAG_IS_EMPTY", "The tag is empty")
+val KANBAN_COLUMN_RULE_EMAIL_IS_EMPTY = KanbanExceptions("KANBAN_COLUMN_RULE_EMAIL_IS_EMPTY", "The email is empty")
+val KANBAN_COLUMN_RULE_USER_IS_EMPTY = KanbanExceptions("KANBAN_COLUMN_RULE_USER_IS_EMPTY", "The user is empty")
+val KANBAN_COLUMN_RULE_DATA_INVALID = KanbanExceptions("KANBAN_COLUMN_RULE_DATA_INVALID", "The data rule is invalid")
+
+val KANBAN_ALLOWED_COLUMNS_IS_EMPTY = KanbanExceptions("KANBAN_ALLOWED_COLUMNS_IS_EMPTY", "Allowed columns is empty")
 
 class KanbanExceptions(code: String, message: String): DefaultError(code, message)

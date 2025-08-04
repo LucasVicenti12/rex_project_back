@@ -7,6 +7,7 @@ import java.util.UUID
 class Tag(
     var uuid: UUID? = null,
     var boardUUID: UUID? = null,
+    var title: String? = null,
     var color: String? = null,
     var description: String? = null,
     var status: TagStatus? = TagStatus.ACTIVE,

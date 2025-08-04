@@ -1,10 +1,7 @@
 package com.delice.crm.modules.kanban.infra.web
 
 import com.delice.crm.core.utils.filter.parametersToMap
-import com.delice.crm.modules.kanban.domain.entities.Board
-import com.delice.crm.modules.kanban.domain.entities.Card
-import com.delice.crm.modules.kanban.domain.entities.Column
-import com.delice.crm.modules.kanban.domain.entities.Tag
+import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
 import com.delice.crm.modules.kanban.domain.usecase.response.*
 import jakarta.servlet.http.HttpServletRequest
@@ -178,6 +175,101 @@ class KanbanWebService(
         val params = request.queryString.parametersToMap()
 
         val response = kanbanUseCase.getBoardPagination(page, count, params)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @DeleteMapping("/deleteTagByUUID/{uuid}")
+    fun deleteTagByUUID(
+        @PathVariable(
+            value = "uuid",
+            required = true
+        ) tagUUID: UUID
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.deleteTagByUUID(tagUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @DeleteMapping("/deleteColumnByUUID/{uuid}")
+    fun deleteColumnByUUID(
+        @PathVariable(
+            value = "uuid",
+            required = true
+        ) tagUUID: UUID
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.deleteColumnByUUID(tagUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/reorderColumns")
+    fun reorderColumns(
+        @RequestBody columns: List<Column>
+    ): ResponseEntity<ColumnListResponse> {
+        val response = kanbanUseCase.reorderColumns(columns)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/saveColumnRule")
+    fun saveColumnRule(
+        @RequestBody columnRule: ColumnRule
+    ): ResponseEntity<ColumnRuleResponse> {
+        val response = kanbanUseCase.saveColumnRule(columnRule)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/saveAllowedColumns/{uuid}")
+    fun saveAllowedColumns(
+        @PathVariable(
+            name = "uuid",
+            required = true
+        ) uuid: UUID,
+        @RequestBody columns: List<UUID>
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.saveAllowedColumns(uuid, columns)
 
         if (response.error != null) {
             return ResponseEntity
