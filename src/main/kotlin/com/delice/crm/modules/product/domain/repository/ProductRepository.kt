@@ -10,6 +10,6 @@ interface ProductRepository {
     fun updateProduct(product: Product): Product?
     fun getProductByUUID(uuid: UUID): Product?
     fun getProductByCode(code: String): Product?
-    fun getProductPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Product>?
+    fun getProductPagination(page: Int, count: Int, orderyBy: String?, params: Map<String, Any?>): Pagination<Product>?
     fun saveProductMedia(media: List<ProductMedia>, productUUID: UUID): List<ProductMedia>
 }

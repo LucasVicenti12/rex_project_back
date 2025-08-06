@@ -92,16 +92,16 @@ class ProductRepositoryImplementation : ProductRepository {
         }.firstOrNull()
     }
 
-    override fun getProductPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Product>? =
+    override fun getProductPagination(page: Int, count: Int, orderBy: String?, params: Map<String, Any?>): Pagination<Product>? =
         transaction {
             val query = ProductDatabase
                 .selectAll()
                 .where(ProductFilter(params).toFilter(ProductDatabase))
+                .orderBy(*parseOrderBy(orderBy).toTypedArray())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 
             val items = query
-                .orderBy(name)
                 .limit(count)
                 .offset((page * count).toLong())
                 .map {
@@ -114,6 +114,44 @@ class ProductRepositoryImplementation : ProductRepository {
                 total = total,
             )
         }
+
+    private fun parseOrderBy(orderBy: String?): List<Pair<Expression<*>, SortOrder>> {
+        if (orderBy.isNullOrBlank()) return listOf(ProductDatabase.name to SortOrder.ASC)
+
+        // Mapeia os nomes de campos válidos para as colunas do banco
+        val fieldMap = mapOf(
+            "uuid" to ProductDatabase.uuid,
+            "code" to ProductDatabase.code,
+            "name" to ProductDatabase.name,
+            "price" to ProductDatabase.price,
+            "weight" to ProductDatabase.weight,
+            "createdAt" to ProductDatabase.createdAt,
+            "modifiedAt" to ProductDatabase.modifiedAt,
+            "status" to ProductDatabase.status
+        )
+
+        return orderBy.split(",").map { raw ->
+            val parts = raw.trim().split(":")
+            val fieldName = parts.getOrNull(0)?.trim() ?: throw IllegalArgumentException(
+                "Campo de ordenação vazio detectado em '$raw'. Verifique o parâmetro 'orderBy'."
+            )
+
+            val sortOrder = when (parts.getOrNull(1)?.trim()?.lowercase()) {
+                "desc" -> SortOrder.DESC
+                null, "", "asc" -> SortOrder.ASC
+                else -> throw IllegalArgumentException(
+                    "Direção de ordenação inválida para o campo '$fieldName'. Use apenas 'asc' ou 'desc'."
+                )
+            }
+
+            val column = fieldMap[fieldName] ?: throw IllegalArgumentException(
+                "Campo '$fieldName' não é válido para ordenação. Campos permitidos: ${fieldMap.keys.joinToString()}."
+            )
+
+            column to sortOrder
+        }
+    }
+
 
     private fun getProductMedia(productUUID: UUID): List<ProductMedia> = transaction {
         ProductMediaDatabase
