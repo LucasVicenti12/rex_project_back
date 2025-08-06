@@ -171,10 +171,10 @@ class RolesRepositoryImplementation : RolesRepository {
     override fun getAllRolesByModule(): List<DataModule>? = transaction {
         val roles = getRoles() ?: return@transaction emptyList()
 
-        return@transaction groupRoleByModule(roles)
+        return@transaction groupRoleByModule(roles.filter { it.roleType == RoleType.USER })
     }
 
-    private fun groupRoleByModule(roles: List<Role>): List<DataModule>{
+    private fun groupRoleByModule(roles: List<Role>): List<DataModule> {
         val modules = roles.map { it.moduleUUID }.groupBy { it }.map { it.key }
 
         if (modules.isEmpty()) {

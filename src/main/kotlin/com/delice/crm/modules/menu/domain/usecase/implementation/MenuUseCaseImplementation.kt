@@ -5,6 +5,7 @@ import com.delice.crm.modules.menu.domain.exceptions.INVALID_QUERY
 import com.delice.crm.modules.menu.domain.exceptions.MENU_UNEXPECTED_ERROR
 import com.delice.crm.modules.menu.domain.repository.MenuRepository
 import com.delice.crm.modules.menu.domain.usecase.MenuUseCase
+import com.delice.crm.modules.menu.domain.usecase.response.BenchmarkResponse
 import com.delice.crm.modules.menu.domain.usecase.response.MenuResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -26,5 +27,12 @@ class MenuUseCaseImplementation(
     } catch (e: Exception) {
         logger.error("QUERY_MENU_OPTIONS", e)
         MenuResponse(error = MENU_UNEXPECTED_ERROR)
+    }
+
+    override fun getHomeResume(): BenchmarkResponse = try {
+        BenchmarkResponse(benchmark = menuRepository.getHomeResume())
+    }catch (e: Exception){
+        logger.error("GET_HOME_RESUME", e)
+        BenchmarkResponse(error = MENU_UNEXPECTED_ERROR)
     }
 }

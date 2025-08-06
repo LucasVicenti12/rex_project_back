@@ -9,6 +9,7 @@ import com.delice.crm.modules.customer.domain.usecase.response.*
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -16,6 +17,7 @@ import java.util.*
 @RequestMapping("/customer")
 class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     @PostMapping("/register")
+    @PreAuthorize("hasAnyAuthority('CREATE_CUSTOMER', 'ALL_CUSTOMER')")
     fun registerCustomer(@RequestBody customer: Customer): ResponseEntity<CustomerResponse> {
         val user = getCurrentUser()
 
@@ -33,6 +35,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     }
 
     @PutMapping("/update")
+    @PreAuthorize("hasAnyAuthority('CREATE_CUSTOMER', 'ALL_CUSTOMER')")
     fun updateCustomer(@RequestBody customer: Customer): ResponseEntity<CustomerResponse> {
         val user = getCurrentUser()
 
@@ -50,6 +53,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     }
 
     @PostMapping("/approval/{customerUUID}")
+    @PreAuthorize("hasAnyAuthority('APPROVAL_CUSTOMER', 'ALL_CUSTOMER')")
     fun approvalCustomer(
         @RequestParam(value = "status", required = true) status: CustomerStatus,
         @PathVariable(name = "customerUUID", required = true) customerUUID: UUID
@@ -70,6 +74,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     }
 
     @GetMapping("/customerEconomicActivities/{customerUUID}")
+    @PreAuthorize("hasAnyAuthority('READ_CUSTOMER', 'ALL_CUSTOMER')")
     fun listEconomicActivitiesByCustomerUUID(
         @PathVariable(name = "customerUUID", required = true) customerUUID: UUID
     ): ResponseEntity<CustomerEconomicActivities> {
@@ -87,6 +92,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     }
 
     @GetMapping("/getCustomerByUIUD")
+    @PreAuthorize("hasAnyAuthority('READ_CUSTOMER', 'ALL_CUSTOMER')")
     fun getCustomerByUUID(
         @RequestParam(value = "uuid", required = true) customerUUID: UUID
     ): ResponseEntity<CustomerResponse> {
@@ -104,6 +110,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
     }
 
     @GetMapping("/getPagination")
+    @PreAuthorize("hasAnyAuthority('READ_CUSTOMER', 'ALL_CUSTOMER')")
     fun getCustomerPagination(
         @RequestParam(
             value = "page",

@@ -1,11 +1,13 @@
 package com.delice.crm.modules.wallet.domain.usecase.implementation
 
 import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.wallet.domain.entities.Wallet
 import com.delice.crm.modules.wallet.domain.exceptions.*
 import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import com.delice.crm.modules.wallet.domain.usecase.WalletUseCase
+import com.delice.crm.modules.wallet.domain.usecase.response.FreeCustomers
 import com.delice.crm.modules.wallet.domain.usecase.response.WalletPaginationResponse
 import com.delice.crm.modules.wallet.domain.usecase.response.WalletResponse
 import org.slf4j.LoggerFactory
@@ -36,6 +38,10 @@ class WalletUseCaseImplementation(
                 WalletResponse(error = WALLET_LABEL_IS_EMPTY)
             }
 
+            validateRepeatedCustomers(wallet.customers!!) -> {
+                WalletResponse(error = WALLET_CUSTOMER_DUPLICATE)
+            }
+
             else -> {
                 var error: WalletExceptions? = null
 
@@ -49,7 +55,7 @@ class WalletUseCaseImplementation(
 
                     val attached = walletRepository.getCustomerWallet(customer.uuid!!, null)
 
-                    if(attached != null) {
+                    if (attached != null) {
                         error = WALLET_CUSTOMER_ALREADY_ATTACHED
                         return@forEach
                     }
@@ -85,6 +91,10 @@ class WalletUseCaseImplementation(
                 WalletResponse(error = WALLET_LABEL_IS_EMPTY)
             }
 
+            validateRepeatedCustomers(wallet.customers!!) -> {
+                WalletResponse(error = WALLET_CUSTOMER_DUPLICATE)
+            }
+
             else -> {
                 var error: WalletExceptions? = null
 
@@ -98,7 +108,7 @@ class WalletUseCaseImplementation(
 
                     val attached = walletRepository.getCustomerWallet(customer.uuid!!, wallet.uuid)
 
-                    if(attached != null) {
+                    if (attached != null) {
                         error = WALLET_CUSTOMER_ALREADY_ATTACHED
                         return@forEach
                     }
@@ -137,5 +147,21 @@ class WalletUseCaseImplementation(
             logger.error("ERROR_GET_WALLET_PAGINATION", e)
             WalletPaginationResponse(error = WALLET_UNEXPECTED_ERROR)
         }
+    }
+
+    override fun getFreeCustomers(): FreeCustomers {
+        return try {
+            return FreeCustomers(
+                customers = walletRepository.getFreeCustomers(),
+                error = null
+            )
+        } catch (e: Exception) {
+            logger.error("ERROR_GET_FREE_CUSTOMERS", e)
+            FreeCustomers(error = WALLET_UNEXPECTED_ERROR)
+        }
+    }
+
+    private fun validateRepeatedCustomers(customers: List<Customer>): Boolean {
+        return (customers.groupBy { it.uuid }.filter { it.value.size > 1 }.keys).isNotEmpty()
     }
 }

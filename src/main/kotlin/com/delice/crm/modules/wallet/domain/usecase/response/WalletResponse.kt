@@ -1,6 +1,8 @@
 package com.delice.crm.modules.wallet.domain.usecase.response
 
 import com.delice.crm.core.utils.pagination.Pagination
+import com.delice.crm.modules.customer.domain.entities.Customer
+import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
 import com.delice.crm.modules.wallet.domain.entities.Wallet
 import com.delice.crm.modules.wallet.domain.exceptions.WalletExceptions
 
@@ -11,5 +13,10 @@ data class WalletResponse(
 
 data class WalletPaginationResponse(
     val wallet: Pagination<Wallet>? = null,
+    val error: WalletExceptions? = null
+)
+
+data class FreeCustomers(
+    val customers: List<SimpleCustomer>? = null,
     val error: WalletExceptions? = null
 )

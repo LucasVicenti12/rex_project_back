@@ -3,7 +3,10 @@ package com.delice.crm.modules.wallet.infra.repository
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.pagination.Pagination
+import com.delice.crm.modules.customer.domain.entities.CustomerStatus
+import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
+import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.wallet.domain.entities.Wallet
 import com.delice.crm.modules.wallet.domain.entities.WalletStatus
 import com.delice.crm.modules.wallet.domain.repository.WalletRepository
@@ -127,6 +130,28 @@ class WalletRepositoryImplementation(
                 total = total
             )
         }
+
+    override fun getFreeCustomers(): List<SimpleCustomer>? = transaction {
+        CustomerDatabase
+            .join(
+                otherTable = WalletCustomersDatabase,
+                joinType = JoinType.LEFT,
+                additionalConstraint = { WalletCustomersDatabase.customerUUID eq CustomerDatabase.uuid }
+            )
+            .select(
+                CustomerDatabase.uuid,
+                CustomerDatabase.companyName,
+                CustomerDatabase.document
+            ).where {
+                WalletCustomersDatabase.uuid.isNull() and (CustomerDatabase.status eq CustomerStatus.FIT.code)
+            }.map {
+                SimpleCustomer(
+                    uuid = it[CustomerDatabase.uuid],
+                    document = it[CustomerDatabase.document],
+                    companyName = it[CustomerDatabase.companyName],
+                )
+            }
+    }
 
     private fun resultRowToWallet(it: ResultRow): Wallet {
         val wallet = Wallet(
