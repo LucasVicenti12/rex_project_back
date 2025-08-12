@@ -49,6 +49,11 @@ object CustomerContactsDatabase : Table("customer_contacts") {
     var customerUUID = uuid("customer_uuid") references CustomerDatabase.uuid
 }
 
+object CustomerCardDatabase: Table("customer_card"){
+    var cardUUID = uuid("card_uuid")
+    var customerUUID = uuid("customer_uuid")
+}
+
 data class CustomerFilter(
     val parameters: Map<String, Any?>
 ) : ExposedFilter<CustomerDatabase> {

@@ -11,10 +11,14 @@ import com.delice.crm.core.utils.contact.Contact
 import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
-import com.delice.crm.modules.customer.infra.database.CustomerContactsDatabase
-import com.delice.crm.modules.customer.infra.database.CustomerDatabase
-import com.delice.crm.modules.customer.infra.database.CustomerEconomicActivitiesDatabase
-import com.delice.crm.modules.customer.infra.database.CustomerFilter
+import com.delice.crm.modules.customer.infra.database.*
+import com.delice.crm.modules.kanban.domain.entities.ColumnRuleType
+import com.delice.crm.modules.kanban.domain.entities.KanbanKeys
+import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
+import com.delice.crm.modules.kanban.infra.database.BoardDatabase
+import com.delice.crm.modules.kanban.infra.database.CardDatabase
+import com.delice.crm.modules.kanban.infra.database.ColumnDatabase
+import com.delice.crm.modules.kanban.infra.database.ColumnRuleDatabase
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -24,7 +28,9 @@ import java.util.*
 import kotlin.math.ceil
 
 @Service
-class CustomerRepositoryImplementation() : CustomerRepository {
+class CustomerRepositoryImplementation(
+    private val kanbanRepository: KanbanRepository
+) : CustomerRepository {
     override fun registerCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
         val customerUUID = UUID.randomUUID()
 
@@ -138,6 +144,72 @@ class CustomerRepositoryImplementation() : CustomerRepository {
             CustomerDatabase.update({ CustomerDatabase.uuid eq customerUUID }) {
                 it[CustomerDatabase.status] = status.code
             }
+
+            val card = CustomerCardDatabase.select(CustomerCardDatabase.cardUUID).where {
+                CustomerCardDatabase.customerUUID eq customerUUID
+            }.map { it[CustomerCardDatabase.cardUUID] }.firstOrNull()
+
+            if (card != null) {
+                moveCardToColumnWithRuleStatus(
+                    cardUUID = card,
+                    status = status,
+                )
+            }
+        }
+    }
+
+    private fun moveCardToColumnWithRuleStatus(cardUUID: UUID, status: CustomerStatus) {
+        val ruleType = when (status) {
+            CustomerStatus.FIT -> {
+                ColumnRuleType.APPROVE_CUSTOMER
+            }
+            CustomerStatus.NOT_FIT -> {
+                ColumnRuleType.REPROVE_CUSTOMER
+            }
+            CustomerStatus.PENDING -> {
+                ColumnRuleType.REVIEW_CUSTOMER
+            }
+            else -> {
+                null
+            }
+        }
+
+        if (ruleType == null) return
+
+        transaction {
+            val column = ColumnRuleDatabase
+                .join(
+                    otherTable = ColumnDatabase,
+                    joinType = JoinType.INNER,
+                    additionalConstraint = {
+                        ColumnRuleDatabase.columnUUID eq ColumnDatabase.uuid
+                    }
+                )
+                .join(
+                    otherTable = BoardDatabase,
+                    joinType = JoinType.INNER,
+                    additionalConstraint = {
+                        BoardDatabase.uuid eq ColumnDatabase.boardUUID
+                    }
+                )
+                .select(
+                    ColumnDatabase.uuid
+                )
+                .where {
+                    ColumnRuleDatabase.type eq ruleType.type and (
+                        BoardDatabase.code eq KanbanKeys.LEADS.type
+                    )
+                }
+                .limit(1)
+                .map { it[ColumnDatabase.uuid] }.firstOrNull()
+
+            if(column != null){
+
+                CardDatabase.update ({CardDatabase.uuid eq cardUUID}){
+                    it[columnUUID] = column
+                    it[modifiedAt] = LocalDateTime.now()
+                }
+            }
         }
     }
 
@@ -235,6 +307,15 @@ class CustomerRepositoryImplementation() : CustomerRepository {
                     document = it[CustomerDatabase.document],
                 )
             }
+    }
+
+    override fun attachCustomerToCard(customerUUID: UUID, cardUUID: UUID) {
+        transaction {
+            CustomerCardDatabase.insert {
+                it[CustomerCardDatabase.cardUUID] = cardUUID
+                it[CustomerCardDatabase.customerUUID] = customerUUID
+            }
+        }
     }
 
     private fun getContactsByCustomerUUID(customerUUID: UUID): List<Contact> = transaction {

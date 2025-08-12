@@ -281,4 +281,117 @@ class KanbanWebService(
             .ok()
             .body(response)
     }
+
+    @GetMapping("/getColumnRuleByUUID/{uuid}")
+    fun getColumnRuleByUUID(
+        @PathVariable(
+            name = "uuid",
+            required = true,
+        ) uuid: UUID
+    ): ResponseEntity<ColumnRuleResponse> {
+        val response = kanbanUseCase.getColumnRuleByUUID(uuid)
+
+        if (response.error != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+        }
+        return ResponseEntity.ok(response)
+    }
+
+    @DeleteMapping("/deleteAllowedColumnUUID/{mainColumnUUID}/{columnUUID}")
+    fun deleteAllowedColumnUUID(
+        @PathVariable(
+            value = "mainColumnUUID",
+            required = true
+        ) mainColumnUUID: UUID,
+        @PathVariable(
+            value = "columnUUID",
+            required = true
+        ) columnUUID: UUID
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.deleteAllowedColumnUUID(mainColumnUUID, columnUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @DeleteMapping("/deleteColumnRuleByUUID/{uuid}")
+    fun deleteColumnRuleByUUID(
+        @PathVariable(
+            value = "uuid",
+            required = true
+        ) tagUUID: UUID
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.deleteColumnRuleByUUID(tagUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/moveCardToColumn/{cardUUID}/{columnUUID}")
+    fun moveCardToColumn(
+        @PathVariable(
+            value = "cardUUID",
+            required = true
+        ) cardUUID: UUID,
+        @PathVariable(
+            value = "columnUUID",
+            required = true
+        ) columnUUID: UUID
+    ): ResponseEntity<CardListResponse> {
+        val response = kanbanUseCase.validateMoveCardToColumn(
+            cardUUID,
+            columnUUID
+        )
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/setDefaultColumn/{boardUUID}/{columnUUID}")
+    fun setDefaultColumn(
+        @PathVariable(
+            value = "boardUUID",
+            required = true
+        ) boardUUID: UUID,
+        @PathVariable(
+            value = "columnUUID",
+            required = true
+        ) columnUUID: UUID
+    ): ResponseEntity<ColumnListResponse> {
+        val response = kanbanUseCase.setDefaultColumn(
+            boardUUID,
+            columnUUID
+        )
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
 }

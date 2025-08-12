@@ -29,6 +29,11 @@ data class CardListResponse(
     val error: KanbanExceptions? = null
 )
 
+data class MoveCardResponse(
+    val move: Boolean,
+    val error: KanbanExceptions? = null
+)
+
 data class ColumnListResponse(
     val columns: List<Column>? = listOf(),
     val error: KanbanExceptions? = null
