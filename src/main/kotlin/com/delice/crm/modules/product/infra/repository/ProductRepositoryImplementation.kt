@@ -118,7 +118,7 @@ class ProductRepositoryImplementation : ProductRepository {
     private fun parseOrderBy(orderBy: String?): List<Pair<Expression<*>, SortOrder>> {
         if (orderBy.isNullOrBlank()) return listOf(ProductDatabase.name to SortOrder.ASC)
 
-        // Mapeia os nomes de campos válidos para as colunas do banco
+        // Maps valid field names to database columns
         val fieldMap = mapOf(
             "uuid" to ProductDatabase.uuid,
             "code" to ProductDatabase.code,
@@ -133,19 +133,19 @@ class ProductRepositoryImplementation : ProductRepository {
         return orderBy.split(",").map { raw ->
             val parts = raw.trim().split(":")
             val fieldName = parts.getOrNull(0)?.trim() ?: throw IllegalArgumentException(
-                "Campo de ordenação vazio detectado em '$raw'. Verifique o parâmetro 'orderBy'."
+                "Empty sort field detected in '$raw'. check the 'orderBy' parameter."
             )
 
             val sortOrder = when (parts.getOrNull(1)?.trim()?.lowercase()) {
                 "desc" -> SortOrder.DESC
                 null, "", "asc" -> SortOrder.ASC
                 else -> throw IllegalArgumentException(
-                    "Direção de ordenação inválida para o campo '$fieldName'. Use apenas 'asc' ou 'desc'."
+                    "Invalid sort direction for field '$fieldName'. Use only 'asc' or 'desc'."
                 )
             }
 
             val column = fieldMap[fieldName] ?: throw IllegalArgumentException(
-                "Campo '$fieldName' não é válido para ordenação. Campos permitidos: ${fieldMap.keys.joinToString()}."
+                "Field '$fieldName' is not valid for sorting. Allowed fields: ${fieldMap.keys.joinToString()}."
             )
 
             column to sortOrder
