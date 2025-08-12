@@ -1,12 +1,8 @@
 package com.delice.crm.modules.kanban.infra.database
 
 import com.delice.crm.core.utils.filter.ExposedFilter
-import com.delice.crm.modules.kanban.domain.entities.CardMetadata
+import com.delice.crm.modules.kanban.domain.entities.CardBaseMetadata
 import com.delice.crm.modules.kanban.domain.entities.ColumnRuleMetadata
-import com.delice.crm.modules.kanban.infra.database.CardDatabase.nullable
-import com.delice.crm.modules.kanban.infra.database.ColumnAllowedDatabase.references
-import com.delice.crm.modules.kanban.infra.database.ColumnDatabase.uniqueIndex
-import com.delice.crm.modules.kanban.infra.database.TagDatabase.uniqueIndex
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.jetbrains.exposed.sql.Op
@@ -67,8 +63,9 @@ object CardDatabase : Table("kanban_card") {
     var metadata = json(
         name = "metadata",
         serialize = { mapper.writeValueAsString(it) },
-        deserialize = { mapper.readValue<CardMetadata>(it) },
+        deserialize = { mapper.readValue<CardBaseMetadata>(it) },
     ).nullable()
+    var tagUUID = uuid("tag_uuid").nullable()
     var status = integer("status")
     var createdAt = datetime("created_at")
     var modifiedAt = datetime("modified_at")
@@ -85,6 +82,7 @@ object ColumnDatabase : Table("kanban_column") {
     var type = varchar("type", 10)
     var status = integer("status")
     var index = integer("index")
+    var isDefault = bool("is_default")
     var createdAt = datetime("created_at")
     var modifiedAt = datetime("modified_at")
 
@@ -114,7 +112,7 @@ object ColumnRuleDatabase: Table("kanban_column_rule") {
     var uuid = uuid("uuid").uniqueIndex()
     val columnUUID = uuid("column_uuid") references ColumnDatabase.uuid
     val title = varchar("title", 90)
-    val type = varchar("type", 30).uniqueIndex()
+    val type = varchar("type", 30)
     val metadata = json(
         name = "metadata",
         serialize = { mapper.writeValueAsString(it) },

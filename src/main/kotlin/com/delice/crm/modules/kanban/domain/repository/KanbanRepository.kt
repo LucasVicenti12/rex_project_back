@@ -1,5 +1,6 @@
 package com.delice.crm.modules.kanban.domain.repository
 
+import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.kanban.domain.entities.*
 import java.util.UUID
@@ -40,4 +41,18 @@ interface KanbanRepository {
     fun getRulesByColumnUUID(columnUUID: UUID): List<ColumnRule>?
 
     fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>)
+
+    fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID)
+    fun deleteColumnRuleByUUID(ruleUUID: UUID)
+
+    fun addTagToCard(cardUUID: UUID, tagUUID: UUID?)
+
+    fun applyRulesOnMoveEnd(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean
+    fun applyRulesOnMoveStart(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean
+
+    fun moveCardToColumn(cardUUID: UUID, columnUUID: UUID, boardUUID: UUID): List<Card>?
+
+    fun getCardIndexByBoardUUID(boardUUID: UUID): Int?
+
+    fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): List<Column>?
 }

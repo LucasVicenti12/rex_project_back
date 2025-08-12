@@ -1,6 +1,10 @@
 package com.delice.crm.modules.kanban.infra.repository
 
+import com.delice.crm.core.mail.entities.Mail
+import com.delice.crm.core.mail.queue.MailQueue
+import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
@@ -22,7 +26,8 @@ import kotlin.math.ceil
 @Service
 class KanbanRepositoryImplementation(
     private val customerRepository: CustomerRepository,
-    private val walletRepository: WalletRepository
+    private val walletRepository: WalletRepository,
+    private val mailQueue: MailQueue
 ) : KanbanRepository {
     override fun registerBoard(board: Board): Board? = transaction {
         val uuid = UUID.randomUUID()
@@ -54,8 +59,8 @@ class KanbanRepositoryImplementation(
             it[createdAt] = LocalDateTime.now()
             it[modifiedAt] = LocalDateTime.now()
 
-            if (card.metadata != null) {
-                it[metadata] = card.metadata
+            if (card.cardBaseMetadata != null) {
+                it[metadata] = card.cardBaseMetadata
             }
         }
 
@@ -67,6 +72,14 @@ class KanbanRepositoryImplementation(
 
         val lastIndex = getColumnLastIndex() ?: 0
 
+        val defaultColumnCount = ColumnDatabase.select(ColumnDatabase.isDefault).where({
+            ColumnDatabase.boardUUID eq column.boardUUID!! and (ColumnDatabase.isDefault eq true)
+        }).count().toInt()
+
+        if(defaultColumnCount == 0){
+            column.isDefault = true
+        }
+
         ColumnDatabase.insert {
             it[ColumnDatabase.uuid] = uuid
             it[code] = column.code!!
@@ -76,6 +89,7 @@ class KanbanRepositoryImplementation(
             it[status] = column.status!!.code
             it[index] = lastIndex
             it[type] = column.type!!.type
+            it[isDefault] = column.isDefault!!
             it[createdAt] = LocalDateTime.now()
             it[modifiedAt] = LocalDateTime.now()
         }
@@ -121,8 +135,8 @@ class KanbanRepositoryImplementation(
             it[status] = card.status!!.code
             it[modifiedAt] = LocalDateTime.now()
 
-            if (card.metadata != null) {
-                it[metadata] = card.metadata
+            if (card.cardBaseMetadata != null) {
+                it[metadata] = card.cardBaseMetadata
             }
         }
 
@@ -135,6 +149,7 @@ class KanbanRepositoryImplementation(
             it[description] = column.description
             it[status] = column.status!!.code
             it[type] = column.type!!.type
+            it[isDefault] = column.isDefault!!
             it[modifiedAt] = LocalDateTime.now()
         }
 
@@ -178,7 +193,11 @@ class KanbanRepositoryImplementation(
 
     override fun getColumnByUUID(uuid: UUID): Column? = transaction {
         val column = ColumnDatabase.selectAll().where { ColumnDatabase.uuid eq uuid }.map {
-            resultRowToColumn(it)
+            val column = resultRowToColumn(it)
+
+            column.allowedColumns = getAllowedColumns(column.uuid!!)
+
+            column
         }.firstOrNull()
 
         return@transaction column
@@ -228,32 +247,28 @@ class KanbanRepositoryImplementation(
         }.map {
             val card = resultRowToCard(it)
 
-            if (card.metadata != null) {
-                if (card.metadata!!.customer != null) {
+            if (card.cardBaseMetadata != null) {
+                if (card.cardBaseMetadata!!.customer != null) {
                     val customer = customerRepository.getCustomerByUUID(
-                        UUID.fromString(card.metadata!!.customer!!.uuid!!)
+                        UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid!!)
                     )
 
                     if (customer != null) {
-                        card.movable = when (customer.status) {
-                            CustomerStatus.FIT -> false
-                            CustomerStatus.PENDING -> true
-                            else -> false
-                        }
+                        val wallet = walletRepository.getCustomerWallet(
+                            customerUUID = customer.uuid!!,
+                            walletUUID = null
+                        )
 
-                        card.metadata!!.customer!!.companyName = customer.companyName
+                        card.metadata = CardMetadata(
+                            customer = customer,
+                            wallet = wallet
+                        )
                     }
                 }
+            }
 
-                if (card.metadata!!.wallet != null) {
-                    val wallet = walletRepository.getWalletByUUID(
-                        UUID.fromString(card.metadata!!.wallet!!.uuid!!)
-                    )
-
-                    if (wallet != null) {
-                        card.metadata!!.wallet!!.label = wallet.label
-                    }
-                }
+            if (it[CardDatabase.tagUUID] != null) {
+                card.tag = it[CardDatabase.tagUUID]?.let { tagUUID -> getTagByUUID(tagUUID) }
             }
 
             card
@@ -313,17 +328,13 @@ class KanbanRepositoryImplementation(
 
     override fun deleteTagByUUID(tagUUID: UUID) {
         transaction {
-            TagDatabase.update({ TagDatabase.uuid eq tagUUID }) {
-                it[status] = TagStatus.INACTIVE.code
-            }
+            TagDatabase.deleteWhere { uuid eq tagUUID }
         }
     }
 
     override fun deleteColumnByUUID(columnUUID: UUID) {
         transaction {
-            ColumnDatabase.update({ ColumnDatabase.uuid eq columnUUID }) {
-                it[status] = ColumnStatus.INACTIVE.code
-            }
+            ColumnDatabase.deleteWhere { uuid eq columnUUID }
         }
     }
 
@@ -399,6 +410,189 @@ class KanbanRepositoryImplementation(
         }
     }
 
+    override fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID) {
+        transaction {
+            ColumnAllowedDatabase.deleteWhere {
+                allowedColumnUUID eq columnUUID and (ColumnAllowedDatabase.columnUUID eq mainColumnUUID)
+            }
+        }
+    }
+
+    override fun deleteColumnRuleByUUID(ruleUUID: UUID) {
+        transaction {
+            ColumnRuleDatabase.deleteWhere {
+                uuid eq ruleUUID
+            }
+        }
+    }
+
+    override fun addTagToCard(cardUUID: UUID, tagUUID: UUID?) {
+        transaction {
+            CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
+                it[CardDatabase.tagUUID] = tagUUID
+            }
+        }
+    }
+
+    override fun applyRulesOnMoveEnd(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean {
+        var move = true
+
+        transaction {
+            rules.forEach { rule ->
+                when (rule.type) {
+                    ColumnRuleType.SEND_EMAIL, ColumnRuleType.NOTIFY_USER -> {
+                        val mails = rule.metadata!!.emails!!.joinToString(";")
+
+                        val date = LocalDateTime.now().format(DateTimeFormat)
+
+                        val mail = Mail(
+                            subject = CARD_MOVE_MESSAGE.format(
+                                card.code,
+                                column.title,
+                                user.name
+                            ),
+                            content = CARD_CONTENT_EMAIL.format(
+                                card.code,
+                                card.title,
+                                card.description,
+                                date,
+                                column.title
+                            ),
+                            to = mails,
+                            withHtml = true
+                        )
+
+                        mailQueue.addMail(
+                            mail = mail
+                        )
+                    }
+
+                    ColumnRuleType.ADD_TAG -> {
+                        val tag = getTagByUUID(
+                            UUID.fromString(rule.metadata!!.tag)
+                        )
+
+                        addTagToCard(
+                            cardUUID = card.uuid!!,
+                            tagUUID = tag!!.uuid
+                        )
+                    }
+
+                    ColumnRuleType.REMOVE_TAG -> {
+                        addTagToCard(
+                            cardUUID = card.uuid!!,
+                            tagUUID = null
+                        )
+                    }
+
+                    ColumnRuleType.VALIDATE_CUSTOMER -> {
+                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
+
+                        val customer = customerRepository.getCustomerByUUID(customerUUID)
+
+                        if (customer!!.status != CustomerStatus.FIT) {
+                            move = false
+                        }
+                    }
+
+                    ColumnRuleType.VALIDATE_CUSTOMER_WALLET -> {
+                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
+
+                        val wallet = walletRepository.getCustomerWallet(
+                            customerUUID = customerUUID,
+                            walletUUID = null,
+                        )
+
+                        if (wallet == null) {
+                            move = false
+                        }
+                    }
+
+                    ColumnRuleType.APPROVE_CUSTOMER -> {
+                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
+
+                        customerRepository.approvalCustomer(
+                            status = CustomerStatus.FIT,
+                            customerUUID = customerUUID,
+                            userUUID = user.uuid!!
+                        )
+                    }
+
+                    ColumnRuleType.REPROVE_CUSTOMER -> {
+                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
+
+                        customerRepository.approvalCustomer(
+                            status = CustomerStatus.NOT_FIT,
+                            customerUUID = customerUUID,
+                            userUUID = user.uuid!!
+                        )
+                    }
+
+                    ColumnRuleType.REVIEW_CUSTOMER -> {
+                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
+
+                        customerRepository.approvalCustomer(
+                            status = CustomerStatus.PENDING,
+                            customerUUID = customerUUID,
+                            userUUID = user.uuid!!
+                        )
+                    }
+
+                    else -> {}
+                }
+            }
+
+            if (!move) {
+                rollback()
+            }
+        }
+
+        return move
+    }
+
+    override fun applyRulesOnMoveStart(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean {
+        var move = true
+
+        transaction {
+            rules.forEach { rule ->
+                if (ColumnRuleType.NOT_MOVABLE == rule.type) {
+                    move = false
+                }
+            }
+
+            if (!move) {
+                rollback()
+            }
+        }
+
+        return move
+    }
+
+    override fun moveCardToColumn(cardUUID: UUID, columnUUID: UUID, boardUUID: UUID): List<Card>? = transaction {
+        CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
+            it[CardDatabase.columnUUID] = columnUUID
+            it[modifiedAt] = LocalDateTime.now()
+        }
+
+        return@transaction getCardsByBoardUUID(boardUUID)
+    }
+
+    override fun getCardIndexByBoardUUID(boardUUID: UUID): Int? = transaction {
+        CardDatabase.select(CardDatabase.uuid).where({ CardDatabase.boardUUID eq boardUUID }).count().toInt() + 1
+    }
+
+    override fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): List<Column>? = transaction {
+        ColumnDatabase.update({ ColumnDatabase.boardUUID eq boardUUID }) {
+            it[isDefault] = false
+        }
+
+        ColumnDatabase.update({ ColumnDatabase.uuid eq columnUUID }) {
+            it[isDefault] = true
+        }
+
+        return@transaction getColumnsByBoardUUID(boardUUID)
+    }
+
     private fun getAllowedColumns(columnUUID: UUID): List<UUID> = transaction {
         ColumnAllowedDatabase.select(ColumnAllowedDatabase.allowedColumnUUID).where {
             ColumnAllowedDatabase.columnUUID eq columnUUID
@@ -433,7 +627,7 @@ class KanbanRepositoryImplementation(
         code = it[CardDatabase.code],
         title = it[CardDatabase.title],
         description = it[CardDatabase.description],
-        metadata = it[CardDatabase.metadata],
+        cardBaseMetadata = it[CardDatabase.metadata],
         status = enumFromTypeValue<CardStatus, Int>(it[CardDatabase.status]),
         createdAt = it[CardDatabase.createdAt],
         modifiedAt = it[CardDatabase.modifiedAt],
@@ -448,6 +642,7 @@ class KanbanRepositoryImplementation(
         status = enumFromTypeValue<ColumnStatus, Int>(it[ColumnDatabase.status]),
         type = enumFromTypeValue<ColumnType, String>(it[ColumnDatabase.type]),
         index = it[ColumnDatabase.index],
+        isDefault = it[ColumnDatabase.isDefault],
         createdAt = it[ColumnDatabase.createdAt],
         modifiedAt = it[ColumnDatabase.modifiedAt],
     )

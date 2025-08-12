@@ -28,6 +28,14 @@ interface KanbanUseCase {
     fun reorderColumns(columns: List<Column>): ColumnListResponse
 
     fun saveColumnRule(columnRule: ColumnRule): ColumnRuleResponse
+    fun getColumnRuleByUUID(uuid: UUID): ColumnRuleResponse
 
     fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>): MessageBoardResponse
+
+    fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID): MessageBoardResponse
+    fun deleteColumnRuleByUUID(ruleUUID: UUID): MessageBoardResponse
+
+    fun validateMoveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse
+
+    fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): ColumnListResponse
 }

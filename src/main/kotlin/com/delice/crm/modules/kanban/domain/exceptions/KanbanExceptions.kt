@@ -26,6 +26,7 @@ val KANBAN_CARD_NOT_FOUND = KanbanExceptions("KANBAN_CARD_NOT_FOUND", "The card 
 val KANBAN_COLUMN_NOT_FOUND = KanbanExceptions("KANBAN_COLUMN_NOT_FOUND", "The column not found")
 val KANBAN_TAG_NOT_FOUND = KanbanExceptions("KANBAN_TAG_NOT_FOUND", "The tag not found")
 val KANBAN_USER_NOT_FOUND = KanbanExceptions("KANBAN_USER_NOT_FOUND", "The user not found")
+val KANBAN_COLUMN_RULE_NOT_FOUND = KanbanExceptions("KANBAN_COLUMN_RULE_NOT_FOUND", "The column rule not found")
 
 val KANBAN_COLUMN_INDEX_REPEATED = KanbanExceptions("KANBAN_COLUMN_INDEX_REPEATED", "The index cannot be repeated in order")
 
@@ -36,5 +37,8 @@ val KANBAN_COLUMN_RULE_USER_IS_EMPTY = KanbanExceptions("KANBAN_COLUMN_RULE_USER
 val KANBAN_COLUMN_RULE_DATA_INVALID = KanbanExceptions("KANBAN_COLUMN_RULE_DATA_INVALID", "The data rule is invalid")
 
 val KANBAN_ALLOWED_COLUMNS_IS_EMPTY = KanbanExceptions("KANBAN_ALLOWED_COLUMNS_IS_EMPTY", "Allowed columns is empty")
+
+val KANBAN_COLUMN_RULE_TYPE_IS_INVALID = KanbanExceptions("KANBAN_COLUMN_RULE_TYPE_IS_INVALID", "The rule type is invalid")
+val KANBAN_COLUMN_MOVE_IN_SAME_COLUMN = KanbanExceptions("KANBAN_COLUMN_MOVE_IN_SAME_COLUMN", "You can't move to the same column")
 
 class KanbanExceptions(code: String, message: String): DefaultError(code, message)

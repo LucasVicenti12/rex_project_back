@@ -16,4 +16,5 @@ interface CustomerRepository {
     fun getCustomerByDocument(document: String): Customer?
     fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Customer>?
     fun listSimpleCustomer(): List<SimpleCustomer>?
+    fun attachCustomerToCard(customerUUID: UUID, cardUUID: UUID)
 }

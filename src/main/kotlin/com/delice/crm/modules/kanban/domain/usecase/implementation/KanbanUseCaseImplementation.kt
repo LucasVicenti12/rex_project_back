@@ -1,6 +1,7 @@
 package com.delice.crm.modules.kanban.domain.usecase.implementation
 
 import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.exceptions.*
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
@@ -13,7 +14,7 @@ import java.util.*
 @Service
 class KanbanUseCaseImplementation(
     private val kanbanRepository: KanbanRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : KanbanUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(KanbanUseCaseImplementation::class.java)
@@ -279,6 +280,19 @@ class KanbanUseCaseImplementation(
         ColumnRuleResponse(error = KANBAN_UNEXPECTED)
     }
 
+    override fun getColumnRuleByUUID(uuid: UUID): ColumnRuleResponse = try {
+        val rule = kanbanRepository.getColumnRuleByUUID(uuid)
+
+        if (rule == null) {
+            ColumnRuleResponse(error = KANBAN_COLUMN_RULE_NOT_FOUND)
+        } else {
+            ColumnRuleResponse(columnRule = rule)
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_GET_COLUMN_RULE_BY_UUID", e)
+        ColumnRuleResponse(error = KANBAN_UNEXPECTED)
+    }
+
     override fun saveAllowedColumns(columnUUID: UUID, allowed: List<UUID>): MessageBoardResponse = try {
         validateAllowedColumns(allowed).let {
             when {
@@ -300,6 +314,137 @@ class KanbanUseCaseImplementation(
     } catch (e: Exception) {
         logger.error("ERROR_IN_SAVE_ALLOWED_COLUMNS", e)
         MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID): MessageBoardResponse = try {
+        val column = kanbanRepository.getColumnByUUID(columnUUID)
+
+        if (column == null) {
+            MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
+        } else {
+            kanbanRepository.deleteAllowedColumnUUID(mainColumnUUID, columnUUID)
+            MessageBoardResponse(message = "Allowed column deleted with success")
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_DELETE_ALLOWED_COLUMN_BY_UUID", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun deleteColumnRuleByUUID(ruleUUID: UUID): MessageBoardResponse = try {
+        val rule = kanbanRepository.getColumnRuleByUUID(ruleUUID)
+
+        if (rule == null) {
+            MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
+        } else {
+            kanbanRepository.deleteColumnRuleByUUID(ruleUUID)
+            MessageBoardResponse(message = "Allowed column deleted with success")
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_DELETE_RULE_COLUMN_BY_UUID", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun validateMoveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse {
+        try {
+            val user = getCurrentUser().getUserData()
+
+            val card = kanbanRepository.getCardByUUID(cardUUID) ?: return CardListResponse(
+                error = KANBAN_CARD_NOT_FOUND
+            )
+
+            val column = kanbanRepository.getColumnByUUID(toColumnUUID) ?: return CardListResponse(
+                error = KANBAN_COLUMN_NOT_FOUND
+            )
+
+            val currentColumn = kanbanRepository.getColumnByUUID(card.columnUUID!!) ?: return CardListResponse(
+                error = KANBAN_COLUMN_NOT_FOUND
+            )
+
+            if(card.columnUUID == toColumnUUID){
+                return CardListResponse(
+                    error = KANBAN_COLUMN_MOVE_IN_SAME_COLUMN
+                )
+            }
+
+            if (!column.allowedColumns!!.contains(card.columnUUID)) {
+                return CardListResponse(
+                    error = KANBAN_CANNOT_DO_ACTION
+                )
+            }
+
+            val rules = kanbanRepository.getRulesByColumnUUID(column.uuid!!)
+
+            val currentRules = kanbanRepository.getRulesByColumnUUID(currentColumn.uuid!!)
+
+            if(!currentRules.isNullOrEmpty()){
+                val move = kanbanRepository.applyRulesOnMoveStart(
+                    card = card,
+                    column = currentColumn,
+                    user = user,
+                    rules = currentRules
+                )
+
+                if(!move){
+                    return CardListResponse(
+                        error = KANBAN_CANNOT_DO_ACTION
+                    )
+                }
+            }
+
+            return if (rules.isNullOrEmpty()) {
+                return CardListResponse(
+                    cards = kanbanRepository.moveCardToColumn(
+                        cardUUID = cardUUID,
+                        columnUUID = toColumnUUID,
+                        boardUUID = column.boardUUID!!
+                    ),
+                )
+            } else {
+                val move = kanbanRepository.applyRulesOnMoveEnd(
+                    card = card,
+                    column = column,
+                    user = user,
+                    rules = rules
+                )
+
+                if (move) {
+                    return CardListResponse(
+                        cards = kanbanRepository.moveCardToColumn(
+                            cardUUID = cardUUID,
+                            columnUUID = toColumnUUID,
+                            boardUUID = column.boardUUID!!
+                        ),
+                    )
+                } else {
+                    CardListResponse(
+                        error = KANBAN_CANNOT_DO_ACTION
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            logger.error("ERROR_IN_VALIDATE_MOVE_CARD_TO_COLUMN", e)
+            return CardListResponse(
+                error = KANBAN_UNEXPECTED,
+            )
+        }
+    }
+
+    override fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): ColumnListResponse = try {
+        val column = kanbanRepository.getColumnByUUID(columnUUID)
+
+        if (column == null) {
+            ColumnListResponse(error = KANBAN_COLUMN_NOT_FOUND)
+        } else {
+            ColumnListResponse(
+                columns = kanbanRepository.setDefaultColumn(
+                    boardUUID = boardUUID,
+                    columnUUID = columnUUID
+                )
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_SET_DEFAULT_COLUMN", e)
+        ColumnListResponse(error = KANBAN_UNEXPECTED)
     }
 
     private fun validateBoard(board: Board): KanbanExceptions? = when {

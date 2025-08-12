@@ -38,5 +38,4 @@ data class SimpleCustomer(
 @Serializable
 data class SerializableCustomer(
     var uuid: String? = null,
-    var companyName: String? = null,
 )

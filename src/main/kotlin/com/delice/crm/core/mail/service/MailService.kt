@@ -22,10 +22,12 @@ class MailService(
         val mime = mail.createMimeMessage()
         val helper = MimeMessageHelper(mime, true)
 
+        val toList = message.to.split(";").toTypedArray()
+
         helper.setFrom(from!!)
-        helper.setTo(message.to)
+        helper.setTo(toList)
         helper.setSubject(message.subject)
-        helper.setText(message.content)
+        helper.setText(message.content, message.withHtml!!)
 
         mail.send(helper.mimeMessage)
 
