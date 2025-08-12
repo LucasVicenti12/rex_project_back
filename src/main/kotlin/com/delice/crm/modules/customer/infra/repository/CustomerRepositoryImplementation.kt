@@ -28,9 +28,7 @@ import java.util.*
 import kotlin.math.ceil
 
 @Service
-class CustomerRepositoryImplementation(
-    private val kanbanRepository: KanbanRepository
-) : CustomerRepository {
+class CustomerRepositoryImplementation : CustomerRepository {
     override fun registerCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
         val customerUUID = UUID.randomUUID()
 
