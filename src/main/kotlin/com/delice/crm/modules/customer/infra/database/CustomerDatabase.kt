@@ -5,13 +5,11 @@ import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.api.economicActivities.infra.database.EconomicActivityDatabase
 import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.filter.ExposedFilter
-import org.jetbrains.exposed.sql.Op
+import com.delice.crm.modules.kanban.infra.database.CardDatabase
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.datetime
-import org.jetbrains.exposed.sql.stringLiteral
 
 object CustomerDatabase : Table("customer") {
     var uuid = uuid("uuid").uniqueIndex()
@@ -27,12 +25,20 @@ object CustomerDatabase : Table("customer") {
     var addressNumber = integer("address_number")
     var observation = text("observation").nullable()
     var status = integer("status")
+    var kanbanCardUUID = uuid("kanban_card_uuid").nullable()
     var createdAt = datetime("created_at")
     var modifiedAt = datetime("modified_at")
     var createdBy = uuid("created_by") references UserDatabase.uuid
     var modifiedBy = uuid("modified_by") references UserDatabase.uuid
 
     override val primaryKey = PrimaryKey(uuid, name = "pk_customer")
+
+    init {
+        foreignKey(
+            kanbanCardUUID to CardDatabase.uuid,
+            onDelete = ReferenceOption.SET_NULL
+        )
+    }
 }
 
 object CustomerEconomicActivitiesDatabase : Table("customer_economic_activities") {
@@ -47,11 +53,6 @@ object CustomerContactsDatabase : Table("customer_contacts") {
     var label = text("label")
     var isPrincipal = bool("is_principal")
     var customerUUID = uuid("customer_uuid") references CustomerDatabase.uuid
-}
-
-object CustomerCardDatabase: Table("customer_card"){
-    var cardUUID = uuid("card_uuid")
-    var customerUUID = uuid("customer_uuid")
 }
 
 data class CustomerFilter(

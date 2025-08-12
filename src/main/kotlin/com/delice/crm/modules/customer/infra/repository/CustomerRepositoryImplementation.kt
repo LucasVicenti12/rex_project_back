@@ -145,13 +145,14 @@ class CustomerRepositoryImplementation(
                 it[CustomerDatabase.status] = status.code
             }
 
-            val card = CustomerCardDatabase.select(CustomerCardDatabase.cardUUID).where {
-                CustomerCardDatabase.customerUUID eq customerUUID
-            }.map { it[CustomerCardDatabase.cardUUID] }.firstOrNull()
+            val cardUUID = CustomerDatabase
+                .select(CustomerDatabase.kanbanCardUUID)
+                .map { it[CustomerDatabase.kanbanCardUUID] }
+                .firstOrNull()
 
-            if (card != null) {
+            if (cardUUID != null) {
                 moveCardToColumnWithRuleStatus(
-                    cardUUID = card,
+                    cardUUID = cardUUID,
                     status = status,
                 )
             }
@@ -163,12 +164,15 @@ class CustomerRepositoryImplementation(
             CustomerStatus.FIT -> {
                 ColumnRuleType.APPROVE_CUSTOMER
             }
+
             CustomerStatus.NOT_FIT -> {
                 ColumnRuleType.REPROVE_CUSTOMER
             }
+
             CustomerStatus.PENDING -> {
                 ColumnRuleType.REVIEW_CUSTOMER
             }
+
             else -> {
                 null
             }
@@ -197,15 +201,14 @@ class CustomerRepositoryImplementation(
                 )
                 .where {
                     ColumnRuleDatabase.type eq ruleType.type and (
-                        BoardDatabase.code eq KanbanKeys.LEADS.type
-                    )
+                            BoardDatabase.code eq KanbanKeys.LEADS.type
+                            )
                 }
                 .limit(1)
                 .map { it[ColumnDatabase.uuid] }.firstOrNull()
 
-            if(column != null){
-
-                CardDatabase.update ({CardDatabase.uuid eq cardUUID}){
+            if (column != null) {
+                CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
                     it[columnUUID] = column
                     it[modifiedAt] = LocalDateTime.now()
                 }
@@ -311,9 +314,8 @@ class CustomerRepositoryImplementation(
 
     override fun attachCustomerToCard(customerUUID: UUID, cardUUID: UUID) {
         transaction {
-            CustomerCardDatabase.insert {
-                it[CustomerCardDatabase.cardUUID] = cardUUID
-                it[CustomerCardDatabase.customerUUID] = customerUUID
+            CustomerDatabase.update({ CustomerDatabase.uuid eq customerUUID }) {
+                it[kanbanCardUUID] = cardUUID
             }
         }
     }
