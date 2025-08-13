@@ -35,7 +35,9 @@ interface KanbanUseCase {
     fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID): MessageBoardResponse
     fun deleteColumnRuleByUUID(ruleUUID: UUID): MessageBoardResponse
 
-    fun validateMoveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse
-
     fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): ColumnListResponse
+
+    fun recreateCards(boardUUID: UUID): MessageBoardResponse
+
+    fun moveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse
 }

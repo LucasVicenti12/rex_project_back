@@ -352,7 +352,7 @@ class KanbanWebService(
             required = true
         ) columnUUID: UUID
     ): ResponseEntity<CardListResponse> {
-        val response = kanbanUseCase.validateMoveCardToColumn(
+        val response = kanbanUseCase.moveCardToColumn(
             cardUUID,
             columnUUID
         )
@@ -382,6 +382,28 @@ class KanbanWebService(
         val response = kanbanUseCase.setDefaultColumn(
             boardUUID,
             columnUUID
+        )
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/recreateCards/{boardUUID}")
+    fun recreateCards(
+        @PathVariable(
+            value = "boardUUID",
+            required = true
+        ) boardUUID: UUID
+    ): ResponseEntity<MessageBoardResponse> {
+        val response = kanbanUseCase.recreateCards(
+            boardUUID
         )
 
         if (response.error != null) {

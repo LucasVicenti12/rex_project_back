@@ -4,16 +4,10 @@ import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import com.delice.crm.api.economicActivities.domain.usecase.EconomicActivityUseCase
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
-import com.delice.crm.modules.customer.domain.entities.SerializableCustomer
 import com.delice.crm.modules.customer.domain.exceptions.*
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
 import com.delice.crm.modules.customer.domain.usecase.response.*
-import com.delice.crm.modules.kanban.domain.entities.CARD_LEAD_TITLE
-import com.delice.crm.modules.kanban.domain.entities.Card
-import com.delice.crm.modules.kanban.domain.entities.CardBaseMetadata
-import com.delice.crm.modules.kanban.domain.entities.KanbanKeys
-import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -24,7 +18,6 @@ class CustomerUseCaseImplementation(
     private val customerRepository: CustomerRepository,
     private val walletRepository: WalletRepository,
     private val economicActivityUseCase: EconomicActivityUseCase,
-    private val kanbanRepository: KanbanRepository
 ) : CustomerUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(CustomerUseCaseImplementation::class.java)
@@ -44,44 +37,8 @@ class CustomerUseCaseImplementation(
 
             val newCustomer = customerRepository.registerCustomer(customer, userUUID)
 
-            val board = kanbanRepository.getBoardByCode(KanbanKeys.LEADS.type)
-
-            if (board != null && !board.columns.isNullOrEmpty()) {
-                val column = board.columns!!.find { it.isDefault!! } ?: throw Exception(
-                    "Error on get default column in leads kanban board"
-                )
-
-                val index = kanbanRepository.getCardIndexByBoardUUID(board.uuid!!)
-
-                val fi = board.code!!.first()
-                val fl = board.code!!.last()
-
-                val code = "$fi$fl-$index"
-                val title = CARD_LEAD_TITLE.format(customer.document)
-
-                val card = Card(
-                    boardUUID = board.uuid!!,
-                    columnUUID = column.uuid!!,
-                    code = code,
-                    title = title,
-                    description = "${customer.tradingName} - ${customer.observation}",
-                    cardBaseMetadata = CardBaseMetadata(
-                        customer = SerializableCustomer(
-                            uuid = newCustomer!!.uuid.toString()
-                        )
-                    ),
-                )
-
-                val newCard = kanbanRepository.registerCard(
-                    card
-                )
-
-                if (newCard != null) {
-                    customerRepository.attachCustomerToCard(
-                        customerUUID = newCustomer.uuid!!,
-                        cardUUID = newCard.uuid!!,
-                    )
-                }
+            if (newCustomer != null) {
+                customerRepository.createCustomerCardKanban(newCustomer)
             }
 
             return CustomerResponse(customer = newCustomer)

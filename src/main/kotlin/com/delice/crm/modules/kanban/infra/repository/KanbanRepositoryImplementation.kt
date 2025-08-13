@@ -1,20 +1,23 @@
 package com.delice.crm.modules.kanban.infra.repository
 
-import com.delice.crm.core.mail.entities.Mail
-import com.delice.crm.core.mail.queue.MailQueue
 import com.delice.crm.core.user.domain.entities.User
+import com.delice.crm.core.user.domain.entities.UserType
+import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.enums.enumFromTypeValue
-import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.pagination.Pagination
+import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
-import com.delice.crm.modules.customer.domain.repository.CustomerRepository
+import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.entities.Column
 import com.delice.crm.modules.kanban.domain.entities.ColumnRule
 import com.delice.crm.modules.kanban.domain.entities.ColumnType
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.infra.database.*
-import com.delice.crm.modules.wallet.domain.repository.WalletRepository
+import com.delice.crm.modules.wallet.domain.entities.Wallet
+import com.delice.crm.modules.wallet.domain.entities.WalletStatus
+import com.delice.crm.modules.wallet.infra.database.WalletCustomersDatabase
+import com.delice.crm.modules.wallet.infra.database.WalletDatabase
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -24,11 +27,7 @@ import java.util.*
 import kotlin.math.ceil
 
 @Service
-class KanbanRepositoryImplementation(
-    private val customerRepository: CustomerRepository,
-    private val walletRepository: WalletRepository,
-    private val mailQueue: MailQueue
-) : KanbanRepository {
+class KanbanRepositoryImplementation : KanbanRepository {
     override fun registerBoard(board: Board): Board? = transaction {
         val uuid = UUID.randomUUID()
 
@@ -76,7 +75,7 @@ class KanbanRepositoryImplementation(
             ColumnDatabase.boardUUID eq column.boardUUID!! and (ColumnDatabase.isDefault eq true)
         }).count().toInt()
 
-        if(defaultColumnCount == 0){
+        if (defaultColumnCount == 0) {
             column.isDefault = true
         }
 
@@ -245,33 +244,7 @@ class KanbanRepositoryImplementation(
         val cards = CardDatabase.selectAll().where {
             CardDatabase.boardUUID eq uuid and (CardDatabase.status eq CardStatus.ACTIVE.code)
         }.map {
-            val card = resultRowToCard(it)
-
-            if (card.cardBaseMetadata != null) {
-                if (card.cardBaseMetadata!!.customer != null) {
-                    val customer = customerRepository.getCustomerByUUID(
-                        UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid!!)
-                    )
-
-                    if (customer != null) {
-                        val wallet = walletRepository.getCustomerWallet(
-                            customerUUID = customer.uuid!!,
-                            walletUUID = null
-                        )
-
-                        card.metadata = CardMetadata(
-                            customer = customer,
-                            wallet = wallet
-                        )
-                    }
-                }
-            }
-
-            if (it[CardDatabase.tagUUID] != null) {
-                card.tag = it[CardDatabase.tagUUID]?.let { tagUUID -> getTagByUUID(tagUUID) }
-            }
-
-            card
+            resultRowToCard(it)
         }
 
         return@transaction cards
@@ -434,140 +407,6 @@ class KanbanRepositoryImplementation(
         }
     }
 
-    override fun applyRulesOnMoveEnd(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean {
-        var move = true
-
-        transaction {
-            rules.forEach { rule ->
-                when (rule.type) {
-                    ColumnRuleType.SEND_EMAIL, ColumnRuleType.NOTIFY_USER -> {
-                        val mails = rule.metadata!!.emails!!.joinToString(";")
-
-                        val date = LocalDateTime.now().format(DateTimeFormat)
-
-                        val mail = Mail(
-                            subject = CARD_MOVE_MESSAGE.format(
-                                card.code,
-                                column.title,
-                                user.name
-                            ),
-                            content = CARD_CONTENT_EMAIL.format(
-                                card.code,
-                                card.title,
-                                card.description,
-                                date,
-                                column.title
-                            ),
-                            to = mails,
-                            withHtml = true
-                        )
-
-                        mailQueue.addMail(
-                            mail = mail
-                        )
-                    }
-
-                    ColumnRuleType.ADD_TAG -> {
-                        val tag = getTagByUUID(
-                            UUID.fromString(rule.metadata!!.tag)
-                        )
-
-                        addTagToCard(
-                            cardUUID = card.uuid!!,
-                            tagUUID = tag!!.uuid
-                        )
-                    }
-
-                    ColumnRuleType.REMOVE_TAG -> {
-                        addTagToCard(
-                            cardUUID = card.uuid!!,
-                            tagUUID = null
-                        )
-                    }
-
-                    ColumnRuleType.VALIDATE_CUSTOMER -> {
-                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
-
-                        val customer = customerRepository.getCustomerByUUID(customerUUID)
-
-                        if (customer!!.status != CustomerStatus.FIT) {
-                            move = false
-                        }
-                    }
-
-                    ColumnRuleType.VALIDATE_CUSTOMER_WALLET -> {
-                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
-
-                        val wallet = walletRepository.getCustomerWallet(
-                            customerUUID = customerUUID,
-                            walletUUID = null,
-                        )
-
-                        if (wallet == null) {
-                            move = false
-                        }
-                    }
-
-                    ColumnRuleType.APPROVE_CUSTOMER -> {
-                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
-
-                        customerRepository.approvalCustomer(
-                            status = CustomerStatus.FIT,
-                            customerUUID = customerUUID,
-                            userUUID = user.uuid!!
-                        )
-                    }
-
-                    ColumnRuleType.REPROVE_CUSTOMER -> {
-                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
-
-                        customerRepository.approvalCustomer(
-                            status = CustomerStatus.NOT_FIT,
-                            customerUUID = customerUUID,
-                            userUUID = user.uuid!!
-                        )
-                    }
-
-                    ColumnRuleType.REVIEW_CUSTOMER -> {
-                        val customerUUID = UUID.fromString(card.cardBaseMetadata!!.customer!!.uuid)
-
-                        customerRepository.approvalCustomer(
-                            status = CustomerStatus.PENDING,
-                            customerUUID = customerUUID,
-                            userUUID = user.uuid!!
-                        )
-                    }
-
-                    else -> {}
-                }
-            }
-
-            if (!move) {
-                rollback()
-            }
-        }
-
-        return move
-    }
-
-    override fun applyRulesOnMoveStart(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean {
-        var move = true
-
-        transaction {
-            rules.forEach { rule ->
-                if (ColumnRuleType.NOT_MOVABLE == rule.type) {
-                    move = false
-                }
-            }
-
-            if (!move) {
-                rollback()
-            }
-        }
-
-        return move
-    }
-
     override fun moveCardToColumn(cardUUID: UUID, columnUUID: UUID, boardUUID: UUID): List<Card>? = transaction {
         CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
             it[CardDatabase.columnUUID] = columnUUID
@@ -591,6 +430,88 @@ class KanbanRepositoryImplementation(
         }
 
         return@transaction getColumnsByBoardUUID(boardUUID)
+    }
+
+    override fun deleteCardsByBoardUUID(boardUUID: UUID) {
+        transaction {
+            CardDatabase.deleteWhere { CardDatabase.boardUUID eq boardUUID }
+        }
+    }
+
+    private fun getCardMetadata(cardBaseMetadata: CardBaseMetadata?): CardMetadata? {
+        if (cardBaseMetadata == null) return null
+
+        val metadata = CardMetadata()
+
+        if (cardBaseMetadata.customer != null) {
+            val customerUUID = UUID.fromString(cardBaseMetadata.customer.uuid!!)
+
+            metadata.customer = CustomerDatabase
+                .select(
+                    CustomerDatabase.uuid,
+                    CustomerDatabase.document,
+                    CustomerDatabase.companyName,
+                    CustomerDatabase.tradingName,
+                    CustomerDatabase.personName,
+                    CustomerDatabase.observation,
+                    CustomerDatabase.status
+                ).where { CustomerDatabase.uuid eq customerUUID }.map {
+                    Customer(
+                        uuid = it[CustomerDatabase.uuid],
+                        document = it[CustomerDatabase.document],
+                        companyName = it[CustomerDatabase.companyName],
+                        tradingName = it[CustomerDatabase.tradingName],
+                        personName = it[CustomerDatabase.personName],
+                        observation = it[CustomerDatabase.observation],
+                        status = enumFromTypeValue<CustomerStatus, Int>(it[CustomerDatabase.status]),
+                    )
+                }.firstOrNull()
+
+            metadata.wallet = WalletDatabase
+                .join(
+                    otherTable = WalletCustomersDatabase,
+                    joinType = JoinType.INNER,
+                    additionalConstraint = { WalletCustomersDatabase.uuid eq WalletDatabase.uuid }
+                )
+                .join(
+                    otherTable = UserDatabase,
+                    joinType = JoinType.INNER,
+                    additionalConstraint = { UserDatabase.uuid eq WalletDatabase.accountable }
+                )
+                .select(
+                    WalletDatabase.label,
+                    WalletDatabase.observation,
+                    WalletDatabase.status,
+                    WalletDatabase.accountable,
+                    UserDatabase.login,
+                    UserDatabase.name,
+                    UserDatabase.surname,
+                    UserDatabase.userType
+                ).where {
+                    WalletCustomersDatabase.customerUUID eq customerUUID
+                }.map {
+                    Wallet(
+                        label = it[WalletDatabase.label],
+                        observation = it[WalletDatabase.observation],
+                        status = enumFromTypeValue<WalletStatus, Int>(it[WalletDatabase.status]),
+                        accountable = User(
+                            uuid = it[WalletDatabase.accountable],
+                            login = it[UserDatabase.login],
+                            name = it[UserDatabase.name],
+                            surname = it[UserDatabase.surname],
+                            userType = enumFromTypeValue<UserType, String>(it[UserDatabase.userType]),
+                        ),
+                    )
+                }.firstOrNull()
+        }
+
+        return metadata
+    }
+
+    private fun getCardTag(tagUUID: UUID?): Tag? {
+        if(tagUUID == null) return null
+
+        return getTagByUUID(tagUUID)
     }
 
     private fun getAllowedColumns(columnUUID: UUID): List<UUID> = transaction {
@@ -627,7 +548,8 @@ class KanbanRepositoryImplementation(
         code = it[CardDatabase.code],
         title = it[CardDatabase.title],
         description = it[CardDatabase.description],
-        cardBaseMetadata = it[CardDatabase.metadata],
+        metadata = getCardMetadata(it[CardDatabase.metadata]),
+        tag = getCardTag(it[CardDatabase.tagUUID]),
         status = enumFromTypeValue<CardStatus, Int>(it[CardDatabase.status]),
         createdAt = it[CardDatabase.createdAt],
         modifiedAt = it[CardDatabase.modifiedAt],
