@@ -115,13 +115,20 @@ class ProductRepositoryImplementation : ProductRepository {
             )
         }
 
+    fun castStringToInt(expr: Expression<String>): Expression<Int> =
+        object : Expression<Int>() {
+            override fun toQueryBuilder(queryBuilder: QueryBuilder) {
+                queryBuilder.append("CAST(", expr, " AS SIGNED)")
+            }
+        }
+
     private fun parseOrderBy(orderBy: String?): List<Pair<Expression<*>, SortOrder>> {
         if (orderBy.isNullOrBlank()) return listOf(ProductDatabase.name to SortOrder.ASC)
 
         // Maps valid field names to database columns
         val fieldMap = mapOf(
             "uuid" to ProductDatabase.uuid,
-            "code" to ProductDatabase.code,
+            "code" to castStringToInt(ProductDatabase.code),
             "name" to ProductDatabase.name,
             "price" to ProductDatabase.price,
             "weight" to ProductDatabase.weight,
