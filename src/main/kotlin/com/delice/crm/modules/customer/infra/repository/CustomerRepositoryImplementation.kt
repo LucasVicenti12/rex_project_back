@@ -10,10 +10,10 @@ import com.delice.crm.api.economicActivities.infra.database.EconomicActivityData
 import com.delice.crm.core.utils.contact.Contact
 import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.modules.customer.domain.entities.SerializableCustomer
 import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
 import com.delice.crm.modules.customer.infra.database.*
-import com.delice.crm.modules.kanban.domain.entities.ColumnRuleType
-import com.delice.crm.modules.kanban.domain.entities.KanbanKeys
+import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.infra.database.BoardDatabase
 import com.delice.crm.modules.kanban.infra.database.CardDatabase
@@ -28,7 +28,9 @@ import java.util.*
 import kotlin.math.ceil
 
 @Service
-class CustomerRepositoryImplementation : CustomerRepository {
+class CustomerRepositoryImplementation(
+    private val kanbanRepository: KanbanRepository
+) : CustomerRepository {
     override fun registerCustomer(customer: Customer, userUUID: UUID): Customer? = transaction {
         val customerUUID = UUID.randomUUID()
 
@@ -148,16 +150,18 @@ class CustomerRepositoryImplementation : CustomerRepository {
                 .map { it[CustomerDatabase.kanbanCardUUID] }
                 .firstOrNull()
 
-            if (cardUUID != null) {
-                moveCardToColumnWithRuleStatus(
+            val columnUUID = getKanbanColumnUUIDByCustomerStatus(status)
+
+            if (cardUUID != null && columnUUID != null) {
+                moveCustomerCardToColumn(
                     cardUUID = cardUUID,
-                    status = status,
+                    columnUUID = columnUUID,
                 )
             }
         }
     }
 
-    private fun moveCardToColumnWithRuleStatus(cardUUID: UUID, status: CustomerStatus) {
+    override fun getKanbanColumnUUIDByCustomerStatus(status: CustomerStatus): UUID? {
         val ruleType = when (status) {
             CustomerStatus.FIT -> {
                 ColumnRuleType.APPROVE_CUSTOMER
@@ -176,10 +180,10 @@ class CustomerRepositoryImplementation : CustomerRepository {
             }
         }
 
-        if (ruleType == null) return
+        if (ruleType == null) return null
 
-        transaction {
-            val column = ColumnRuleDatabase
+        return transaction {
+            ColumnRuleDatabase
                 .join(
                     otherTable = ColumnDatabase,
                     joinType = JoinType.INNER,
@@ -204,12 +208,14 @@ class CustomerRepositoryImplementation : CustomerRepository {
                 }
                 .limit(1)
                 .map { it[ColumnDatabase.uuid] }.firstOrNull()
+        }
+    }
 
-            if (column != null) {
-                CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
-                    it[columnUUID] = column
-                    it[modifiedAt] = LocalDateTime.now()
-                }
+    private fun moveCustomerCardToColumn(cardUUID: UUID, columnUUID: UUID) {
+        transaction {
+            CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
+                it[CardDatabase.columnUUID] = columnUUID
+                it[modifiedAt] = LocalDateTime.now()
             }
         }
     }
@@ -310,12 +316,53 @@ class CustomerRepositoryImplementation : CustomerRepository {
             }
     }
 
-    override fun attachCustomerToCard(customerUUID: UUID, cardUUID: UUID) {
-        transaction {
-            CustomerDatabase.update({ CustomerDatabase.uuid eq customerUUID }) {
-                it[kanbanCardUUID] = cardUUID
+    override fun getCustomerAll(): List<Customer>? = transaction {
+        CustomerDatabase.selectAll().map { resultRowToCustomer(it) }
+    }
+
+    override fun createCustomerCardKanban(customer: Customer): Card? = transaction {
+        val board = kanbanRepository.getBoardByCode(KanbanKeys.LEADS.type)
+
+        if (board != null && !board.columns.isNullOrEmpty()) {
+            val column = board.columns!!.find { it.isDefault!! } ?: throw Exception(
+                "Error on get default column in leads kanban board"
+            )
+
+            val index = kanbanRepository.getCardIndexByBoardUUID(board.uuid!!)
+
+            val fi = board.code!!.first()
+            val fl = board.code!!.last()
+
+            val code = "$fi$fl-$index"
+            val title = CARD_LEAD_TITLE.format(customer.document)
+
+            val card = Card(
+                boardUUID = board.uuid!!,
+                columnUUID = column.uuid!!,
+                code = code,
+                title = title,
+                description = "${customer.tradingName} - ${customer.observation}",
+                cardBaseMetadata = CardBaseMetadata(
+                    customer = SerializableCustomer(
+                        uuid = customer.uuid.toString()
+                    )
+                ),
+            )
+
+            val newCard = kanbanRepository.registerCard(
+                card
+            )
+
+            if (newCard != null) {
+                CustomerDatabase.update({ CustomerDatabase.uuid eq customer.uuid!! }) {
+                    it[kanbanCardUUID] = newCard.uuid!!
+                }
             }
+
+            return@transaction newCard
         }
+
+        return@transaction null
     }
 
     private fun getContactsByCustomerUUID(customerUUID: UUID): List<Contact> = transaction {

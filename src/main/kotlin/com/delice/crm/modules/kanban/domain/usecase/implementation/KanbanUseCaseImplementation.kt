@@ -1,20 +1,31 @@
 package com.delice.crm.modules.kanban.domain.usecase.implementation
 
+import com.delice.crm.core.mail.entities.Mail
+import com.delice.crm.core.mail.queue.MailQueue
+import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.modules.customer.domain.entities.CustomerStatus
+import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.exceptions.*
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
 import com.delice.crm.modules.kanban.domain.usecase.response.*
+import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
 class KanbanUseCaseImplementation(
     private val kanbanRepository: KanbanRepository,
+    private val customerRepository: CustomerRepository,
+    private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
+    private val mailQueue: MailQueue
 ) : KanbanUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(KanbanUseCaseImplementation::class.java)
@@ -344,91 +355,6 @@ class KanbanUseCaseImplementation(
         MessageBoardResponse(error = KANBAN_UNEXPECTED)
     }
 
-    override fun validateMoveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse {
-        try {
-            val user = getCurrentUser().getUserData()
-
-            val card = kanbanRepository.getCardByUUID(cardUUID) ?: return CardListResponse(
-                error = KANBAN_CARD_NOT_FOUND
-            )
-
-            val column = kanbanRepository.getColumnByUUID(toColumnUUID) ?: return CardListResponse(
-                error = KANBAN_COLUMN_NOT_FOUND
-            )
-
-            val currentColumn = kanbanRepository.getColumnByUUID(card.columnUUID!!) ?: return CardListResponse(
-                error = KANBAN_COLUMN_NOT_FOUND
-            )
-
-            if(card.columnUUID == toColumnUUID){
-                return CardListResponse(
-                    error = KANBAN_COLUMN_MOVE_IN_SAME_COLUMN
-                )
-            }
-
-            if (!column.allowedColumns!!.contains(card.columnUUID)) {
-                return CardListResponse(
-                    error = KANBAN_CANNOT_DO_ACTION
-                )
-            }
-
-            val rules = kanbanRepository.getRulesByColumnUUID(column.uuid!!)
-
-            val currentRules = kanbanRepository.getRulesByColumnUUID(currentColumn.uuid!!)
-
-            if(!currentRules.isNullOrEmpty()){
-                val move = kanbanRepository.applyRulesOnMoveStart(
-                    card = card,
-                    column = currentColumn,
-                    user = user,
-                    rules = currentRules
-                )
-
-                if(!move){
-                    return CardListResponse(
-                        error = KANBAN_CANNOT_DO_ACTION
-                    )
-                }
-            }
-
-            return if (rules.isNullOrEmpty()) {
-                return CardListResponse(
-                    cards = kanbanRepository.moveCardToColumn(
-                        cardUUID = cardUUID,
-                        columnUUID = toColumnUUID,
-                        boardUUID = column.boardUUID!!
-                    ),
-                )
-            } else {
-                val move = kanbanRepository.applyRulesOnMoveEnd(
-                    card = card,
-                    column = column,
-                    user = user,
-                    rules = rules
-                )
-
-                if (move) {
-                    return CardListResponse(
-                        cards = kanbanRepository.moveCardToColumn(
-                            cardUUID = cardUUID,
-                            columnUUID = toColumnUUID,
-                            boardUUID = column.boardUUID!!
-                        ),
-                    )
-                } else {
-                    CardListResponse(
-                        error = KANBAN_CANNOT_DO_ACTION
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            logger.error("ERROR_IN_VALIDATE_MOVE_CARD_TO_COLUMN", e)
-            return CardListResponse(
-                error = KANBAN_UNEXPECTED,
-            )
-        }
-    }
-
     override fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): ColumnListResponse = try {
         val column = kanbanRepository.getColumnByUUID(columnUUID)
 
@@ -445,6 +371,222 @@ class KanbanUseCaseImplementation(
     } catch (e: Exception) {
         logger.error("ERROR_IN_SET_DEFAULT_COLUMN", e)
         ColumnListResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun recreateCards(boardUUID: UUID): MessageBoardResponse = try {
+        kanbanRepository.deleteCardsByBoardUUID(boardUUID)
+
+        val customers = customerRepository.getCustomerAll()
+
+        customers!!.forEach {
+            val card = customerRepository.createCustomerCardKanban(it)
+            val columnUUID = customerRepository.getKanbanColumnUUIDByCustomerStatus(it.status!!)
+
+            if(card != null && columnUUID != null){
+                moveCardToColumn(card.uuid!!, columnUUID)
+            }
+        }
+
+        MessageBoardResponse(message = "Cards recreated with success")
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_RECREATE_CARDS", e)
+        MessageBoardResponse(error = KANBAN_UNEXPECTED)
+    }
+
+    override fun moveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse {
+        try {
+            val user = getCurrentUser().getUserData()
+
+            val card = kanbanRepository.getCardByUUID(cardUUID) ?: return CardListResponse(
+                error = KANBAN_CARD_NOT_FOUND
+            )
+
+            val column = kanbanRepository.getColumnByUUID(toColumnUUID) ?: return CardListResponse(
+                error = KANBAN_COLUMN_NOT_FOUND
+            )
+
+            if (card.columnUUID == toColumnUUID) {
+                return CardListResponse(
+                    error = KANBAN_COLUMN_MOVE_IN_SAME_COLUMN
+                )
+            }
+
+            if (!column.allowedColumns!!.contains(card.columnUUID)) {
+                return CardListResponse(
+                    error = KANBAN_CANNOT_DO_ACTION
+                )
+            }
+
+            val currentColumn = kanbanRepository.getColumnByUUID(card.columnUUID!!) ?: return CardListResponse(
+                error = KANBAN_COLUMN_NOT_FOUND
+            )
+
+            val currentColumnRule = kanbanRepository.getRulesByColumnUUID(currentColumn.uuid!!)
+
+            var move = applyCurrentColumnRuleValidation(
+                rules = currentColumnRule!!
+            )
+
+            if (!move) {
+                return CardListResponse(error = KANBAN_UNEXPECTED)
+            }
+
+            val newColumnRule = kanbanRepository.getRulesByColumnUUID(column.uuid!!)
+
+            move = applyNewColumnRuleValidation(
+                card = card,
+                rules = newColumnRule!!,
+            )
+
+            if (!move) {
+                return CardListResponse(error = KANBAN_UNEXPECTED)
+            }
+
+            applyColumnRuleAction(
+                card = card,
+                column = column,
+                user = user,
+                rules = newColumnRule,
+            )
+
+            return CardListResponse(
+                cards = kanbanRepository.moveCardToColumn(
+                    cardUUID = card.uuid!!,
+                    columnUUID = column.uuid!!,
+                    boardUUID = column.boardUUID!!
+                )
+            )
+        } catch (e: Exception) {
+            logger.error("ERROR_IN_MOVE_CARD_TO_COLUMN", e)
+            return CardListResponse(error = KANBAN_UNEXPECTED)
+        }
+    }
+
+    private fun applyCurrentColumnRuleValidation(rules: List<ColumnRule>): Boolean {
+        var move = true
+
+        if (rules.isEmpty()) return true
+
+        rules.forEach {
+            if (ColumnRuleType.NOT_MOVABLE == it.type) {
+                move = false
+                return@forEach
+            }
+        }
+
+        return move
+    }
+
+    private fun applyNewColumnRuleValidation(card: Card, rules: List<ColumnRule>): Boolean {
+        var move = true
+
+        if (rules.isEmpty()) return true
+
+        rules.forEach {
+            if (ColumnRuleType.VALIDATE_CUSTOMER == it.type) {
+                val customer = customerRepository.getCustomerByUUID(
+                    customerUUID = card.metadata!!.customer!!.uuid!!
+                )
+
+                if (customer!!.status != CustomerStatus.FIT) {
+                    move = false
+                    return@forEach
+                }
+            }
+            if (ColumnRuleType.VALIDATE_CUSTOMER_WALLET == it.type) {
+                val wallet = walletRepository.getCustomerWallet(
+                    customerUUID = card.metadata!!.wallet!!.uuid!!,
+                    walletUUID = null,
+                )
+
+                if (wallet == null) {
+                    move = false
+                    return@forEach
+                }
+            }
+        }
+
+        return move
+    }
+
+    private fun applyColumnRuleAction(
+        card: Card,
+        column: Column,
+        user: User,
+        rules: List<ColumnRule>
+    ) {
+        if (rules.isEmpty()) return
+
+        rules.forEach {
+            if (ColumnRuleType.SEND_EMAIL == it.type || ColumnRuleType.NOTIFY_USER == it.type) {
+                val mails = it.metadata!!.emails!!.joinToString(";")
+
+                val date = LocalDateTime.now().format(DateTimeFormat)
+
+                val mail = Mail(
+                    subject = CARD_MOVE_MESSAGE.format(
+                        card.code,
+                        column.title,
+                        user.name
+                    ),
+                    content = CARD_CONTENT_EMAIL.format(
+                        card.code,
+                        card.title,
+                        card.description,
+                        date,
+                        column.title
+                    ),
+                    to = mails,
+                    withHtml = true
+                )
+
+                mailQueue.addMail(
+                    mail = mail
+                )
+            }
+
+            if (ColumnRuleType.ADD_TAG == it.type) {
+                val tag = kanbanRepository.getTagByUUID(
+                    uuid = UUID.fromString(it.metadata!!.tag)
+                )
+
+                kanbanRepository.addTagToCard(
+                    cardUUID = card.uuid!!,
+                    tagUUID = tag!!.uuid
+                )
+            }
+
+            if (ColumnRuleType.REMOVE_TAG == it.type) {
+                kanbanRepository.addTagToCard(
+                    cardUUID = card.uuid!!,
+                    tagUUID = null
+                )
+            }
+
+            if (ColumnRuleType.APPROVE_CUSTOMER == it.type) {
+                customerRepository.approvalCustomer(
+                    status = CustomerStatus.FIT,
+                    customerUUID = card.metadata!!.customer!!.uuid!!,
+                    userUUID = user.uuid!!
+                )
+            }
+
+            if (ColumnRuleType.REPROVE_CUSTOMER == it.type) {
+                customerRepository.approvalCustomer(
+                    status = CustomerStatus.NOT_FIT,
+                    customerUUID = card.metadata!!.customer!!.uuid!!,
+                    userUUID = user.uuid!!
+                )
+            }
+
+            if (ColumnRuleType.REVIEW_CUSTOMER == it.type) {
+                customerRepository.approvalCustomer(
+                    status = CustomerStatus.PENDING,
+                    customerUUID = card.metadata!!.customer!!.uuid!!,
+                    userUUID = user.uuid!!
+                )
+            }
+        }
     }
 
     private fun validateBoard(board: Board): KanbanExceptions? = when {

@@ -5,6 +5,7 @@ import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
+import com.delice.crm.modules.kanban.domain.entities.Card
 import java.util.UUID
 
 interface CustomerRepository {
@@ -16,5 +17,7 @@ interface CustomerRepository {
     fun getCustomerByDocument(document: String): Customer?
     fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Customer>?
     fun listSimpleCustomer(): List<SimpleCustomer>?
-    fun attachCustomerToCard(customerUUID: UUID, cardUUID: UUID)
+    fun getCustomerAll(): List<Customer>?
+    fun createCustomerCardKanban(customer: Customer): Card?
+    fun getKanbanColumnUUIDByCustomerStatus(status: CustomerStatus): UUID?
 }

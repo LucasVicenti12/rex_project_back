@@ -47,12 +47,11 @@ interface KanbanRepository {
 
     fun addTagToCard(cardUUID: UUID, tagUUID: UUID?)
 
-    fun applyRulesOnMoveEnd(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean
-    fun applyRulesOnMoveStart(card: Card, column: Column, user: User, rules: List<ColumnRule>): Boolean
-
     fun moveCardToColumn(cardUUID: UUID, columnUUID: UUID, boardUUID: UUID): List<Card>?
 
     fun getCardIndexByBoardUUID(boardUUID: UUID): Int?
 
     fun setDefaultColumn(boardUUID: UUID, columnUUID: UUID): List<Column>?
+
+    fun deleteCardsByBoardUUID(boardUUID: UUID)
 }
