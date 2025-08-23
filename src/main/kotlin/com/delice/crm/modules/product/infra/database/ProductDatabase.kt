@@ -7,6 +7,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.date
+import org.jetbrains.exposed.sql.or
 
 object ProductDatabase : Table("product") {
     val uuid = uuid("uuid").uniqueIndex()
@@ -40,6 +41,33 @@ data class ProductFilter(
         if (parameters.isEmpty()) {
             return op
         }
+
+        parameters["allFields"]?.let {
+            if (it is String && it.isNotBlank()) {
+                val value = it.trim()
+
+                // Tenta converter para número quando for possível (pra peso e preço)
+                val numericValue = value.toDoubleOrNull()
+                val statusValue = if (value == "ativo") 0 else if (value == "inativo") 1 else null
+
+                val generalFilter = Op.build {
+                    // Campos de texto
+                    (table.code like "%$value%") or
+                            (table.name like "%$value%") or
+                            (table.description like "%$value%") or
+
+                            // Campos numéricos
+                            (if (numericValue != null) (table.weight eq numericValue) else Op.FALSE) or
+                            (if (numericValue != null) (table.price eq numericValue) else Op.FALSE) or
+
+                            // Status
+                            (if (statusValue != null) (table.status eq statusValue) else Op.FALSE)
+                }
+
+                op = op.and(generalFilter)
+            }
+        }
+
 
         parameters["code"]?.let {
             if (it is String && it.isNotBlank()) {
