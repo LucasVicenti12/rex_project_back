@@ -416,4 +416,19 @@ class KanbanWebService(
             .ok()
             .body(response)
     }
+
+    @GetMapping("/getColumnRuleTypes")
+    fun getColumnRuleTypes(): ResponseEntity<ColumnRuleTypeListResponse> {
+        val response = kanbanUseCase.getColumnRuleTypes()
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
 }

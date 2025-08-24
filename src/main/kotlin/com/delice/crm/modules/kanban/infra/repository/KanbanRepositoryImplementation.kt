@@ -243,9 +243,11 @@ class KanbanRepositoryImplementation : KanbanRepository {
     override fun getCardsByBoardUUID(uuid: UUID): List<Card>? = transaction {
         val cards = CardDatabase.selectAll().where {
             CardDatabase.boardUUID eq uuid and (CardDatabase.status eq CardStatus.ACTIVE.code)
-        }.map {
-            resultRowToCard(it)
         }
+            .orderBy(CardDatabase.modifiedAt, SortOrder.DESC)
+            .map {
+                resultRowToCard(it)
+            }
 
         return@transaction cards
     }
@@ -307,6 +309,14 @@ class KanbanRepositoryImplementation : KanbanRepository {
 
     override fun deleteColumnByUUID(columnUUID: UUID) {
         transaction {
+            ColumnRuleDatabase.deleteWhere {
+                ColumnRuleDatabase.columnUUID eq columnUUID
+            }
+
+            ColumnAllowedDatabase.deleteWhere {
+                allowedColumnUUID eq columnUUID
+            }
+
             ColumnDatabase.deleteWhere { uuid eq columnUUID }
         }
     }
@@ -454,7 +464,12 @@ class KanbanRepositoryImplementation : KanbanRepository {
                     CustomerDatabase.tradingName,
                     CustomerDatabase.personName,
                     CustomerDatabase.observation,
-                    CustomerDatabase.status
+                    CustomerDatabase.status,
+                    CustomerDatabase.addressNumber,
+                    CustomerDatabase.address,
+                    CustomerDatabase.zipCode,
+                    CustomerDatabase.city,
+                    CustomerDatabase.state,
                 ).where { CustomerDatabase.uuid eq customerUUID }.map {
                     Customer(
                         uuid = it[CustomerDatabase.uuid],
@@ -464,14 +479,19 @@ class KanbanRepositoryImplementation : KanbanRepository {
                         personName = it[CustomerDatabase.personName],
                         observation = it[CustomerDatabase.observation],
                         status = enumFromTypeValue<CustomerStatus, Int>(it[CustomerDatabase.status]),
+                        addressNumber = it[CustomerDatabase.addressNumber],
+                        address = it[CustomerDatabase.address],
+                        zipCode = it[CustomerDatabase.zipCode],
+                        city = it[CustomerDatabase.city],
+                        state = it[CustomerDatabase.state],
                     )
                 }.firstOrNull()
 
-            metadata.wallet = WalletDatabase
+            metadata.wallet = WalletCustomersDatabase
                 .join(
-                    otherTable = WalletCustomersDatabase,
+                    otherTable = WalletDatabase,
                     joinType = JoinType.INNER,
-                    additionalConstraint = { WalletCustomersDatabase.uuid eq WalletDatabase.uuid }
+                    additionalConstraint = { WalletDatabase.uuid eq WalletCustomersDatabase.walletUUID }
                 )
                 .join(
                     otherTable = UserDatabase,
@@ -509,7 +529,7 @@ class KanbanRepositoryImplementation : KanbanRepository {
     }
 
     private fun getCardTag(tagUUID: UUID?): Tag? {
-        if(tagUUID == null) return null
+        if (tagUUID == null) return null
 
         return getTagByUUID(tagUUID)
     }

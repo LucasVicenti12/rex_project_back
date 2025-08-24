@@ -8,6 +8,7 @@ import com.delice.crm.modules.customer.domain.exceptions.*
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
 import com.delice.crm.modules.customer.domain.usecase.response.*
+import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
 import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,6 +19,7 @@ class CustomerUseCaseImplementation(
     private val customerRepository: CustomerRepository,
     private val walletRepository: WalletRepository,
     private val economicActivityUseCase: EconomicActivityUseCase,
+    private val kanbanUseCase: KanbanUseCase,
 ) : CustomerUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(CustomerUseCaseImplementation::class.java)
@@ -84,6 +86,16 @@ class CustomerUseCaseImplementation(
             }
 
             customerRepository.approvalCustomer(status, customerUUID, userUUID)
+
+            val cardUUID = customerRepository.getCustomerCardKanban(customerUUID)
+            val columnUUID = customerRepository.getKanbanColumnUUIDByCustomerStatus(status)
+
+            if (cardUUID != null && columnUUID != null) {
+                kanbanUseCase.moveCardToColumn(
+                    cardUUID = cardUUID,
+                    toColumnUUID = columnUUID,
+                )
+            }
 
             return ApprovalCustomerResponse(ok = true)
         } catch (e: Exception) {

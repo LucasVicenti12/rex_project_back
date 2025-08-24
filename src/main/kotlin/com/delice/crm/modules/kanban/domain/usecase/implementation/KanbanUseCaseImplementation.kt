@@ -382,7 +382,7 @@ class KanbanUseCaseImplementation(
             val card = customerRepository.createCustomerCardKanban(it)
             val columnUUID = customerRepository.getKanbanColumnUUIDByCustomerStatus(it.status!!)
 
-            if(card != null && columnUUID != null){
+            if (card != null && columnUUID != null) {
                 moveCardToColumn(card.uuid!!, columnUUID)
             }
         }
@@ -423,23 +423,23 @@ class KanbanUseCaseImplementation(
 
             val currentColumnRule = kanbanRepository.getRulesByColumnUUID(currentColumn.uuid!!)
 
-            var move = applyCurrentColumnRuleValidation(
+            var validate = applyCurrentColumnRuleValidation(
                 rules = currentColumnRule!!
             )
 
-            if (!move) {
-                return CardListResponse(error = KANBAN_UNEXPECTED)
+            if (validate != null) {
+                return CardListResponse(error = validate)
             }
 
             val newColumnRule = kanbanRepository.getRulesByColumnUUID(column.uuid!!)
 
-            move = applyNewColumnRuleValidation(
+            validate = applyNewColumnRuleValidation(
                 card = card,
                 rules = newColumnRule!!,
             )
 
-            if (!move) {
-                return CardListResponse(error = KANBAN_UNEXPECTED)
+            if (validate != null) {
+                return CardListResponse(error = validate)
             }
 
             applyColumnRuleAction(
@@ -462,14 +462,23 @@ class KanbanUseCaseImplementation(
         }
     }
 
-    private fun applyCurrentColumnRuleValidation(rules: List<ColumnRule>): Boolean {
-        var move = true
+    override fun getColumnRuleTypes(): ColumnRuleTypeListResponse = try {
+        ColumnRuleTypeListResponse(
+            rules = ColumnRuleType.entries.toList()
+        )
+    } catch (e: Exception) {
+        logger.error("ERROR_IN_GET_COLUMN_RULE_TYPES", e)
+        ColumnRuleTypeListResponse(error = KANBAN_UNEXPECTED)
+    }
 
-        if (rules.isEmpty()) return true
+    private fun applyCurrentColumnRuleValidation(rules: List<ColumnRule>): KanbanExceptions? {
+        var move: KanbanExceptions? = null
+
+        if (rules.isEmpty()) return null
 
         rules.forEach {
             if (ColumnRuleType.NOT_MOVABLE == it.type) {
-                move = false
+                move = KANBAN_RULE_NOT_MOVE
                 return@forEach
             }
         }
@@ -477,30 +486,30 @@ class KanbanUseCaseImplementation(
         return move
     }
 
-    private fun applyNewColumnRuleValidation(card: Card, rules: List<ColumnRule>): Boolean {
-        var move = true
+    private fun applyNewColumnRuleValidation(card: Card, rules: List<ColumnRule>): KanbanExceptions? {
+        var move: KanbanExceptions? = null
 
-        if (rules.isEmpty()) return true
+        if (rules.isEmpty()) return null
 
         rules.forEach {
             if (ColumnRuleType.VALIDATE_CUSTOMER == it.type) {
-                val customer = customerRepository.getCustomerByUUID(
-                    customerUUID = card.metadata!!.customer!!.uuid!!
-                )
+                val customer = card.metadata!!.customer
 
-                if (customer!!.status != CustomerStatus.FIT) {
-                    move = false
+                if (customer == null) {
+                    move = KANBAN_RULE_CUSTOMER_NOT_FIT
+                    return@forEach
+                }
+
+                if (customer.status != CustomerStatus.FIT) {
+                    move = KANBAN_RULE_CUSTOMER_NOT_FIT
                     return@forEach
                 }
             }
             if (ColumnRuleType.VALIDATE_CUSTOMER_WALLET == it.type) {
-                val wallet = walletRepository.getCustomerWallet(
-                    customerUUID = card.metadata!!.wallet!!.uuid!!,
-                    walletUUID = null,
-                )
+                val wallet = card.metadata!!.wallet
 
                 if (wallet == null) {
-                    move = false
+                    move = KANBAN_RULE_CUSTOMER_WITHOUT_WALLET
                     return@forEach
                 }
             }

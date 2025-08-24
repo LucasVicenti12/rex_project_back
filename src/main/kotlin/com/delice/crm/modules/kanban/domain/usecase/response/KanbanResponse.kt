@@ -58,3 +58,8 @@ data class MessageBoardResponse(
     val message: String? = null,
     val error: KanbanExceptions? = null
 )
+
+data class ColumnRuleTypeListResponse(
+    val rules: List<ColumnRuleType>? = null,
+    val error: KanbanExceptions? = null
+)
