@@ -97,10 +97,10 @@ class ProductUseCaseImplementation(
         ProductResponse(error = PRODUCT_UNEXPECTED_ERROR)
     }
 
-    override fun getProductPagination(page: Int, count: Int, params: Map<String, Any?>): ProductPaginationResponse {
+    override fun getProductPagination(page: Int, count: Int, orderBy: String?, params: Map<String, Any?>): ProductPaginationResponse {
         return try {
             return ProductPaginationResponse(
-                products = productRepository.getProductPagination(page, count, params),
+                products = productRepository.getProductPagination(page, count, orderBy, params),
                 error = null
             )
         } catch (e: Exception) {
