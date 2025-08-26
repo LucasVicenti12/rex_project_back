@@ -1,5 +1,6 @@
 package com.delice.crm.modules.product.domain.usecase.implementation
 
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
 import com.delice.crm.modules.product.domain.exceptions.*
@@ -68,13 +69,13 @@ class ProductUseCaseImplementation(
 
     override fun saveProductMedia(media: List<ProductMedia>, productUUID: UUID): ProductMediaResponse {
         try {
-            productRepository.getProductByUUID(productUUID)?: return ProductMediaResponse(error = PRODUCT_NOT_FOUND)
+            productRepository.getProductByUUID(productUUID) ?: return ProductMediaResponse(error = PRODUCT_NOT_FOUND)
 
             val hasMorePrincipal = media.count { it.isPrincipal == true }
 
-            if(hasMorePrincipal == 0) return ProductMediaResponse(error = PRODUCT_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL)
+            if (hasMorePrincipal == 0) return ProductMediaResponse(error = PRODUCT_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL)
 
-            if(hasMorePrincipal > 1) return ProductMediaResponse(error = PRODUCT_MEDIA_MUST_BE_PRINCIPAL)
+            if (hasMorePrincipal > 1) return ProductMediaResponse(error = PRODUCT_MEDIA_MUST_BE_PRINCIPAL)
 
             productRepository.saveProductMedia(media, productUUID)
             return ProductMediaResponse(media = media)
@@ -97,7 +98,12 @@ class ProductUseCaseImplementation(
         ProductResponse(error = PRODUCT_UNEXPECTED_ERROR)
     }
 
-    override fun getProductPagination(page: Int, count: Int, orderBy: String?, params: Map<String, Any?>): ProductPaginationResponse {
+    override fun getProductPagination(
+        page: Int,
+        count: Int,
+        orderBy: OrderBy?,
+        params: Map<String, Any?>
+    ): ProductPaginationResponse {
         return try {
             return ProductPaginationResponse(
                 products = productRepository.getProductPagination(page, count, orderBy, params),
@@ -110,7 +116,7 @@ class ProductUseCaseImplementation(
     }
 
     private fun validateProduct(product: Product): ProductResponse = when {
-        product.code.isNullOrBlank() -> {
+        product.code == 0 -> {
             ProductResponse(error = PRODUCT_CODE_IS_EMPTY)
         }
 

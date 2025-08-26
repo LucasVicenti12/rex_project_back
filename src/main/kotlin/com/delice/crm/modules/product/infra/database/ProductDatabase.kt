@@ -1,17 +1,17 @@
 package com.delice.crm.modules.product.infra.database
 
 import com.delice.crm.core.utils.filter.ExposedFilter
-import org.jetbrains.exposed.sql.Op
+import com.delice.crm.core.utils.filter.ExposedOrderBy
+import com.delice.crm.core.utils.ordernation.OrderBy
+import com.delice.crm.core.utils.ordernation.SortBy
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.date
-import org.jetbrains.exposed.sql.or
 
 object ProductDatabase : Table("product") {
     val uuid = uuid("uuid").uniqueIndex()
-    val code = varchar("code", 30).uniqueIndex()
+    val code = integer("code").uniqueIndex()
     val name = varchar("name", 60)
     val description = text("description")
     val price = double("price")
@@ -46,44 +46,30 @@ data class ProductFilter(
             if (it is String && it.isNotBlank()) {
                 val value = it.trim().lowercase()
 
-                // Tenta converter para número quando for possível (pra peso e preço)
-                val numericValue = value.toDoubleOrNull()
-//                val statusValue = if (value == "ativo") 0 else if (value == "inativo") 1 else null
+                val numericDoubleValue = value.toDoubleOrNull()
+                val numericIntegerValue = value.toIntOrNull()
 
                 val generalFilter = Op.build {
-                    // Campos de texto
-                    (table.code like "%$value%") or
-                            (table.name like "%$value%")
+                    (table.name like "%$value%")
 
-                            // Campos numéricos
-                            (if (numericValue != null) (table.weight eq numericValue) else Op.FALSE) or
-                            (if (numericValue != null) (table.price eq numericValue) else Op.FALSE)
-                            // or
-                            // Status
-//                            (if (statusValue != null) (table.status eq statusValue) else Op.FALSE)
+                    (if (numericDoubleValue != null) (table.weight eq numericDoubleValue) else Op.FALSE) or
+                            (if (numericDoubleValue != null) (table.price eq numericDoubleValue) else Op.FALSE) or
+                            (if (numericIntegerValue != null) (table.code eq numericIntegerValue) else Op.FALSE)
                 }
 
                 op = op.and(generalFilter)
             }
         }
 
-//        parameters["status"]?.let {
-//            if (it is String && it.isNotBlank()) {
-//               val value = it.trim().lowercase()
-//
-//                val statusValue = if (value == "ativo" || value == "sim") 0 else if (value == "inativo" || value == "não") 1 else null
-//            }
-//        }
-
         parameters["code"]?.let {
-            if (it is String && it.isNotBlank()) {
-                op = op.and(table.code like "%$it%")
+            val code = it.toString().toIntOrNull()
+            if (code != null) {
+                op = op.and(table.code eq code)
             }
         }
 
         parameters["name"]?.let {
             if (it is String && it.isNotBlank()) {
-                println(it)
                 op = op.and(table.name like "%$it%")
             }
         }
@@ -103,5 +89,40 @@ data class ProductFilter(
         }
 
         return op
+    }
+}
+
+data class ProductOrderBy(
+    private val orderBy: OrderBy? = null,
+) : ExposedOrderBy<ProductDatabase> {
+    override fun toOrderBy(): Pair<Expression<*>, SortOrder> {
+        if (orderBy == null) {
+            return ProductDatabase.name to SortOrder.ASC
+        }
+
+        val orderByMap = mapOf(
+            "uuid" to ProductDatabase.uuid,
+            "code" to ProductDatabase.code,
+            "name" to ProductDatabase.name,
+            "price" to ProductDatabase.price,
+            "weight" to ProductDatabase.weight,
+            "createdAt" to ProductDatabase.createdAt,
+            "modifiedAt" to ProductDatabase.modifiedAt,
+            "status" to ProductDatabase.status
+        )
+
+        val sortByMap = mapOf(
+            SortBy.ASC to SortOrder.ASC,
+            SortBy.DESC to SortOrder.DESC,
+        )
+
+        val column = orderByMap[orderBy.orderBy]
+        val sort = sortByMap[orderBy.sortBy]
+
+        if (column == null || sort == null) {
+            return ProductDatabase.name to SortOrder.ASC
+        }
+
+        return column to sort
     }
 }

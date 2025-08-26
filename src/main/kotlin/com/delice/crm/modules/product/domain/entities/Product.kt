@@ -6,7 +6,7 @@ import java.util.UUID
 class Product (
     val uuid: UUID? = null,
     val name: String? = null,
-    val code: String? = null,
+    val code: Int? = 0,
     val description: String? = null,
     var images: List<ProductMedia>? = emptyList(),
     val price: Double? = 0.0,

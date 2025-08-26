@@ -2,6 +2,7 @@ package com.delice.crm.modules.product.infra.repository
 
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.binaryToString
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
@@ -19,6 +20,7 @@ import com.delice.crm.modules.product.infra.database.ProductDatabase.uuid
 import com.delice.crm.modules.product.infra.database.ProductDatabase.weight
 import com.delice.crm.modules.product.infra.database.ProductFilter
 import com.delice.crm.modules.product.infra.database.ProductMediaDatabase
+import com.delice.crm.modules.product.infra.database.ProductOrderBy
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.statements.api.ExposedBlob
@@ -84,7 +86,7 @@ class ProductRepositoryImplementation : ProductRepository {
         }.firstOrNull()
     }
 
-    override fun getProductByCode(code: String): Product? = transaction {
+    override fun getProductByCode(code: Int): Product? = transaction {
         ProductDatabase.selectAll().where {
             ProductDatabase.code eq code
         }.map {
@@ -92,12 +94,17 @@ class ProductRepositoryImplementation : ProductRepository {
         }.firstOrNull()
     }
 
-    override fun getProductPagination(page: Int, count: Int, orderBy: String?, params: Map<String, Any?>): Pagination<Product>? =
+    override fun getProductPagination(
+        page: Int,
+        count: Int,
+        orderBy: OrderBy?,
+        params: Map<String, Any?>
+    ): Pagination<Product>? =
         transaction {
             val query = ProductDatabase
                 .selectAll()
                 .where(ProductFilter(params).toFilter(ProductDatabase))
-                .orderBy(*parseOrderBy(orderBy).toTypedArray())
+                .orderBy(ProductOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 
@@ -114,50 +121,6 @@ class ProductRepositoryImplementation : ProductRepository {
                 total = total,
             )
         }
-
-    fun castStringToInt(expr: Expression<String>): Expression<Int> =
-        object : Expression<Int>() {
-            override fun toQueryBuilder(queryBuilder: QueryBuilder) {
-                queryBuilder.append("CAST(", expr, " AS SIGNED)")
-            }
-        }
-
-    private fun parseOrderBy(orderBy: String?): List<Pair<Expression<*>, SortOrder>> {
-        if (orderBy.isNullOrBlank()) return listOf(ProductDatabase.name to SortOrder.ASC)
-
-        // Maps valid field names to database columns
-        val fieldMap = mapOf(
-            "uuid" to ProductDatabase.uuid,
-            "code" to castStringToInt(ProductDatabase.code),
-            "name" to ProductDatabase.name,
-            "price" to ProductDatabase.price,
-            "weight" to ProductDatabase.weight,
-            "createdAt" to ProductDatabase.createdAt,
-            "modifiedAt" to ProductDatabase.modifiedAt,
-            "status" to ProductDatabase.status
-        )
-
-        return orderBy.split(",").map { raw ->
-            val parts = raw.trim().split(":")
-            val fieldName = parts.getOrNull(0)?.trim() ?: throw IllegalArgumentException(
-                "Empty sort field detected in '$raw'. check the 'orderBy' parameter."
-            )
-
-            val sortOrder = when (parts.getOrNull(1)?.trim()?.lowercase()) {
-                "desc" -> SortOrder.DESC
-                null, "", "asc" -> SortOrder.ASC
-                else -> throw IllegalArgumentException(
-                    "Invalid sort direction for field '$fieldName'. Use only 'asc' or 'desc'."
-                )
-            }
-
-            val column = fieldMap[fieldName] ?: throw IllegalArgumentException(
-                "Field '$fieldName' is not valid for sorting. Allowed fields: ${fieldMap.keys.joinToString()}."
-            )
-
-            column to sortOrder
-        }
-    }
 
 
     private fun getProductMedia(productUUID: UUID): List<ProductMedia> = transaction {

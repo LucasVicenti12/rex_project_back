@@ -1,7 +1,7 @@
 package com.delice.crm.modules.product.infra.web
 
-import com.delice.crm.core.config.ws.Order
 import com.delice.crm.core.utils.filter.parametersToMap
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
 import com.delice.crm.modules.product.domain.usecase.ProductUseCase
@@ -91,7 +91,7 @@ class ProductWebService(
         @RequestParam(
             value = "orderBy",
             required = false
-        ) orderBy: String,
+        ) orderBy: OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<ProductPaginationResponse> {
         val params = request.queryString.parametersToMap()
