@@ -1,5 +1,6 @@
 package com.delice.crm.modules.product.infra.web
 
+import com.delice.crm.core.config.ws.Order
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
@@ -111,7 +112,7 @@ class ProductWebService(
         @PathVariable(
             value = "productUUID",
             required = true
-        ) productUUID: UUID
+        ) productUUID: UUID,
     ): ResponseEntity<ProductMediaResponse> {
         val response = productUseCase.saveProductMedia(media, productUUID)
 
