@@ -144,20 +144,6 @@ class CustomerRepositoryImplementation(
             CustomerDatabase.update({ CustomerDatabase.uuid eq customerUUID }) {
                 it[CustomerDatabase.status] = status.code
             }
-
-            val cardUUID = CustomerDatabase
-                .select(CustomerDatabase.kanbanCardUUID)
-                .map { it[CustomerDatabase.kanbanCardUUID] }
-                .firstOrNull()
-
-            val columnUUID = getKanbanColumnUUIDByCustomerStatus(status)
-
-            if (cardUUID != null && columnUUID != null) {
-                moveCustomerCardToColumn(
-                    cardUUID = cardUUID,
-                    columnUUID = columnUUID,
-                )
-            }
         }
     }
 
@@ -202,21 +188,10 @@ class CustomerRepositoryImplementation(
                     ColumnDatabase.uuid
                 )
                 .where {
-                    ColumnRuleDatabase.type eq ruleType.type and (
-                            BoardDatabase.code eq KanbanKeys.LEADS.type
-                            )
+                    ColumnRuleDatabase.type eq ruleType.type and (BoardDatabase.code eq KanbanKeys.LEADS.type)
                 }
                 .limit(1)
                 .map { it[ColumnDatabase.uuid] }.firstOrNull()
-        }
-    }
-
-    private fun moveCustomerCardToColumn(cardUUID: UUID, columnUUID: UUID) {
-        transaction {
-            CardDatabase.update({ CardDatabase.uuid eq cardUUID }) {
-                it[CardDatabase.columnUUID] = columnUUID
-                it[modifiedAt] = LocalDateTime.now()
-            }
         }
     }
 
@@ -363,6 +338,14 @@ class CustomerRepositoryImplementation(
         }
 
         return@transaction null
+    }
+
+    override fun getCustomerCardKanban(customerUUID: UUID): UUID? = transaction {
+        CustomerDatabase
+            .select(CustomerDatabase.kanbanCardUUID)
+            .where { CustomerDatabase.uuid eq customerUUID }
+            .map { it[CustomerDatabase.kanbanCardUUID] }
+            .firstOrNull()
     }
 
     private fun getContactsByCustomerUUID(customerUUID: UUID): List<Contact> = transaction {

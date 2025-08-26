@@ -19,5 +19,6 @@ interface CustomerRepository {
     fun listSimpleCustomer(): List<SimpleCustomer>?
     fun getCustomerAll(): List<Customer>?
     fun createCustomerCardKanban(customer: Customer): Card?
+    fun getCustomerCardKanban(customerUUID: UUID): UUID?
     fun getKanbanColumnUUIDByCustomerStatus(status: CustomerStatus): UUID?
 }

@@ -38,7 +38,10 @@ val KANBAN_COLUMN_RULE_DATA_INVALID = KanbanExceptions("KANBAN_COLUMN_RULE_DATA_
 
 val KANBAN_ALLOWED_COLUMNS_IS_EMPTY = KanbanExceptions("KANBAN_ALLOWED_COLUMNS_IS_EMPTY", "Allowed columns is empty")
 
-val KANBAN_COLUMN_RULE_TYPE_IS_INVALID = KanbanExceptions("KANBAN_COLUMN_RULE_TYPE_IS_INVALID", "The rule type is invalid")
 val KANBAN_COLUMN_MOVE_IN_SAME_COLUMN = KanbanExceptions("KANBAN_COLUMN_MOVE_IN_SAME_COLUMN", "You can't move to the same column")
+
+val KANBAN_RULE_NOT_MOVE = KanbanExceptions("KANBAN_RULE_NOT_MOVE", "You cannot move this card")
+val KANBAN_RULE_CUSTOMER_NOT_FIT = KanbanExceptions("KANBAN_RULE_CUSTOMER_NOT_FIT", "Customer not fit")
+val KANBAN_RULE_CUSTOMER_WITHOUT_WALLET = KanbanExceptions("KANBAN_RULE_CUSTOMER_WITHOUT_WALLET", "Customer without wallet")
 
 class KanbanExceptions(code: String, message: String): DefaultError(code, message)

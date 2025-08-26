@@ -1,6 +1,5 @@
 package com.delice.crm.modules.kanban.domain.repository
 
-import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.kanban.domain.entities.*
 import java.util.UUID

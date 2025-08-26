@@ -40,4 +40,6 @@ interface KanbanUseCase {
     fun recreateCards(boardUUID: UUID): MessageBoardResponse
 
     fun moveCardToColumn(cardUUID: UUID, toColumnUUID: UUID): CardListResponse
+
+    fun getColumnRuleTypes(): ColumnRuleTypeListResponse
 }
