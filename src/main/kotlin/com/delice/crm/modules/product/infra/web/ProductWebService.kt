@@ -88,11 +88,15 @@ class ProductWebService(
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy: String,
         request: HttpServletRequest
     ): ResponseEntity<ProductPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = productUseCase.getProductPagination(page, count, params)
+        val response = productUseCase.getProductPagination(page, count, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

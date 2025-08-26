@@ -11,6 +11,6 @@ interface ProductUseCase {
     fun createProduct(product: Product): ProductResponse
     fun updateProduct(product: Product): ProductResponse
     fun getProductByUUID(uuid: UUID): ProductResponse
-    fun getProductPagination(page: Int, count: Int, params: Map<String, Any?>): ProductPaginationResponse
+    fun getProductPagination(page: Int, count: Int, orderBy: String?, params: Map<String, Any?>): ProductPaginationResponse
     fun saveProductMedia(media: List<ProductMedia>, productUUID: UUID): ProductMediaResponse
 }
