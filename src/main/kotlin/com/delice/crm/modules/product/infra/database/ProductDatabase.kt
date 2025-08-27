@@ -86,7 +86,6 @@ data class ProductFilter(
 
         parameters["name"]?.let {
             if (it is String && it.isNotBlank()) {
-                println(it)
                 op = op.and(table.name like "%$it%")
             }
         }
