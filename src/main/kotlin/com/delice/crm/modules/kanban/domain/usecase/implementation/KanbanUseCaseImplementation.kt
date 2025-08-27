@@ -2,8 +2,13 @@ package com.delice.crm.modules.kanban.domain.usecase.implementation
 
 import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.queue.MailQueue
+import com.delice.crm.core.notification.domain.entities.Notification
+import com.delice.crm.core.notification.domain.repository.NotificationRepository
+import com.delice.crm.core.notification.infra.queue.NotificationQueue
+import com.delice.crm.core.user.domain.entities.SimpleUser
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
@@ -13,7 +18,6 @@ import com.delice.crm.modules.kanban.domain.exceptions.*
 import com.delice.crm.modules.kanban.domain.repository.KanbanRepository
 import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
 import com.delice.crm.modules.kanban.domain.usecase.response.*
-import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -23,9 +27,9 @@ import java.util.*
 class KanbanUseCaseImplementation(
     private val kanbanRepository: KanbanRepository,
     private val customerRepository: CustomerRepository,
-    private val walletRepository: WalletRepository,
     private val userRepository: UserRepository,
-    private val mailQueue: MailQueue
+    private val mailQueue: MailQueue,
+    private val notificationRepository: NotificationRepository
 ) : KanbanUseCase {
     companion object {
         private val logger = LoggerFactory.getLogger(KanbanUseCaseImplementation::class.java)
@@ -527,7 +531,7 @@ class KanbanUseCaseImplementation(
         if (rules.isEmpty()) return
 
         rules.forEach {
-            if (ColumnRuleType.SEND_EMAIL == it.type || ColumnRuleType.NOTIFY_USER == it.type) {
+            if (ColumnRuleType.SEND_EMAIL == it.type) {
                 val mails = it.metadata!!.emails!!.joinToString(";")
 
                 val date = LocalDateTime.now().format(DateTimeFormat)
@@ -552,6 +556,40 @@ class KanbanUseCaseImplementation(
                 mailQueue.addMail(
                     mail = mail
                 )
+            }
+
+            if (ColumnRuleType.NOTIFY_USER == it.type) {
+                val receivers = it.metadata?.notifyUsers?.filter { uuid ->
+                    UUID.fromString(uuid) != user.uuid!!
+                }?.map { uuid ->
+                    userRepository.getUserByUUID(UUID.fromString(uuid))!!
+                }?.map { rec ->
+                    SimpleUser(
+                        uuid = rec.uuid!!,
+                        login = rec.login!!,
+                        userName = "${rec.name} ${rec.surname}",
+                    )
+                }
+
+                val sender = SimpleUser(
+                    uuid = user.uuid!!,
+                    login = user.login!!,
+                    userName = "${user.name} ${user.surname}",
+                )
+
+                val notification = Notification(
+                    uuid = UUID.randomUUID(),
+                    message = "",
+                    title = CARD_MOVE_MESSAGE.format(
+                        card.code,
+                        column.title,
+                        user.name
+                    ),
+                    sender = sender,
+                    receivers = receivers,
+                )
+
+                notificationRepository.createNotification(notification)
             }
 
             if (ColumnRuleType.ADD_TAG == it.type) {
