@@ -7,7 +7,10 @@ import com.delice.crm.core.utils.ordernation.SortBy
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.date
+import org.jetbrains.exposed.sql.or
 
 object ProductDatabase : Table("product") {
     val uuid = uuid("uuid").uniqueIndex()
@@ -50,14 +53,27 @@ data class ProductFilter(
                 val numericIntegerValue = value.toIntOrNull()
 
                 val generalFilter = Op.build {
-                    (table.name like "%$value%")
-
+                    (table.name like "%$value%") or
                     (if (numericDoubleValue != null) (table.weight eq numericDoubleValue) else Op.FALSE) or
-                            (if (numericDoubleValue != null) (table.price eq numericDoubleValue) else Op.FALSE) or
-                            (if (numericIntegerValue != null) (table.code eq numericIntegerValue) else Op.FALSE)
+                    (if (numericDoubleValue != null) (table.price eq numericDoubleValue) else Op.FALSE) or
+                    (if (numericIntegerValue != null) (table.code eq numericIntegerValue) else Op.FALSE)
                 }
 
                 op = op.and(generalFilter)
+            }
+        }
+
+        parameters["status"]?.let {
+            if (it is String && it.isNotBlank()) {
+               val value = it.trim().lowercase()
+
+                val statusValue = if (value == "active") 0 else if (value == "inactive") 1 else null
+
+                if (statusValue != null) {
+                    op = op.and(table.status eq statusValue)
+                } else {
+                    op = op.and(Op.FALSE)
+                }
             }
         }
 
