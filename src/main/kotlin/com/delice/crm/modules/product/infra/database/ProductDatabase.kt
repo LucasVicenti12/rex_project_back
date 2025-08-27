@@ -53,11 +53,10 @@ data class ProductFilter(
                 val numericIntegerValue = value.toIntOrNull()
 
                 val generalFilter = Op.build {
-                    (table.name like "%$value%")
-
+                    (table.name like "%$value%") or
                     (if (numericDoubleValue != null) (table.weight eq numericDoubleValue) else Op.FALSE) or
-                            (if (numericDoubleValue != null) (table.price eq numericDoubleValue) else Op.FALSE) or
-                            (if (numericIntegerValue != null) (table.code eq numericIntegerValue) else Op.FALSE)
+                    (if (numericDoubleValue != null) (table.price eq numericDoubleValue) else Op.FALSE) or
+                    (if (numericIntegerValue != null) (table.code eq numericIntegerValue) else Op.FALSE)
                 }
 
                 op = op.and(generalFilter)
