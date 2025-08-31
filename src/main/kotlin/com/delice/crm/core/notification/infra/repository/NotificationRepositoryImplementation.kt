@@ -40,7 +40,12 @@ class NotificationRepositoryImplementation(
                 UserDatabase.surname,
                 NotificationReceiversDatabase.read,
                 NotificationDatabase.createdAt,
-            ).where {
+            )
+            .orderBy(
+                column = NotificationDatabase.createdAt,
+                order = SortOrder.DESC
+            )
+            .where {
                 NotificationReceiversFilter(params).toFilter(NotificationReceiversDatabase) and (
                         NotificationReceiversDatabase.receiverUUID eq userUUID
                         )
@@ -51,30 +56,25 @@ class NotificationRepositoryImplementation(
 
     override fun createNotification(notification: Notification) {
         transaction {
-            val newUUID = UUID.randomUUID()
+            notification.uuid = UUID.randomUUID()
 
             NotificationDatabase.insert {
-                it[uuid] = newUUID
+                it[uuid] = notification.uuid!!
                 it[message] = notification.message!!
                 it[title] = notification.title!!
                 it[sender] = notification.sender.uuid
-                it[createdAt] = LocalDateTime.now()
+                it[createdAt] = notification.createdAt!!
             }
 
             if (!notification.receivers.isNullOrEmpty()) {
                 notification.receivers.forEach { receive ->
                     NotificationReceiversDatabase.insert {
-                        it[notificationUUID] = newUUID
+                        it[notificationUUID] = notification.uuid!!
                         it[receiverUUID] = receive.uuid
                     }
                 }
             }
-
-            val notify = getNotificationByUUID(newUUID)
-
-            if (notify != null) {
-                notificationQueue.addNotification(notify)
-            }
+            notificationQueue.addNotification(notification)
         }
     }
 

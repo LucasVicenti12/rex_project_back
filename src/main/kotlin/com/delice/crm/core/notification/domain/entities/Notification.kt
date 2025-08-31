@@ -5,11 +5,11 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Notification(
-    val uuid: UUID? = null,
+    var uuid: UUID? = null,
     val message: String? = null,
     val title: String? = null,
     val sender: SimpleUser,
     val receivers: List<SimpleUser>? = null,
     val read: Boolean = false,
-    val createdAt: LocalDateTime? = null,
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
 )

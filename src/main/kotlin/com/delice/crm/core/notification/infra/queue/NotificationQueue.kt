@@ -26,14 +26,14 @@ class NotificationQueue(
     override fun run() {
         while (true) {
             try {
-                var mail: Notification?
+                var notify: Notification?
 
                 synchronized(list) {
-                    mail = list.poll() ?: null
+                    notify = list.poll() ?: null
                 }
 
-                if (mail != null) {
-                    service.publish(mail!!)
+                if (notify != null) {
+                    service.publish(notify!!)
                 }
             } catch (e: Exception) {
                 logger.error("ERROR ON NOTIFICATION QUEUE -> ${e.message}", e)
