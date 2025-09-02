@@ -5,11 +5,18 @@ import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.api.economicActivities.infra.database.EconomicActivityDatabase
 import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.filter.ExposedFilter
+import com.delice.crm.core.utils.filter.ExposedOrderBy
+import com.delice.crm.core.utils.ordernation.OrderBy
+import com.delice.crm.core.utils.ordernation.SortBy
 import com.delice.crm.modules.kanban.infra.database.CardDatabase
+import com.delice.crm.modules.product.infra.database.ProductDatabase
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.and
 
 object CustomerDatabase : Table("customer") {
     var uuid = uuid("uuid").uniqueIndex()
@@ -120,11 +127,61 @@ data class CustomerFilter(
         }
 
         parameters["status"]?.let {
-            if (it is Int) {
-                op = op.and(table.status eq it)
+            val statusInt = when (it) {
+                is Int -> it
+                is String -> it.toIntOrNull()
+                else -> null
+            }
+
+            statusInt?.let { status ->
+                op = op.and(table.status eq status)
             }
         }
 
         return op
+    }
+}
+
+data class CustomerOrderBy(
+    private val orderBy: OrderBy? = null,
+) : ExposedOrderBy<CustomerDatabase> {
+    override fun toOrderBy(): Pair<Expression<*>, SortOrder> {
+        if (orderBy == null) {
+            return CustomerDatabase.companyName to SortOrder.ASC
+        }
+
+        val orderByMap = mapOf(
+            "uuid" to CustomerDatabase.uuid,
+            "company_name" to CustomerDatabase.companyName,
+            "trading_name" to CustomerDatabase.tradingName,
+            "person_name" to CustomerDatabase.personName,
+            "status" to CustomerDatabase.status,
+            "document" to CustomerDatabase.document,
+            "state" to CustomerDatabase.state,
+            "city" to CustomerDatabase.city,
+            "address" to CustomerDatabase.address,
+            "zip_code" to CustomerDatabase.zipCode,
+            "complement" to CustomerDatabase.complement,
+            "address_number" to CustomerDatabase.addressNumber,
+            "observation" to CustomerDatabase.observation,
+            "created_at" to CustomerDatabase.createdAt,
+            "modified_at" to CustomerDatabase.modifiedAt,
+            "created_by" to CustomerDatabase.createdBy,
+            "modified_by" to CustomerDatabase.modifiedBy,
+        )
+
+        val sortByMap = mapOf(
+            SortBy.ASC to SortOrder.ASC,
+            SortBy.DESC to SortOrder.DESC,
+        )
+
+        val column = orderByMap[orderBy.orderBy]
+        val sort = sortByMap[orderBy.sortBy]
+
+        if (column == null || sort == null) {
+            return CustomerDatabase.companyName to SortOrder.ASC
+        }
+
+        return column to sort
     }
 }

@@ -2,6 +2,7 @@ package com.delice.crm.modules.customer.infra.web
 
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.usecase.CustomerUseCase
@@ -120,11 +121,15 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value= "orderBy",
+            required = false
+        ) orderBy: OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<CustomerPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = customerUseCase.getCustomerPagination(page, count, params)
+        val response = customerUseCase.getCustomerPagination(page, count, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity
