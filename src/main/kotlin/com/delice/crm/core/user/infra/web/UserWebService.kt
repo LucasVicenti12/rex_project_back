@@ -9,6 +9,7 @@ import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -53,11 +54,15 @@ class UserWebService(
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy: OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<UserPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = userUseCase.getUserPagination(page, count, params)
+        val response = userUseCase.getUserPagination(page, count, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

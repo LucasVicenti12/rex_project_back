@@ -10,6 +10,7 @@ import com.delice.crm.api.economicActivities.infra.database.EconomicActivityData
 import com.delice.crm.core.utils.contact.Contact
 import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.SerializableCustomer
 import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
 import com.delice.crm.modules.customer.infra.database.*
@@ -256,16 +257,16 @@ class CustomerRepositoryImplementation(
             }.firstOrNull()
     }
 
-    override fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Customer>? =
+    override fun getCustomerPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Customer>? =
         transaction {
             val query = CustomerDatabase
                 .selectAll()
                 .where(CustomerFilter(params).toFilter(CustomerDatabase))
+                .orderBy(CustomerOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 
             val items = query
-                .orderBy(CustomerDatabase.companyName)
                 .limit(count)
                 .offset((page * count).toLong())
                 .map {
