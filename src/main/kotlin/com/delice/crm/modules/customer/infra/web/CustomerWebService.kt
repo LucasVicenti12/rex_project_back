@@ -122,7 +122,7 @@ class CustomerWebService(private val customerUseCase: CustomerUseCase) {
             required = true
         ) count: Int,
         @RequestParam(
-            value= "orderBy",
+            value = "orderBy",
             required = false
         ) orderBy: OrderBy,
         request: HttpServletRequest

@@ -127,13 +127,8 @@ data class CustomerFilter(
         }
 
         parameters["status"]?.let {
-            val statusInt = when (it) {
-                is Int -> it
-                is String -> it.toIntOrNull()
-                else -> null
-            }
-
-            statusInt?.let { status ->
+            val status = it.toString().toIntOrNull()
+            if (status != null) {
                 op = op.and(table.status eq status)
             }
         }

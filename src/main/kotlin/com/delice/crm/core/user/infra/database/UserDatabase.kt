@@ -2,8 +2,13 @@ package com.delice.crm.core.user.infra.database
 
 import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.filter.ExposedFilter
+import com.delice.crm.core.utils.filter.ExposedOrderBy
 import com.delice.crm.core.utils.formatter.DateFormatter
+import com.delice.crm.core.utils.ordernation.OrderBy
+import com.delice.crm.core.utils.ordernation.SortBy
+import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.concat
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
@@ -52,7 +57,7 @@ data class UserFilter(
             }
         }
 
-        parameters["userType"]?.let {
+        parameters["user_type"]?.let {
             if (it is String && it.isNotBlank()) {
                 op = op.and((table.userType eq it))
             }
@@ -65,8 +70,9 @@ data class UserFilter(
         }
 
         parameters["status"]?.let {
-            if (it is Int && it != 0) {
-                op = op.and((table.status eq it))
+            val status = it.toString().toIntOrNull()
+            if (status != null) {
+                op = op.and(table.status eq status)
             }
         }
 
@@ -110,5 +116,46 @@ data class UserFilter(
 
         return op
     }
+}
 
+data class UserOrderBy(
+    private val orderBy: OrderBy? = null,
+) : ExposedOrderBy<UserDatabase> {
+    override fun toOrderBy(): Pair<Expression<*>, SortOrder> {
+        if (orderBy == null) {
+            return UserDatabase.login to SortOrder.ASC
+        }
+
+        val orderByMap = mapOf(
+            "uuid" to UserDatabase.uuid,
+            "login" to UserDatabase.login,
+            "user_type" to UserDatabase.userType,
+            "email" to UserDatabase.email,
+            "status" to UserDatabase.status,
+            "name" to concat(UserDatabase.name, UserDatabase.surname),
+            "document" to UserDatabase.document,
+            "phone" to UserDatabase.phone,
+            "date_of_birth" to UserDatabase.dateOfBirth,
+            "state" to UserDatabase.state,
+            "city" to UserDatabase.city,
+            "address" to UserDatabase.address,
+            "zip_code" to UserDatabase.zipCode,
+            "created_at" to UserDatabase.createdAt,
+            "modified_at" to UserDatabase.modifiedAt,
+        )
+
+        val sortByMap = mapOf(
+            SortBy.ASC to SortOrder.ASC,
+            SortBy.DESC to SortOrder.DESC,
+        )
+
+        val column = orderByMap[orderBy.orderBy]
+        val sort = sortByMap[orderBy.sortBy]
+
+        if (column == null || sort == null) {
+           return UserDatabase.login to SortOrder.ASC
+        }
+
+        return column to sort
+    }
 }
