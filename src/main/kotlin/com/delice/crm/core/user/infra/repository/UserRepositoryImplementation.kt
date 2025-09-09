@@ -7,8 +7,10 @@ import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.user.infra.database.UserFilter
+import com.delice.crm.core.user.infra.database.UserOrderBy
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.binaryToString
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -36,10 +38,11 @@ class UserRepositoryImplementation : UserRepository {
         }.firstOrNull()
     }
 
-    override fun getUserPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<User>? = transaction {
+    override fun getUserPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<User>? = transaction {
         val query = UserDatabase
             .selectAll()
             .where(UserFilter(params).toFilter(UserDatabase))
+            .orderBy(UserOrderBy(orderBy).toOrderBy())
 
         val total = ceil(query.count().toDouble() / count).toInt()
 

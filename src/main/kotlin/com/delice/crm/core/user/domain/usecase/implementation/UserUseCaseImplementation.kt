@@ -8,6 +8,7 @@ import com.delice.crm.core.user.domain.usecase.response.ChangeAvatarResponse
 import com.delice.crm.core.user.domain.usecase.response.SimpleUsersResponse
 import com.delice.crm.core.user.domain.usecase.response.UserPaginationResponse
 import com.delice.crm.core.user.domain.usecase.response.UserResponse
+import com.delice.crm.core.utils.ordernation.OrderBy
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -43,8 +44,8 @@ class UserUseCaseImplementation(
         )
     }
 
-    override fun getUserPagination(page: Int, count: Int, params: Map<String, Any?>): UserPaginationResponse = try {
-        val pagination = userRepository.getUserPagination(page, count, params)
+    override fun getUserPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): UserPaginationResponse = try {
+        val pagination = userRepository.getUserPagination(page, count, orderBy, params)
 
         UserPaginationResponse(
             users = pagination,
