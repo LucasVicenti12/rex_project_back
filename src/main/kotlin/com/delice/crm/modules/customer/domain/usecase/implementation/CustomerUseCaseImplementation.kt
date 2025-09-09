@@ -2,6 +2,7 @@ package com.delice.crm.modules.customer.domain.usecase.implementation
 
 import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import com.delice.crm.api.economicActivities.domain.usecase.EconomicActivityUseCase
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.exceptions.*
@@ -133,10 +134,10 @@ class CustomerUseCaseImplementation(
         }
     }
 
-    override fun getCustomerPagination(page: Int, count: Int, params: Map<String, Any?>): CustomerPaginationResponse {
+    override fun getCustomerPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): CustomerPaginationResponse {
         return try {
             return CustomerPaginationResponse(
-                customers = customerRepository.getCustomerPagination(page, count, params),
+                customers = customerRepository.getCustomerPagination(page, count, orderBy, params),
                 error = null
             )
         } catch (e: Exception) {
