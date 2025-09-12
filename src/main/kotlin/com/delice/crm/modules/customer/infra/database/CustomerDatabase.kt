@@ -72,6 +72,29 @@ data class CustomerFilter(
             return op
         }
 
+        parameters["allFields"]?.let {
+            if (it is String && it.isNotBlank()) {
+                val value = it.trim().lowercase()
+                val numericValue = value.toIntOrNull()
+
+                val generalFilter = Op.build {
+                    (table.companyName like "%$value%") or
+                            (table.tradingName like "%$value%") or
+                            (table.personName like "%$value%") or
+                            (table.document like "%${value.removeSpecialChars()}%") or
+                            (table.state like "%$value%") or
+                            (table.city like "%$value%") or
+                            (table.address like "%$value%") or
+                            (table.zipCode like "%${value.removeSpecialChars()}%") or
+                            (table.complement like "%$value%") or
+                            (table.observation like "%$value%") or
+                            (if (numericValue != null) (table.addressNumber eq numericValue) else Op.FALSE) or
+                            (if (numericValue != null) (table.status eq numericValue) else Op.FALSE)
+                }
+                op = op.and(generalFilter)
+            }
+        }
+
         parameters["companyName"]?.let {
             if (it is String && it.isNotBlank()) {
                 op = op.and(table.companyName like stringLiteral("%$it%"))
