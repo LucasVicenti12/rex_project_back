@@ -1,6 +1,7 @@
 package com.delice.crm.modules.wallet.domain.usecase.implementation
 
 import com.delice.crm.core.user.domain.repository.UserRepository
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.wallet.domain.entities.Wallet
@@ -137,10 +138,10 @@ class WalletUseCaseImplementation(
         }
     }
 
-    override fun getWalletPagination(count: Int, page: Int, params: Map<String, Any?>): WalletPaginationResponse {
+    override fun getWalletPagination(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): WalletPaginationResponse {
         return try {
             return WalletPaginationResponse(
-                wallet = walletRepository.getWalletPagination(count, page, params),
+                wallet = walletRepository.getWalletPagination(count, page, orderBy, params),
                 error = null
             )
         } catch (e: Exception) {
