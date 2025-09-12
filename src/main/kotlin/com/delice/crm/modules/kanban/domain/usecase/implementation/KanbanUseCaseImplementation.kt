@@ -11,6 +11,7 @@ import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.kanban.domain.entities.*
@@ -222,8 +223,8 @@ class KanbanUseCaseImplementation(
         TagListResponse(error = KANBAN_UNEXPECTED)
     }
 
-    override fun getBoardPagination(page: Int, count: Int, params: Map<String, Any?>): BoardPaginationResponse = try {
-        val boards = kanbanRepository.getBoardPagination(page, count, params)
+    override fun getBoardPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): BoardPaginationResponse = try {
+        val boards = kanbanRepository.getBoardPagination(page, count, orderBy, params)
 
         BoardPaginationResponse(boards = boards)
     } catch (e: Exception) {
