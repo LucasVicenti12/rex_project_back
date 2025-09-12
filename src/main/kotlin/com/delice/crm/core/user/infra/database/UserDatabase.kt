@@ -3,7 +3,6 @@ package com.delice.crm.core.user.infra.database
 import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.filter.ExposedFilter
 import com.delice.crm.core.utils.filter.ExposedOrderBy
-import com.delice.crm.core.utils.formatter.DateFormatter
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.ordernation.SortBy
 import org.jetbrains.exposed.sql.Expression
@@ -16,7 +15,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
-import java.time.LocalDate
+import org.jetbrains.exposed.sql.or
 
 object UserDatabase : Table("users") {
     var uuid = uuid("uuid").uniqueIndex()
@@ -49,6 +48,30 @@ data class UserFilter(
 
         if (parameters.isEmpty()) {
             return op
+        }
+
+        parameters["allFields"]?.let {
+            if (it is String && it.isNotBlank()) {
+                val value = it.trim().lowercase()
+                val numericValue = value.toIntOrNull()
+
+                val generalFilter = Op.build {
+                    (table.login like "%$value%") or
+                            (table.userType like "%$value%") or
+                            (table.email like "%$value%") or
+                            (table.name like "%$value%") or
+                            (table.surname like "%$value%") or
+                            (concat(table.name, table.surname) like "%$value%") or
+                            (table.document like "%${value.removeSpecialChars()}%") or
+                            (table.phone like "%${value.removeSpecialChars()}%") or
+                            (table.state like "%$value%") or
+                            (table.city like "%$value%") or
+                            (table.address like "%$value%") or
+                            (table.zipCode like "%${value.removeSpecialChars()}%") or
+                            (if (numericValue != null) (table.status eq numericValue) else Op.FALSE)
+                }
+                op = op.and(generalFilter)
+            }
         }
 
         parameters["login"]?.let {
@@ -91,14 +114,6 @@ data class UserFilter(
         parameters["phone"]?.let {
             if (it is String && it.isNotBlank()) {
                 op = op.and(table.phone like "%${it.removeSpecialChars()}%")
-            }
-        }
-
-        parameters["dateOfBirth"]?.let {
-            if (it is String && it.isNotBlank()) {
-                val date = LocalDate.parse(it, DateFormatter)
-
-                op = op.and(table.dateOfBirth eq date)
             }
         }
 
