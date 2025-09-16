@@ -3,6 +3,7 @@ package com.delice.crm.core.roles.domain.usecase
 import com.delice.crm.core.roles.domain.entities.Module
 import com.delice.crm.core.roles.domain.entities.Role
 import com.delice.crm.core.roles.domain.usecase.response.*
+import com.delice.crm.core.utils.ordernation.OrderBy
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -10,6 +11,7 @@ import java.util.*
 interface RolesUseCase {
     fun getRoles(): RoleListResponse
     fun getModules(): ModuleListResponse
+    fun getModulesPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): ModulePaginationResponse
     fun getRolesPerUser(userUUID: UUID): RoleListResponse
     fun createRole(role: Role): RoleResponse
     fun deleteRole(roleUUID: UUID): RoleDeleteResponse

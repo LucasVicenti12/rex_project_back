@@ -6,6 +6,7 @@ import com.delice.crm.core.roles.domain.exceptions.*
 import com.delice.crm.core.roles.domain.repository.RolesRepository
 import com.delice.crm.core.roles.domain.usecase.RolesUseCase
 import com.delice.crm.core.roles.domain.usecase.response.*
+import com.delice.crm.core.utils.ordernation.OrderBy
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -42,6 +43,23 @@ class RolesUseCaseImplementation(
     } catch (e: Exception) {
         logger.error("ROLES_MODULE_GET_MODULES", e)
         ModuleListResponse(modules = null, error = ROLE_UNEXPECTED_ERROR)
+    }
+
+    override fun getModulesPagination(
+        page: Int,
+        count: Int,
+        orderBy: OrderBy?,
+        params: Map<String, Any?>
+    ): ModulePaginationResponse {
+        return try {
+            return ModulePaginationResponse(
+                modules = rolesRepository.getModulesPagination(page, count, orderBy, params),
+                error = null
+            )
+        } catch (e: Exception) {
+            logger.error("ROLES_MODULE_GET_MODULES", e)
+            ModulePaginationResponse(error = ROLE_UNEXPECTED_ERROR)
+        }
     }
 
     override fun getRolesPerUser(userUUID: UUID): RoleListResponse = try {

@@ -5,6 +5,8 @@ import com.delice.crm.core.roles.domain.entities.Role
 import org.springframework.stereotype.Service
 import java.util.UUID
 import com.delice.crm.core.roles.domain.entities.Module
+import com.delice.crm.core.utils.ordernation.OrderBy
+import com.delice.crm.core.utils.pagination.Pagination
 
 @Service
 interface RolesRepository {
@@ -12,6 +14,7 @@ interface RolesRepository {
     fun getRoleByUUID(roleUUID: UUID): Role?
     fun getRoleByCode(code: String): Role?
     fun getModules(): List<Module>?
+    fun getModulesPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Module>?
     fun getModuleByUUID(moduleUUID: UUID): Module?
     fun getModuleByCode(code: String): Module?
     fun getRolesPerUser(userUUID: UUID): List<Role>?
