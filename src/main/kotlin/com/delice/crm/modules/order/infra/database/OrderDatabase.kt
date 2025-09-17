@@ -4,16 +4,14 @@ import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.filter.ExposedFilter
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.product.infra.database.ProductDatabase
-import org.jetbrains.exposed.sql.Op
+import com.delice.crm.modules.product.infra.database.ProductMediaDatabase
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.datetime
 
 object OrderDatabase : Table("order") {
     var uuid = uuid("uuid").uniqueIndex()
     var code = integer("code").autoIncrement()
-    var discount = double("discount")
     var defaultDiscount = double("default_discount")
     var customerUUID = uuid("customer_uuid") references CustomerDatabase.uuid
     var status = integer("status")
@@ -35,7 +33,7 @@ object OrderItemDatabase : Table("order_item") {
 
 data class OrderFilter(
     val parameters: Map<String, Any?>,
-): ExposedFilter<OrderDatabase>{
+) : ExposedFilter<OrderDatabase> {
     override fun toFilter(table: OrderDatabase): Op<Boolean> {
         var op: Op<Boolean> = Op.TRUE
 

@@ -3,9 +3,11 @@ package com.delice.crm.modules.product.domain.usecase
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
+import com.delice.crm.modules.product.domain.entities.SimpleProduct
 import com.delice.crm.modules.product.domain.usecase.response.ProductMediaResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductPaginationResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductResponse
+import com.delice.crm.modules.product.domain.usecase.response.SimpleProductListResponse
 import java.util.UUID
 
 interface ProductUseCase {
@@ -14,4 +16,5 @@ interface ProductUseCase {
     fun getProductByUUID(uuid: UUID): ProductResponse
     fun getProductPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): ProductPaginationResponse
     fun saveProductMedia(media: List<ProductMedia>, productUUID: UUID): ProductMediaResponse
+    fun getSimpleProducts(): SimpleProductListResponse
 }

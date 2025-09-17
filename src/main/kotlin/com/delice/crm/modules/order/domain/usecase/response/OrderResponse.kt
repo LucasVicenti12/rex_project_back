@@ -14,8 +14,3 @@ class OrderPaginationResponse(
     val orders: Pagination<Order>? = null,
     val error: OrderExceptions? = null,
 )
-
-class OrderItemListResponse(
-    val items: List<OrderItem>? = null,
-    val error: OrderExceptions? = null,
-)

@@ -23,3 +23,8 @@ class ProductMedia(
     val createdAt: LocalDate? = null,
     val modifiedAt: LocalDate? = null
 )
+
+data class SimpleProduct(
+    val uuid: UUID,
+    val name: String
+)

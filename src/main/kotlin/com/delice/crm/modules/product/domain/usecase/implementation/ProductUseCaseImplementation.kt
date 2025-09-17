@@ -9,6 +9,7 @@ import com.delice.crm.modules.product.domain.usecase.ProductUseCase
 import com.delice.crm.modules.product.domain.usecase.response.ProductMediaResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductPaginationResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductResponse
+import com.delice.crm.modules.product.domain.usecase.response.SimpleProductListResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
@@ -83,6 +84,17 @@ class ProductUseCaseImplementation(
             logger.error("SAVE_PRODUCT_MEDIA", e)
             return ProductMediaResponse(error = PRODUCT_UNEXPECTED_ERROR)
         }
+    }
+
+    override fun getSimpleProducts(): SimpleProductListResponse = try {
+        SimpleProductListResponse(
+            products = productRepository.getSimpleProducts()
+        )
+    }catch (e: Exception){
+        logger.error("GET_SIMPLE_PRODUCTS", e)
+        SimpleProductListResponse(
+            error = PRODUCT_UNEXPECTED_ERROR
+        )
     }
 
     override fun getProductByUUID(uuid: UUID): ProductResponse = try {

@@ -9,13 +9,11 @@ import java.util.UUID
 
 interface OrderRepository {
     fun createOrder(order: Order): Order?
-    fun changeOrderDefaultDiscount(orderUUID: UUID, manipulateOrder: ManipulateOrder): Order?
-    fun addOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): List<OrderItem>?
-    fun changeOrderItemDiscount(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): List<OrderItem>?
-    fun removeOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): List<OrderItem>?
+    fun saveOrder(orderUUID: UUID, manipulateOrder: ManipulateOrder): Order?
+    fun saveOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): Order?
+    fun removeOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): Order?
     fun getOrderItemByProductUUID(orderUUID: UUID, productUUID: UUID): OrderItem?
     fun getOrderItemsByUUID(orderUUID: UUID): List<OrderItem>?
-    fun changeOrderStatus(orderUUID: UUID, manipulateOrder: ManipulateOrder): Order?
     fun getOrderByUUID(orderUUID: UUID): Order?
     fun getPaginatedOrder(count: Int, page: Int, params: Map<String, Any?>): Pagination<Order>?
 }

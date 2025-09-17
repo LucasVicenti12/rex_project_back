@@ -8,6 +8,7 @@ import com.delice.crm.modules.product.domain.usecase.ProductUseCase
 import com.delice.crm.modules.product.domain.usecase.response.ProductMediaResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductPaginationResponse
 import com.delice.crm.modules.product.domain.usecase.response.ProductResponse
+import com.delice.crm.modules.product.domain.usecase.response.SimpleProductListResponse
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -119,6 +120,21 @@ class ProductWebService(
         ) productUUID: UUID,
     ): ResponseEntity<ProductMediaResponse> {
         val response = productUseCase.saveProductMedia(media, productUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/simple")
+    fun getSimpleProducts(): ResponseEntity<SimpleProductListResponse> {
+        val response = productUseCase.getSimpleProducts()
 
         if (response.error != null) {
             return ResponseEntity

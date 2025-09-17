@@ -7,6 +7,7 @@ import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
 import com.delice.crm.modules.product.domain.entities.ProductStatus
+import com.delice.crm.modules.product.domain.entities.SimpleProduct
 import com.delice.crm.modules.product.domain.repository.ProductRepository
 import com.delice.crm.modules.product.infra.database.ProductDatabase
 import com.delice.crm.modules.product.infra.database.ProductDatabase.code
@@ -76,6 +77,20 @@ class ProductRepositoryImplementation : ProductRepository {
             }
         }
         return@transaction getProductMedia(productUUID)
+    }
+
+    override fun getSimpleProducts(): List<SimpleProduct>? = transaction {
+        ProductDatabase.select(
+            uuid,
+            name
+        ).where {
+            status eq ProductStatus.ACTIVE.code
+        }.map {
+            SimpleProduct(
+                uuid = it[uuid],
+                name = it[name],
+            )
+        }
     }
 
     override fun getProductByUUID(uuid: UUID): Product? = transaction {

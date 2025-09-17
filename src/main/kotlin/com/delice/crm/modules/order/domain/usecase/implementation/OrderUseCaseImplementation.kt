@@ -10,7 +10,6 @@ import com.delice.crm.modules.order.domain.entities.OrderStatus
 import com.delice.crm.modules.order.domain.exceptions.*
 import com.delice.crm.modules.order.domain.repository.OrderRepository
 import com.delice.crm.modules.order.domain.usecase.OrderUseCase
-import com.delice.crm.modules.order.domain.usecase.response.OrderItemListResponse
 import com.delice.crm.modules.order.domain.usecase.response.OrderPaginationResponse
 import com.delice.crm.modules.order.domain.usecase.response.OrderResponse
 import com.delice.crm.modules.product.domain.entities.ProductStatus
@@ -52,7 +51,7 @@ class OrderUseCaseImplementation(
         OrderResponse(error = ORDER_UNEXPECTED)
     }
 
-    override fun changeOrderDefaultDiscount(orderUUID: UUID, manipulateOrder: ManipulateOrder): OrderResponse = try {
+    override fun saveOrder(orderUUID: UUID, manipulateOrder: ManipulateOrder): OrderResponse = try {
         val order = orderRepository.getOrderByUUID(orderUUID)
 
         if (order!!.status != OrderStatus.OPEN) {
@@ -61,7 +60,7 @@ class OrderUseCaseImplementation(
             )
         } else {
             OrderResponse(
-                order = orderRepository.getOrderByUUID(orderUUID)
+                order = orderRepository.saveOrder(orderUUID, manipulateOrder)
             )
         }
     } catch (e: Exception) {
@@ -69,80 +68,44 @@ class OrderUseCaseImplementation(
         OrderResponse(error = ORDER_UNEXPECTED)
     }
 
-    override fun addOrderItem(
+    override fun saveOrderItem(
         orderUUID: UUID,
         manipulateOrderItem: ManipulateOrderItem
-    ): OrderItemListResponse = try {
-        validateOrderItem(orderUUID, manipulateOrderItem, OrderItemValidateType.Quantity).let { validate ->
+    ): OrderResponse = try {
+        validateOrderItem(orderUUID, manipulateOrderItem, OrderItemValidateType.Change).let { validate ->
             if (validate != null) {
-                OrderItemListResponse(
+                OrderResponse(
                     error = validate
                 )
             } else {
-                OrderItemListResponse(
-                    items = orderRepository.addOrderItem(orderUUID, manipulateOrderItem)
+                OrderResponse(
+                    order = orderRepository.saveOrderItem(orderUUID, manipulateOrderItem)
                 )
             }
         }
     } catch (e: Exception) {
         logger.error("ERROR_ADD_ITEM", e)
-        OrderItemListResponse(error = ORDER_UNEXPECTED)
-    }
-
-    override fun changeOrderItemDiscount(
-        orderUUID: UUID,
-        manipulateOrderItem: ManipulateOrderItem
-    ): OrderItemListResponse = try {
-        validateOrderItem(orderUUID, manipulateOrderItem, OrderItemValidateType.Discount).let { validate ->
-            if (validate != null) {
-                OrderItemListResponse(
-                    error = validate
-                )
-            } else {
-                OrderItemListResponse(
-                    items = orderRepository.changeOrderItemDiscount(orderUUID, manipulateOrderItem)
-                )
-            }
-        }
-    } catch (e: Exception) {
-        logger.error("ERROR_CHANGE_ITEM_DISCOUNT", e)
-        OrderItemListResponse(error = ORDER_UNEXPECTED)
+        OrderResponse(error = ORDER_UNEXPECTED)
     }
 
     override fun removeOrderItem(
         orderUUID: UUID,
         manipulateOrderItem: ManipulateOrderItem
-    ): OrderItemListResponse = try {
+    ): OrderResponse = try {
         validateOrderItem(orderUUID, manipulateOrderItem, OrderItemValidateType.Remove).let { validate ->
             if (validate != null) {
-                OrderItemListResponse(
+                OrderResponse(
                     error = validate
                 )
             } else {
-                OrderItemListResponse(
-                    items = orderRepository.removeOrderItem(orderUUID, manipulateOrderItem)
+                OrderResponse(
+                    order = orderRepository.removeOrderItem(orderUUID, manipulateOrderItem)
                 )
             }
         }
     } catch (e: Exception) {
         logger.error("ERROR_REMOVE_ORDER_ITEM", e)
-        OrderItemListResponse(error = ORDER_UNEXPECTED)
-    }
-
-    override fun changeOrderStatus(
-        orderUUID: UUID,
-        manipulateOrder: ManipulateOrder
-    ): OrderResponse {
-        try {
-            orderRepository.getOrderByUUID(orderUUID) ?: return OrderResponse(error = ORDER_NOT_FOUND)
-
-            return OrderResponse(
-                order = orderRepository.changeOrderStatus(orderUUID, manipulateOrder)
-            )
-        } catch (e: Exception) {
-            logger.error("ERROR_CHANGE_ORDER_STATUS", e)
-            return OrderResponse(error = ORDER_UNEXPECTED)
-        }
+        OrderResponse(error = ORDER_UNEXPECTED)
     }
 
     override fun getOrderByUUID(orderUUID: UUID): OrderResponse {
@@ -198,23 +161,19 @@ class OrderUseCaseImplementation(
             return ORDER_IS_NOT_OPEN
         }
 
-        val product = productRepository.getProductByUUID(manipulateOrderItem.productUUID)
+        manipulateOrderItem.products.forEach {
+            val product = productRepository.getProductByUUID(it)
 
-        if (product == null) {
-            return ORDER_PRODUCT_NOT_FOUND
-        } else if (product.status != ProductStatus.ACTIVE) {
-            return ORDER_PRODUCT_INVALID
-        }
-
-        if (validateType == OrderItemValidateType.Quantity) {
-            if (manipulateOrderItem.quantity <= 0) {
-                return ORDER_INVALID_QUANTITY
+            if (product == null) {
+                return@validateOrderItem ORDER_PRODUCT_NOT_FOUND
+            } else if (product.status != ProductStatus.ACTIVE) {
+                return@validateOrderItem ORDER_PRODUCT_INVALID
             }
         }
 
-        if (validateType == OrderItemValidateType.Discount){
-            if(manipulateOrderItem.discount < order.defaultDiscount!!){
-                return ORDER_DISCOUNT_LESS_THAN_DEFAULT
+        if (validateType == OrderItemValidateType.Change) {
+            if (manipulateOrderItem.quantity <= 0) {
+                return ORDER_INVALID_QUANTITY
             }
         }
 
@@ -222,8 +181,7 @@ class OrderUseCaseImplementation(
     }
 
     private enum class OrderItemValidateType{
-        Quantity,
-        Discount,
+        Change,
         Remove
     }
 }
