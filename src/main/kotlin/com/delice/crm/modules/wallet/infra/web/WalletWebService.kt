@@ -2,6 +2,7 @@ package com.delice.crm.modules.wallet.infra.web
 
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.wallet.domain.entities.Wallet
 import com.delice.crm.modules.wallet.domain.usecase.WalletUseCase
 import com.delice.crm.modules.wallet.domain.usecase.response.FreeCustomers
@@ -93,11 +94,15 @@ class WalletWebService(
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy : OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<WalletPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = walletUseCase.getWalletPagination(count, page, params)
+        val response = walletUseCase.getWalletPagination(count, page, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

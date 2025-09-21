@@ -2,17 +2,24 @@ package com.delice.crm.core.roles.infra.repository
 
 import com.delice.crm.core.roles.domain.entities.*
 import com.delice.crm.core.roles.domain.repository.RolesRepository
+import com.delice.crm.core.roles.domain.usecase.response.ModulePaginationResponse
 import com.delice.crm.core.roles.infra.database.ModuleDatabase
+import com.delice.crm.core.roles.infra.database.ModuleFilter
+import com.delice.crm.core.roles.infra.database.ModuleOrderBy
 import com.delice.crm.core.roles.infra.database.PermissionDatabase
 import com.delice.crm.core.roles.infra.database.RoleDatabase
 import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.ordernation.OrderBy
+import com.delice.crm.core.utils.pagination.Pagination
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.math.ceil
+import kotlin.random.Random
 
 @Service
 class RolesRepositoryImplementation : RolesRepository {
@@ -39,6 +46,29 @@ class RolesRepositoryImplementation : RolesRepository {
             convertResultRowToModule(it)
         }
     }
+
+    override fun getModulesPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Module>? =
+        transaction {
+            val query = ModuleDatabase
+                .selectAll()
+                .where(ModuleFilter(params).toFilter(ModuleDatabase))
+                .orderBy(ModuleOrderBy(orderBy).toOrderBy())
+
+            val total = ceil(query.count().toDouble() / count).toInt()
+
+            val items = query
+                .limit(count)
+                .offset((page * count).toLong())
+                .map {
+                    convertResultRowToModule(it)
+                }
+
+            Pagination(
+                items = items,
+                page = page,
+                total = total,
+            )
+        }
 
     override fun getModuleByUUID(moduleUUID: UUID): Module? = transaction {
         ModuleDatabase.selectAll().where { ModuleDatabase.uuid eq moduleUUID }.map {

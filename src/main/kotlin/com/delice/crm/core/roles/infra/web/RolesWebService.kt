@@ -4,7 +4,9 @@ import com.delice.crm.core.roles.domain.entities.Module
 import com.delice.crm.core.roles.domain.entities.Role
 import com.delice.crm.core.roles.domain.usecase.RolesUseCase
 import com.delice.crm.core.roles.domain.usecase.response.*
+import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -44,6 +46,38 @@ class RolesWebService(
     @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
     fun getModules(): ResponseEntity<ModuleListResponse> {
         val response = rolesUseCase.getModules()
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/getModulesPagination")
+    @PreAuthorize("hasAnyAuthority('CREATE_ROLES')")
+    fun getModulesPagination(
+        @RequestParam(
+            value = "page",
+            required = true
+        ) page : Int,
+        @RequestParam(
+            value = "count",
+            required = true
+        ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy : OrderBy,
+        request: HttpServletRequest
+    ): ResponseEntity<ModulePaginationResponse> {
+        val params = request.queryString.parametersToMap()
+
+        val response = rolesUseCase.getModulesPagination(page, count, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

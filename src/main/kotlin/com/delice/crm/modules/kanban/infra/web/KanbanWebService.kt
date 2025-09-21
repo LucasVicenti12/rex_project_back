@@ -1,6 +1,7 @@
 package com.delice.crm.modules.kanban.infra.web
 
 import com.delice.crm.core.utils.filter.parametersToMap
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.usecase.KanbanUseCase
 import com.delice.crm.modules.kanban.domain.usecase.response.*
@@ -170,11 +171,15 @@ class KanbanWebService(
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy: OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<BoardPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = kanbanUseCase.getBoardPagination(page, count, params)
+        val response = kanbanUseCase.getBoardPagination(page, count, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

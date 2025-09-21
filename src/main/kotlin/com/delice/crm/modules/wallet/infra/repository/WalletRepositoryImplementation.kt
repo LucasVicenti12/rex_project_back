@@ -2,6 +2,7 @@ package com.delice.crm.modules.wallet.infra.repository
 
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.entities.SimpleCustomer
@@ -13,6 +14,7 @@ import com.delice.crm.modules.wallet.domain.repository.WalletRepository
 import com.delice.crm.modules.wallet.infra.database.WalletCustomersDatabase
 import com.delice.crm.modules.wallet.infra.database.WalletDatabase
 import com.delice.crm.modules.wallet.infra.database.WalletFilter
+import com.delice.crm.modules.wallet.infra.database.WalletOrderBy
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
@@ -108,11 +110,12 @@ class WalletRepositoryImplementation(
         }.firstOrNull()
     }
 
-    override fun getWalletPagination(count: Int, page: Int, params: Map<String, Any?>): Pagination<Wallet> =
+    override fun getWalletPagination(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Wallet> =
         transaction {
             val query = WalletDatabase
                 .selectAll()
                 .where(WalletFilter(params).toFilter(WalletDatabase))
+                .orderBy(WalletOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 

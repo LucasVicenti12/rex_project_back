@@ -4,6 +4,7 @@ import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.entities.UserType
 import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
@@ -280,11 +281,12 @@ class KanbanRepositoryImplementation : KanbanRepository {
         return@transaction tag
     }
 
-    override fun getBoardPagination(page: Int, count: Int, params: Map<String, Any?>): Pagination<Board>? =
+    override fun getBoardPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Board>? =
         transaction {
             val query = BoardDatabase
                 .selectAll()
                 .where(BoardFilter(params).toFilter(BoardDatabase))
+                .orderBy(KanbanOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 

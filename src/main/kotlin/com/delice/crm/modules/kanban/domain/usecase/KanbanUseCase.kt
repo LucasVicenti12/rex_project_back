@@ -1,5 +1,6 @@
 package com.delice.crm.modules.kanban.domain.usecase
 
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.kanban.domain.entities.*
 import com.delice.crm.modules.kanban.domain.usecase.response.*
 import java.util.*
@@ -20,7 +21,7 @@ interface KanbanUseCase {
     fun getColumnsByBoardUUID(uuid: UUID): ColumnListResponse
     fun getTagsByBoardUUID(uuid: UUID): TagListResponse
 
-    fun getBoardPagination(page: Int, count: Int, params: Map<String, Any?>): BoardPaginationResponse
+    fun getBoardPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): BoardPaginationResponse
 
     fun deleteTagByUUID(tagUUID: UUID): MessageBoardResponse
     fun deleteColumnByUUID(columnUUID: UUID): MessageBoardResponse
