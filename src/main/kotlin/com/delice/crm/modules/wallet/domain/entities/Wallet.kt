@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Wallet(
-    val uuid: UUID? = null,
+    val uuid: UUID? =  null,
     val label: String? = null,
     var accountable: User? = null,
     var customers: List<Customer>? = emptyList(),
