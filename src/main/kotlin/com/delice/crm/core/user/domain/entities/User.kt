@@ -1,6 +1,5 @@
 package com.delice.crm.core.user.domain.entities
 
-import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
