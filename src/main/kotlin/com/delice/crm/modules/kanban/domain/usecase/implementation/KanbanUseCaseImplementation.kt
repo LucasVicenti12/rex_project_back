@@ -239,7 +239,7 @@ class KanbanUseCaseImplementation(
             MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
         } else {
             kanbanRepository.deleteTagByUUID(tagUUID)
-            MessageBoardResponse(message = "Tag deleted with success")
+            MessageBoardResponse(message = "TAG_DELETED_WITH_SUCCESS")
         }
     } catch (e: Exception) {
         logger.error("ERROR_IN_DELETE_TAG_BY_UUID", e)
@@ -253,7 +253,7 @@ class KanbanUseCaseImplementation(
             MessageBoardResponse(error = KANBAN_COLUMN_NOT_FOUND)
         } else {
             kanbanRepository.deleteColumnByUUID(columnUUID)
-            MessageBoardResponse(message = "Column deleted with success")
+            MessageBoardResponse(message = "COLUMN_DELETED_WITH_SUCCESS")
         }
     } catch (e: Exception) {
         logger.error("ERROR_IN_DELETE_COLUMN_BY_UUID", e)
@@ -323,7 +323,7 @@ class KanbanUseCaseImplementation(
                 else -> {
                     kanbanRepository.saveAllowedColumns(columnUUID, allowed)
 
-                    MessageBoardResponse(message = "Allowed columns saved with success")
+                    MessageBoardResponse(message = "ALLOWED_COLUMNS_SAVED_WITH_SUCCESS")
                 }
             }
         }
@@ -332,14 +332,14 @@ class KanbanUseCaseImplementation(
         MessageBoardResponse(error = KANBAN_UNEXPECTED)
     }
 
-    override fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID): MessageBoardResponse = try {
+        override fun deleteAllowedColumnUUID(mainColumnUUID: UUID, columnUUID: UUID): MessageBoardResponse = try {
         val column = kanbanRepository.getColumnByUUID(columnUUID)
 
         if (column == null) {
             MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
         } else {
             kanbanRepository.deleteAllowedColumnUUID(mainColumnUUID, columnUUID)
-            MessageBoardResponse(message = "Allowed column deleted with success")
+            MessageBoardResponse(message = "ALLOWED_COLUMN_DELETED_WITH_SUCCESS")
         }
     } catch (e: Exception) {
         logger.error("ERROR_IN_DELETE_ALLOWED_COLUMN_BY_UUID", e)
@@ -353,7 +353,7 @@ class KanbanUseCaseImplementation(
             MessageBoardResponse(error = KANBAN_TAG_NOT_FOUND)
         } else {
             kanbanRepository.deleteColumnRuleByUUID(ruleUUID)
-            MessageBoardResponse(message = "Allowed column deleted with success")
+            MessageBoardResponse(message = "COLUMN_RULE_DELETED_WITH_SUCCESS")
         }
     } catch (e: Exception) {
         logger.error("ERROR_IN_DELETE_RULE_COLUMN_BY_UUID", e)
@@ -392,7 +392,7 @@ class KanbanUseCaseImplementation(
             }
         }
 
-        MessageBoardResponse(message = "Cards recreated with success")
+        MessageBoardResponse(message = "CARDS_RECREATED_WITH_SUCCESS")
     } catch (e: Exception) {
         logger.error("ERROR_IN_RECREATE_CARDS", e)
         MessageBoardResponse(error = KANBAN_UNEXPECTED)

@@ -118,7 +118,7 @@ class RolesUseCaseImplementation(
         } else {
             rolesRepository.deleteRole(roleUUID)
 
-            RoleDeleteResponse(message = "Deleted with success", error = null)
+            RoleDeleteResponse(message = "DELETED_WITH_SUCCESS", error = null)
         }
     } catch (e: Exception) {
         logger.error("ROLES_MODULE_DELETE_ROLE", e)
@@ -160,7 +160,7 @@ class RolesUseCaseImplementation(
         } else {
             rolesRepository.deleteModule(moduleUUID)
 
-            ModuleDeleteResponse(message = "Deleted with success", error = null)
+            ModuleDeleteResponse(message = "MODULE_DELETED_WITH_SUCCESS", error = null)
         }
     } catch (e: Exception) {
         logger.error("ROLES_MODULE_DELETE_MODULE", e)
