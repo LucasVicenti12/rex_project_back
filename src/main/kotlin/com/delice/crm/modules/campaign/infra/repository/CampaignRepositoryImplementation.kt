@@ -1,5 +1,4 @@
 package com.delice.crm.modules.campaign.infra.repository
-import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.binaryToString
 import com.delice.crm.core.utils.ordernation.OrderBy
@@ -24,11 +23,9 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.math.ceil
 
-
 @Service
 class CampaignRepositoryImplementation(
-    private val productRepository: ProductRepository,
-    private val userRepository: UserRepository
+    private val productRepository: ProductRepository
 ) : CampaignRepository {
     override fun createCampaign(campaign: Campaign): Campaign? = transaction {
         val campaignUUID = UUID.randomUUID()
@@ -85,8 +82,6 @@ class CampaignRepositoryImplementation(
         transaction {
             val query = CampaignDatabase
                 .selectAll()
-//                .where(CampaignFilter(params).toFilter(CampaignDatabase))
-//                .orderBy(CampaignOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 
