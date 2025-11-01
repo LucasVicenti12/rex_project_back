@@ -9,6 +9,7 @@ import com.delice.crm.modules.task.domain.exceptions.*
 import com.delice.crm.modules.task.domain.repository.TaskRepository
 import com.delice.crm.modules.task.domain.usecase.TaskUseCase
 import com.delice.crm.modules.task.domain.usecase.response.MessageTaskResponse
+import com.delice.crm.modules.task.domain.usecase.response.TaskByDateResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskPaginatedResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskResponse
 import org.slf4j.LoggerFactory
@@ -171,6 +172,30 @@ class TaskUseCaseImplementation(
         }
     } catch (e: Exception) {
         logger.error("ERROR_IN_ADD_TASK_HISTORY", e)
+        TaskResponse(
+            error = TASK_UNEXPECTED_ERROR
+        )
+    }
+
+    override fun getTasksByMonth(month: Int, year: Int): TaskByDateResponse = try {
+        TaskByDateResponse(
+            tasks = taskRepository.getTasksByMonth(month, year)
+        )
+    }catch (e: Exception){
+        logger.error("ERROR_IN_GET_TASKS_MONTH", e)
+        TaskByDateResponse(
+            error = TASK_UNEXPECTED_ERROR
+        )
+    }
+
+    override fun getMyNextTask(): TaskResponse = try {
+        val user = getCurrentUser()
+
+        TaskResponse(
+            task = taskRepository.getMyNextTask(user.uuid)
+        )
+    }catch (e: Exception){
+        logger.error("ERROR_IN_GET_MY_NEXT_TASK", e)
         TaskResponse(
             error = TASK_UNEXPECTED_ERROR
         )

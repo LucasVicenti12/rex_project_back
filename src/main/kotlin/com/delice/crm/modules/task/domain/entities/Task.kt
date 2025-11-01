@@ -4,6 +4,7 @@ import com.delice.crm.core.utils.enums.HasCode
 import java.time.LocalDateTime
 import java.util.UUID
 import com.delice.crm.core.user.domain.entities.User
+import java.time.LocalDate
 
 class Task (
     val uuid: UUID? = null,
@@ -27,6 +28,11 @@ class TaskHistory(
     val action: TaskAction? = TaskAction.UPDATED,
     var actionBy: User? = null,
     val actionAt: LocalDateTime? = LocalDateTime.now(),
+)
+
+class TaskByDate(
+    val day: LocalDate,
+    val tasks: List<Task>
 )
 
 enum class TaskStatus(override val code: Int): HasCode {

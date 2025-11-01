@@ -3,6 +3,9 @@ package com.delice.crm.modules.task.infra.repository
 import com.delice.crm.core.user.domain.entities.User
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.utils.enums.enumFromTypeValue
+import com.delice.crm.core.utils.function.convertDateTimeToDate
+import com.delice.crm.core.utils.function.convertDateTimeToMonth
+import com.delice.crm.core.utils.function.convertDateTimeToYear
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.task.domain.entities.*
 import com.delice.crm.modules.task.domain.repository.TaskRepository
@@ -13,6 +16,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.ceil
@@ -132,10 +136,11 @@ class TaskRepositoryImplementation(
             it[TaskDatabase.status] = status.code
         }
 
-        val action = when{
+        val action = when {
             status == TaskStatus.COMPLETED -> {
                 TaskAction.FINISHED
             }
+
             else -> {
                 TaskAction.UPDATED
             }
@@ -163,6 +168,48 @@ class TaskRepositoryImplementation(
         }
 
         return@transaction getTaskByUUID(history.taskUUID!!)
+    }
+
+    override fun getTasksByMonth(month: Int, year: Int): List<TaskByDate>? = transaction {
+        val taskMap = mutableMapOf<LocalDate, MutableList<Task>>()
+
+        val monthTask = convertDateTimeToMonth(TaskDatabase.dueDate)
+        val dateTask = convertDateTimeToDate(TaskDatabase.dueDate)
+        val yearTask = convertDateTimeToYear(TaskDatabase.dueDate)
+
+        TaskDatabase.select(
+            TaskDatabase.uuid,
+            monthTask,
+            dateTask,
+        ).where {
+            monthTask eq month and (yearTask eq year)
+        }.orderBy(TaskDatabase.dueDate, SortOrder.ASC).forEach {
+            val date = it[dateTask]
+            val task = getTaskByUUID(it[TaskDatabase.uuid]) ?: return@forEach
+
+            val tasksForDay = taskMap.getOrPut(date) { mutableListOf() }
+            tasksForDay.add(task)
+        }
+
+        val taskList = taskMap.map { (t, u) ->
+            TaskByDate(
+                tasks = u.toList(),
+                day = t
+            )
+        }.sortedBy { it.day }
+
+        return@transaction taskList
+    }
+
+    override fun getMyNextTask(userUUID: UUID): Task? = transaction {
+        val taskUUID = TaskDatabase.select(TaskDatabase.uuid).where({
+            TaskDatabase.responsible eq userUUID and (TaskDatabase.status neq TaskStatus.COMPLETED.code)
+        }).limit(1)
+            .map {
+                it[TaskDatabase.uuid]
+            }.firstOrNull() ?: return@transaction null
+
+        return@transaction getTaskByUUID(taskUUID)
     }
 
     private fun getHistoryByTaskUUID(taskUUID: UUID): List<TaskHistory> = transaction {

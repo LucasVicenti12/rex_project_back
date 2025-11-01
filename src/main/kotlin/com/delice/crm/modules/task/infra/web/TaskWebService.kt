@@ -4,9 +4,9 @@ import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.modules.task.domain.entities.Task
 import com.delice.crm.modules.task.domain.entities.TaskHistory
-import com.delice.crm.modules.task.domain.entities.TaskStatus
 import com.delice.crm.modules.task.domain.usecase.TaskUseCase
 import com.delice.crm.modules.task.domain.usecase.response.MessageTaskResponse
+import com.delice.crm.modules.task.domain.usecase.response.TaskByDateResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskPaginatedResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskResponse
 import jakarta.servlet.http.HttpServletRequest
@@ -150,6 +150,45 @@ class TaskWebService(
         @RequestBody history: TaskHistory
     ): ResponseEntity<TaskResponse> {
         val response = taskUseCase.addTaskHistory(history)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/taskByMonth/{year}/{month}")
+    fun getTasksByMonth(
+        @PathVariable(
+            value = "year",
+            required = true
+        ) year: Int,
+        @PathVariable(
+            value = "month",
+            required = true
+        ) month: Int
+    ): ResponseEntity<TaskByDateResponse>{
+        val response = taskUseCase.getTasksByMonth(month, year)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/nextTask")
+    fun getMyNextTask(): ResponseEntity<TaskResponse>{
+        val response = taskUseCase.getMyNextTask()
 
         if (response.error != null) {
             return ResponseEntity

@@ -4,6 +4,7 @@ import com.delice.crm.modules.task.domain.entities.Task
 import com.delice.crm.modules.task.domain.entities.TaskHistory
 import com.delice.crm.modules.task.domain.entities.TaskStatus
 import com.delice.crm.modules.task.domain.usecase.response.MessageTaskResponse
+import com.delice.crm.modules.task.domain.usecase.response.TaskByDateResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskPaginatedResponse
 import com.delice.crm.modules.task.domain.usecase.response.TaskResponse
 import java.util.UUID
@@ -17,4 +18,8 @@ interface TaskUseCase {
 
     fun changeTaskStatus(taskUUID: UUID, status: TaskStatus): TaskResponse
     fun addTaskHistory(history: TaskHistory): TaskResponse
+
+    fun getTasksByMonth(month: Int, year: Int): TaskByDateResponse
+
+    fun getMyNextTask(): TaskResponse
 }
