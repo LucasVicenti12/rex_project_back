@@ -4,14 +4,12 @@ import com.delice.crm.modules.dashboard.domain.exceptions.DASHBOARD_UNEXPECTED_E
 import com.delice.crm.modules.dashboard.domain.repository.DashboardRepository
 import com.delice.crm.modules.dashboard.domain.usecase.DashboardUsecase
 import com.delice.crm.modules.dashboard.domain.usecase.response.DashboardResponse
-import com.delice.crm.modules.dashboard.domain.entities.DashboardCustomerValues
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class DashboardUseCaseImplementation (
-    private val dashboardRepository: DashboardRepository,
+    private val dashboardRepository: DashboardRepository
 ) : DashboardUsecase {
     companion object{
         private val logger = LoggerFactory.getLogger(DashboardUseCaseImplementation::class.java)
@@ -26,7 +24,7 @@ class DashboardUseCaseImplementation (
             DashboardResponse(dashboardCustomerValues = dashboardCustomer)
         }
     } catch (e: Exception) {
-        DashboardUseCaseImplementation.logger.error("GET_DASHBOARD_CUSTOMER_VALUES", e)
+        logger.error("GET_DASHBOARD_CUSTOMER_VALUES", e)
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 }
