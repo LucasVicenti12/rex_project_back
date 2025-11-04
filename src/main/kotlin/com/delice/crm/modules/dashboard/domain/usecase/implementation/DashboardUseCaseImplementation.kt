@@ -27,4 +27,30 @@ class DashboardUseCaseImplementation (
         logger.error("GET_DASHBOARD_CUSTOMER_VALUES", e)
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
+
+    override fun getDashboardOrder(): DashboardResponse = try {
+        val dashboardOrder = dashboardRepository.getDashboardOrder();
+
+        if (dashboardOrder == null) {
+            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+        } else {
+            DashboardResponse(dashboardOrderValues = dashboardOrder)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_ORDER_VALUES", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
+
+    override fun getDashboardRank(): DashboardResponse = try {
+        val dashboardRank = dashboardRepository.getDashboardRank();
+
+        if (dashboardRank == null) {
+            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+        } else {
+            DashboardResponse(dashboardRankValues = dashboardRank)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_RANK_VALUES", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
 }

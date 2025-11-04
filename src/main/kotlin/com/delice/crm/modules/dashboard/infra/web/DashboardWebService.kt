@@ -27,4 +27,34 @@ class DashboardWebService(
             .ok()
             .body(response)
     }
+
+    @GetMapping("/order")
+    fun getDashboardOrder(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardOrder()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/rank")
+    fun getDashboardRank(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardRank()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
 }

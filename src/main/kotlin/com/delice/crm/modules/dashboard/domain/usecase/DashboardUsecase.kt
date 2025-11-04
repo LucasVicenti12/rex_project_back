@@ -4,4 +4,6 @@ import com.delice.crm.modules.dashboard.domain.usecase.response.DashboardRespons
 
 interface DashboardUsecase {
     fun getDashboardCustomer(): DashboardResponse?
+    fun getDashboardOrder(): DashboardResponse?
+    fun getDashboardRank(): DashboardResponse?
 }
