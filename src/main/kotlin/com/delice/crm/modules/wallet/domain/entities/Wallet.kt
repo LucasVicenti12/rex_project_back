@@ -24,3 +24,9 @@ data class SerializableWallet(
     var uuid: String? = null,
     var label: String? = null,
 )
+
+class SimpleWallet(
+    var uuid: UUID? = null,
+    var label: String? = null,
+    var sold: Double? = null
+)

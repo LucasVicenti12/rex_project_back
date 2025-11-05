@@ -28,3 +28,9 @@ data class SimpleProduct(
     val uuid: UUID,
     val name: String
 )
+
+data class SimpleProductWithSales(
+    val uuid: UUID,
+    val name: String,
+    val quantity: Int
+)
