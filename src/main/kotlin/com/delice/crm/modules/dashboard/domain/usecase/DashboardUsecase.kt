@@ -6,4 +6,7 @@ interface DashboardUsecase {
     fun getDashboardCustomer(): DashboardResponse?
     fun getDashboardOrder(): DashboardResponse?
     fun getDashboardRank(): DashboardResponse?
+    fun getDashboardTotalSold(): DashboardResponse?
+    fun getDashboardMostWalletSold(): DashboardResponse?
+    fun getDashboardMostOperatorSold(): DashboardResponse?
 }

@@ -1,6 +1,7 @@
 package com.delice.crm.modules.dashboard.domain.entities
 
 import com.delice.crm.modules.product.domain.entities.SimpleProduct
+import com.delice.crm.modules.product.domain.entities.SimpleProductWithSales
 
 class DashboardCustomerValues (
     var pending: Int,
@@ -16,6 +17,6 @@ class DashboardOrderValues (
 )
 
 class DashboardRankValues (
-    var bestProducts: List<SimpleProduct>,
-    var lessProducts: List<SimpleProduct>
+    var bestProducts: List<SimpleProductWithSales>,
+    var lessProducts: List<SimpleProductWithSales>
 )

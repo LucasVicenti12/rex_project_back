@@ -53,4 +53,43 @@ class DashboardUseCaseImplementation (
         logger.error("GET_DASHBOARD_RANK_VALUES", e)
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
+
+    override fun getDashboardTotalSold(): DashboardResponse = try {
+        val dashboardTotalSold = dashboardRepository.getDashboardTotalSold();
+
+        if (dashboardTotalSold == 0.0) {
+            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+        } else {
+            DashboardResponse(dashboardTotalSold = dashboardTotalSold)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_TOTAL_SOLD_VALUES", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
+
+    override fun getDashboardMostWalletSold(): DashboardResponse = try {
+        val dashboardMostWalletSold = dashboardRepository.getDashboardMostWalletSold();
+
+        if (dashboardMostWalletSold == null) {
+            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+        } else {
+            DashboardResponse(dashboardMostWalletSold = dashboardMostWalletSold)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_MOST_WALLET_SOLD", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
+
+    override fun getDashboardMostOperatorSold(): DashboardResponse = try {
+        val dashboardMostOperatorSold = dashboardRepository.getDashboardMostOperatorSold();
+
+        if (dashboardMostOperatorSold == null) {
+            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+        } else {
+            DashboardResponse(dashboardMostOperatorSold = dashboardMostOperatorSold)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_MOST_WALLET_SOLD", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
 }

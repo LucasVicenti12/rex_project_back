@@ -57,4 +57,49 @@ class DashboardWebService(
             .ok()
             .body(response)
     }
+
+    @GetMapping("/totalSold")
+    fun getDashboardTotalSold(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardTotalSold()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/MostWalletSold")
+    fun getDashboardMostWalletSold(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardMostWalletSold()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/MostOperatorSold")
+    fun getDashboardMostOperatorSold(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardMostOperatorSold()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
 }
