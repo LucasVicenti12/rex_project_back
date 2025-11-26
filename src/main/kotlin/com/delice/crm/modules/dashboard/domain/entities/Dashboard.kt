@@ -2,6 +2,7 @@ package com.delice.crm.modules.dashboard.domain.entities
 
 import com.delice.crm.modules.product.domain.entities.SimpleProduct
 import com.delice.crm.modules.product.domain.entities.SimpleProductWithSales
+import java.util.*
 
 class DashboardCustomerValues (
     var pending: Int,
@@ -23,4 +24,11 @@ class DashboardRankProductsValues (
 data class MonthlySales(
     val monthYear: String,
     val total: Double
+)
+
+data class DashboardFilter(
+    val customerUUID: UUID? = null,
+    val walletUUID: UUID? = null,
+    val operatorUUID: UUID? = null,
+    val monthYear: String? = null // formato: MM/yyyy
 )

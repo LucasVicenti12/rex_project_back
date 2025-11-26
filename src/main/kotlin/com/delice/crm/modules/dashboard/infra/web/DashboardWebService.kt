@@ -1,7 +1,9 @@
 package com.delice.crm.modules.dashboard.infra.web
 
+import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.modules.dashboard.domain.usecase.DashboardUsecase
 import com.delice.crm.modules.dashboard.domain.usecase.response.DashboardResponse
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,8 +16,9 @@ class DashboardWebService(
     private val dashboardUsecase: DashboardUsecase
 ) {
     @GetMapping("/customer")
-    fun getDashboardCustomer(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardCustomer()
+    fun getDashboardCustomer(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardCustomer(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -29,8 +32,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/order")
-    fun getDashboardOrder(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardOrder()
+    fun getDashboardOrder(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardOrder(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -44,8 +48,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/rank/best/products")
-    fun getDashboardRankBest(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardRankBest()
+    fun getDashboardRankBest(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardRankBest(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -59,8 +64,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/rank/less/products")
-    fun getDashboardRankLess(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardRankLess()
+    fun getDashboardRankLess(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardRankLess(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -74,8 +80,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/totalSold")
-    fun getDashboardTotalSold(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardTotalSold()
+    fun getDashboardTotalSold(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardTotalSold(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -89,8 +96,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/mostWalletSold")
-    fun getDashboardMostWalletSold(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardMostWalletSold()
+    fun getDashboardMostWalletSold(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardMostWalletSold(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -104,8 +112,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/mostOperatorSold")
-    fun getDashboardMostOperatorSold(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardMostOperatorSold()
+    fun getDashboardMostOperatorSold(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardMostOperatorSold(params)
 
         if (response?.error != null) {
             return ResponseEntity
@@ -119,8 +128,9 @@ class DashboardWebService(
     }
 
     @GetMapping("/monthSold")
-    fun getDashboardMonthSold(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardMonthSold()
+    fun getDashboardMonthSold(request: HttpServletRequest): ResponseEntity<DashboardResponse> {
+        val params = request.queryString.parametersToMap()
+        val response = dashboardUsecase.getDashboardMonthSold(params)
 
         if (response?.error != null) {
             return ResponseEntity

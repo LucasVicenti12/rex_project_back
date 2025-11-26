@@ -3,12 +3,12 @@ package com.delice.crm.modules.dashboard.domain.usecase
 import com.delice.crm.modules.dashboard.domain.usecase.response.DashboardResponse
 
 interface DashboardUsecase {
-    fun getDashboardCustomer(): DashboardResponse?
-    fun getDashboardOrder(): DashboardResponse?
-    fun getDashboardRankBest(): DashboardResponse?
-    fun getDashboardRankLess(): DashboardResponse?
-    fun getDashboardTotalSold(): DashboardResponse?
-    fun getDashboardMostWalletSold(): DashboardResponse?
-    fun getDashboardMostOperatorSold(): DashboardResponse?
-    fun getDashboardMonthSold(): DashboardResponse?
+    fun getDashboardCustomer(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardOrder(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardRankBest(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardRankLess(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardTotalSold(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardMostWalletSold(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardMostOperatorSold(params: Map<String, Any?>): DashboardResponse
+    fun getDashboardMonthSold(params: Map<String, Any?>): DashboardResponse
 }

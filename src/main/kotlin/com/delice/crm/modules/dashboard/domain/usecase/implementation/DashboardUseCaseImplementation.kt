@@ -16,8 +16,8 @@ class DashboardUseCaseImplementation (
         private val logger = LoggerFactory.getLogger(DashboardUseCaseImplementation::class.java)
     }
 
-    override fun getDashboardCustomer(): DashboardResponse = try {
-        val dashboardCustomer = dashboardRepository.getDashboardCustomer();
+    override fun getDashboardCustomer(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardCustomer = dashboardRepository.getDashboardCustomer(params);
 
         if (dashboardCustomer == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -29,8 +29,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardOrder(): DashboardResponse = try {
-        val dashboardOrder = dashboardRepository.getDashboardOrder();
+    override fun getDashboardOrder(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardOrder = dashboardRepository.getDashboardOrder(params);
 
         if (dashboardOrder == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -42,8 +42,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardRankBest(): DashboardResponse = try {
-        val dashboardRank = dashboardRepository.getDashboardRankBest();
+    override fun getDashboardRankBest(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardRank = dashboardRepository.getDashboardRankBest(params);
 
         if (dashboardRank == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -55,8 +55,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardRankLess(): DashboardResponse = try {
-        val dashboardRank = dashboardRepository.getDashboardRankLess();
+    override fun getDashboardRankLess(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardRank = dashboardRepository.getDashboardRankLess(params);
 
         if (dashboardRank == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -68,8 +68,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardTotalSold(): DashboardResponse = try {
-        val dashboardTotalSold = dashboardRepository.getDashboardTotalSold();
+    override fun getDashboardTotalSold(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardTotalSold = dashboardRepository.getDashboardTotalSold(params);
 
         if (dashboardTotalSold == 0.0) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -81,8 +81,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardMostWalletSold(): DashboardResponse = try {
-        val dashboardMostWalletSold = dashboardRepository.getDashboardMostWalletSold();
+    override fun getDashboardMostWalletSold(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardMostWalletSold = dashboardRepository.getDashboardMostWalletSold(params);
 
         if (dashboardMostWalletSold == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -94,8 +94,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardMostOperatorSold(): DashboardResponse = try {
-        val dashboardMostOperatorSold = dashboardRepository.getDashboardMostOperatorSold();
+    override fun getDashboardMostOperatorSold(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardMostOperatorSold = dashboardRepository.getDashboardMostOperatorSold(params);
 
         if (dashboardMostOperatorSold == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
@@ -107,8 +107,8 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardMonthSold(): DashboardResponse = try {
-        val dashboardMonthSold = dashboardRepository.getDashboardMonthSold();
+    override fun getDashboardMonthSold(params: Map<String, Any?>): DashboardResponse = try {
+        val dashboardMonthSold = dashboardRepository.getDashboardMonthSold(params);
 
         if (dashboardMonthSold == null) {
             DashboardResponse(error = DASHBOARD_NOT_FOUND)
