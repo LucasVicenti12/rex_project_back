@@ -32,5 +32,6 @@ data class SimpleProduct(
 data class SimpleProductWithSales(
     val uuid: UUID,
     val name: String,
-    val quantity: Int
+    val quantity: Int,
+    val sold: Double
 )

@@ -6,19 +6,24 @@ import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import com.delice.crm.modules.dashboard.domain.entities.DashboardCustomerValues
 import com.delice.crm.modules.dashboard.domain.entities.DashboardOrderValues
-import com.delice.crm.modules.dashboard.domain.entities.DashboardRankValues
+import com.delice.crm.modules.dashboard.domain.entities.DashboardRankProductsValues
+import com.delice.crm.modules.dashboard.domain.entities.MonthlySales
 import com.delice.crm.modules.dashboard.domain.repository.DashboardRepository
 import com.delice.crm.modules.order.domain.entities.OrderStatus
 import com.delice.crm.modules.order.infra.database.OrderDatabase
 import com.delice.crm.modules.order.infra.database.OrderItemDatabase
+import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.SimpleProductWithSales
 import com.delice.crm.modules.product.infra.database.ProductDatabase
 import com.delice.crm.modules.wallet.domain.entities.SimpleWallet
 import com.delice.crm.modules.wallet.infra.database.WalletCustomersDatabase
 import com.delice.crm.modules.wallet.infra.database.WalletDatabase
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.javatime.month
+import org.jetbrains.exposed.sql.javatime.year
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class DashboardRepositoryImplementation : DashboardRepository {
@@ -60,25 +65,36 @@ class DashboardRepositoryImplementation : DashboardRepository {
             .select(
                 ProductDatabase.uuid,
                 ProductDatabase.name,
-                quantitySum
+                quantitySum,
+                ProductDatabase.price
             )
             .where { OrderDatabase.status eq OrderStatus.CLOSED.code }
-            .groupBy(ProductDatabase.uuid, ProductDatabase.name)
+            .groupBy(ProductDatabase.uuid, ProductDatabase.name, ProductDatabase.price)
             .orderBy(quantitySum, sortOrder)
             .limit(limit)
             .map {
+                val quantity = it[quantitySum] ?: 0
+                val price = it[ProductDatabase.price]
+
                 SimpleProductWithSales(
                     uuid = it[ProductDatabase.uuid],
                     name = it[ProductDatabase.name],
-                    quantity = it[quantitySum] ?: 0
+                    quantity = quantity,
+                    sold = price * quantity.toDouble()
                 )
             }
     }
 
-    override fun getDashboardRank(): DashboardRankValues = transaction {
-        DashboardRankValues(
-            bestProducts = getTopProducts(5, SortOrder.DESC),
-            lessProducts = getTopProducts(5, SortOrder.ASC)
+
+    override fun getDashboardRankBest(): DashboardRankProductsValues = transaction {
+        DashboardRankProductsValues(
+            Products = getTopProducts(5, SortOrder.DESC),
+        )
+    }
+
+    override fun getDashboardRankLess(): DashboardRankProductsValues = transaction {
+        DashboardRankProductsValues(
+            Products = getTopProducts(5, SortOrder.ASC)
         )
     }
 
@@ -161,6 +177,50 @@ class DashboardRepositoryImplementation : DashboardRepository {
                 )
             }
             .maxByOrNull { it.sold }
+    }
+
+    override fun getDashboardMonthSold(): List<MonthlySales> = transaction {
+        val twelveMonthsAgo = LocalDateTime.now().minusMonths(12).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
+
+        val salesData = OrderItemDatabase
+            .innerJoin(OrderDatabase) { OrderItemDatabase.orderUUID eq OrderDatabase.uuid }
+            .innerJoin(ProductDatabase) { ProductDatabase.uuid eq OrderItemDatabase.productUUID }
+            .select(
+                OrderItemDatabase.quantity,
+                ProductDatabase.price,
+                OrderDatabase.createdAt
+            )
+            .where {
+                (OrderDatabase.status eq OrderStatus.CLOSED.code) and
+                        (OrderDatabase.createdAt greaterEq twelveMonthsAgo)
+            }
+            .map {
+                val quantity = it[OrderItemDatabase.quantity]
+                val price = it[ProductDatabase.price].toDouble() // Convertendo para Double
+                val createdAt = it[OrderDatabase.createdAt]
+                val total = quantity * price
+
+                val monthYear = "${createdAt.monthValue.toString().padStart(2, '0')}/${createdAt.year}"
+
+                monthYear to total
+            }
+
+        val salesByMonth = salesData
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, values) -> values.sum() }
+
+        val allMonths = generateSequence(LocalDateTime.now().withDayOfMonth(1)) {
+            it.minusMonths(1)
+        }
+            .take(13)
+            .map {
+                "${it.monthValue.toString().padStart(2, '0')}/${it.year}" to 0.0
+            }
+            .toMap()
+
+        (allMonths + salesByMonth)
+            .map { (monthYear, total) -> MonthlySales(monthYear, total) }
+            .sortedBy { it.monthYear }
     }
 
 }

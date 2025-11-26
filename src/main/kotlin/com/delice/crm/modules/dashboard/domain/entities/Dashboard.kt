@@ -16,7 +16,11 @@ class DashboardOrderValues (
     var canceled: Int
 )
 
-class DashboardRankValues (
-    var bestProducts: List<SimpleProductWithSales>,
-    var lessProducts: List<SimpleProductWithSales>
+class DashboardRankProductsValues (
+    var Products: List<SimpleProductWithSales>
+)
+
+data class MonthlySales(
+    val monthYear: String,
+    val total: Double
 )

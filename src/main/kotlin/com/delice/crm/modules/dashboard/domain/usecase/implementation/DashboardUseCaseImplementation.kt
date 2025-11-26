@@ -1,5 +1,6 @@
 package com.delice.crm.modules.dashboard.domain.usecase.implementation
 
+import com.delice.crm.modules.dashboard.domain.exceptions.DASHBOARD_NOT_FOUND
 import com.delice.crm.modules.dashboard.domain.exceptions.DASHBOARD_UNEXPECTED_ERROR
 import com.delice.crm.modules.dashboard.domain.repository.DashboardRepository
 import com.delice.crm.modules.dashboard.domain.usecase.DashboardUsecase
@@ -19,7 +20,7 @@ class DashboardUseCaseImplementation (
         val dashboardCustomer = dashboardRepository.getDashboardCustomer();
 
         if (dashboardCustomer == null) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
             DashboardResponse(dashboardCustomerValues = dashboardCustomer)
         }
@@ -32,7 +33,7 @@ class DashboardUseCaseImplementation (
         val dashboardOrder = dashboardRepository.getDashboardOrder();
 
         if (dashboardOrder == null) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
             DashboardResponse(dashboardOrderValues = dashboardOrder)
         }
@@ -41,16 +42,29 @@ class DashboardUseCaseImplementation (
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
-    override fun getDashboardRank(): DashboardResponse = try {
-        val dashboardRank = dashboardRepository.getDashboardRank();
+    override fun getDashboardRankBest(): DashboardResponse = try {
+        val dashboardRank = dashboardRepository.getDashboardRankBest();
 
         if (dashboardRank == null) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
-            DashboardResponse(dashboardRankValues = dashboardRank)
+            DashboardResponse(dashboardRankValuesBest = dashboardRank)
         }
     } catch (e: Exception) {
-        logger.error("GET_DASHBOARD_RANK_VALUES", e)
+        logger.error("GET_DASHBOARD_RANK_VALUES_BEST", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
+
+    override fun getDashboardRankLess(): DashboardResponse = try {
+        val dashboardRank = dashboardRepository.getDashboardRankLess();
+
+        if (dashboardRank == null) {
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
+        } else {
+            DashboardResponse(dashboardRankValuesLess = dashboardRank)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_RANK_VALUES_LESS", e)
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 
@@ -58,7 +72,7 @@ class DashboardUseCaseImplementation (
         val dashboardTotalSold = dashboardRepository.getDashboardTotalSold();
 
         if (dashboardTotalSold == 0.0) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
             DashboardResponse(dashboardTotalSold = dashboardTotalSold)
         }
@@ -71,7 +85,7 @@ class DashboardUseCaseImplementation (
         val dashboardMostWalletSold = dashboardRepository.getDashboardMostWalletSold();
 
         if (dashboardMostWalletSold == null) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
             DashboardResponse(dashboardMostWalletSold = dashboardMostWalletSold)
         }
@@ -84,12 +98,25 @@ class DashboardUseCaseImplementation (
         val dashboardMostOperatorSold = dashboardRepository.getDashboardMostOperatorSold();
 
         if (dashboardMostOperatorSold == null) {
-            DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
         } else {
             DashboardResponse(dashboardMostOperatorSold = dashboardMostOperatorSold)
         }
     } catch (e: Exception) {
         logger.error("GET_DASHBOARD_MOST_WALLET_SOLD", e)
+        DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
+    }
+
+    override fun getDashboardMonthSold(): DashboardResponse = try {
+        val dashboardMonthSold = dashboardRepository.getDashboardMonthSold();
+
+        if (dashboardMonthSold == null) {
+            DashboardResponse(error = DASHBOARD_NOT_FOUND)
+        } else {
+            DashboardResponse(dashboardMonthSold = dashboardMonthSold)
+        }
+    } catch (e: Exception) {
+        logger.error("GET_DASHBOARD_MONTH_SOLD", e)
         DashboardResponse(error = DASHBOARD_UNEXPECTED_ERROR)
     }
 }

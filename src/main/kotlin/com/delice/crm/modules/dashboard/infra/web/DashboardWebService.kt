@@ -43,9 +43,24 @@ class DashboardWebService(
             .body(response)
     }
 
-    @GetMapping("/rank")
-    fun getDashboardRank(): ResponseEntity<DashboardResponse> {
-        val response = dashboardUsecase.getDashboardRank()
+    @GetMapping("/rank/best/products")
+    fun getDashboardRankBest(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardRankBest()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/rank/less/products")
+    fun getDashboardRankLess(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardRankLess()
 
         if (response?.error != null) {
             return ResponseEntity
@@ -73,7 +88,7 @@ class DashboardWebService(
             .body(response)
     }
 
-    @GetMapping("/MostWalletSold")
+    @GetMapping("/mostWalletSold")
     fun getDashboardMostWalletSold(): ResponseEntity<DashboardResponse> {
         val response = dashboardUsecase.getDashboardMostWalletSold()
 
@@ -88,9 +103,24 @@ class DashboardWebService(
             .body(response)
     }
 
-    @GetMapping("/MostOperatorSold")
+    @GetMapping("/mostOperatorSold")
     fun getDashboardMostOperatorSold(): ResponseEntity<DashboardResponse> {
         val response = dashboardUsecase.getDashboardMostOperatorSold()
+
+        if (response?.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/monthSold")
+    fun getDashboardMonthSold(): ResponseEntity<DashboardResponse> {
+        val response = dashboardUsecase.getDashboardMonthSold()
 
         if (response?.error != null) {
             return ResponseEntity
