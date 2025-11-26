@@ -2,6 +2,7 @@ package com.delice.crm.modules.campaign.domain.usecase
 
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
+import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
 import java.util.UUID
@@ -19,4 +20,11 @@ interface CampaignUseCase {
         orderBy: OrderBy?,
         params: Map<String, Any?>
     ): CampaignPaginationResponse
+
+    fun saveCampaignMetadata(
+        campaignUUID: UUID,
+        metadata: CampaignMetadata?,
+    ): CampaignResponse
+
+    fun getVisitCampaign(uuid: UUID): CampaignResponse
 }

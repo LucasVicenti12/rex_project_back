@@ -3,6 +3,7 @@ package com.delice.crm.modules.campaign.infra.web
 import com.delice.crm.core.utils.filter.parametersToMap
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
+import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
 import com.delice.crm.modules.campaign.domain.usecase.CampaignUseCase
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
@@ -93,6 +94,47 @@ class CampaignWebService(
         ) campaignUUID: UUID
     ): ResponseEntity<CampaignResponse> {
         val response = campaignUseCase.getCampaignByUUID(campaignUUID)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @PostMapping("/metadata/{uuid}")
+    fun saveCampaignMetadata(
+        @PathVariable(
+            value = "uuid",
+            required = true
+        ) campaignUUID: UUID,
+        @RequestBody metadata: CampaignMetadata?,
+    ): ResponseEntity<CampaignResponse> {
+        val response = campaignUseCase.saveCampaignMetadata(campaignUUID, metadata)
+
+        if (response.error != null) {
+            return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response)
+        }
+
+        return ResponseEntity
+            .ok()
+            .body(response)
+    }
+
+    @GetMapping("/visit/{uuid}")
+    fun saveCampaignMetadata(
+        @PathVariable(
+            value = "uuid",
+            required = true
+        ) campaignUUID: UUID
+    ): ResponseEntity<CampaignResponse> {
+        val response = campaignUseCase.getVisitCampaign(campaignUUID)
 
         if (response.error != null) {
             return ResponseEntity

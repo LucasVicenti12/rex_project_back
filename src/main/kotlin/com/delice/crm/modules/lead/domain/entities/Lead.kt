@@ -1,7 +1,7 @@
 package com.delice.crm.modules.lead.domain.entities
 
-import com.delice.crm.api.economicActivities.domain.entities.EconomicActivity
 import com.delice.crm.core.utils.contact.Contact
+import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import java.time.LocalDateTime
@@ -9,12 +9,12 @@ import java.util.UUID
 
 class Lead(
     val uuid: UUID? = null,
-    val document: String? = "",
+    var document: String? = "",
     val companyName: String? = "",
     val tradingName: String? = "",
     val personName: String? = "",
     val email: String? = "",
-    var contacts: List<Contact>? = listOf(),
+    var phone: String? = "",
     val state: String? = "",
     val city: String? = "",
     val zipCode: String? = "",
@@ -22,8 +22,7 @@ class Lead(
     val complement: String? = "",
     val addressNumber: Int? = 0,
     val status: LeadStatus? = LeadStatus.PENDING,
-    val economicActivitiesCodes: List<String>? = listOf(),
-    var economicActivities: List<EconomicActivity>? = listOf(),
+    var economicActivity: String? = "",
     val createdAt: LocalDateTime? = LocalDateTime.now(),
     val modifiedAt: LocalDateTime? = LocalDateTime.now(),
 ) {
@@ -32,15 +31,19 @@ class Lead(
         tradingName = this.tradingName,
         personName = this.personName,
         document = this.document,
-        contacts = this.contacts,
+        contacts = listOf(
+            Contact(contactType = ContactType.EMAIL, label = this.email),
+            Contact(contactType = ContactType.PHONE, label = this.phone),
+        ),
         state = this.state,
         city = this.city,
         zipCode = this.zipCode,
         address = this.address,
         complement = this.complement,
         addressNumber = this.addressNumber,
-        economicActivitiesCodes = this.economicActivitiesCodes,
-        economicActivities = this.economicActivities,
+        economicActivitiesCodes = listOf(
+            this.economicActivity!!
+        ),
         observation = "",
         status = status,
         createdAt = LocalDateTime.now(),

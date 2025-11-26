@@ -3,6 +3,7 @@ package com.delice.crm.modules.campaign.domain.usecase.implementation
 import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
+import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
 import com.delice.crm.modules.campaign.domain.entities.CampaignStatus
 import com.delice.crm.modules.campaign.domain.exceptions.*
 import com.delice.crm.modules.campaign.domain.repository.CampaignRepository
@@ -91,6 +92,49 @@ class CampaignUseCaseImplementation(
             logger.error("ERROR_ON_GET_CAMPAIGN_PAGINATION", e)
             CampaignPaginationResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
         }
+    }
+
+    override fun saveCampaignMetadata(
+        campaignUUID: UUID,
+        metadata: CampaignMetadata?
+    ): CampaignResponse = try {
+        val user = getCurrentUser()
+
+        val modifiedBy = user.getUserData().uuid!!
+
+        val exists = campaignRepository.getCampaignByUUID(campaignUUID)
+
+        if (exists == null) {
+            CampaignResponse(error = CAMPAIGN_NOT_FOUND)
+        } else {
+            CampaignResponse(
+                campaign = campaignRepository.saveCampaignMetadata(
+                    campaignUUID,
+                    metadata,
+                    modifiedBy
+                )
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_UPDATE_CAMPAIGN_METADATA", e)
+        CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
+    }
+
+    override fun getVisitCampaign(uuid: UUID): CampaignResponse = try {
+        val campaign = campaignRepository.getVisitCampaign(uuid)
+
+        if(campaign == null) {
+            CampaignResponse(
+                error = CAMPAIGN_NOT_FOUND
+            )
+        }else{
+            CampaignResponse(
+                campaign = campaignRepository.getVisitCampaign(uuid)
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_GET_VISIT_CAMPAIGN", e)
+        CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
     }
 
     private fun validateCampaign(campaign: Campaign): CampaignException? = when {

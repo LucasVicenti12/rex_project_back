@@ -2,6 +2,8 @@ package com.delice.crm.modules.lead.domain.usecase.implementation
 
 import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.queue.MailQueue
+import com.delice.crm.core.utils.extensions.removeAlphaChars
+import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.formatter.DateTimeFormat
 import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.core.utils.ordernation.OrderBy
@@ -34,7 +36,10 @@ class LeadUseCaseImplementation(
                 return LeadResponse(error = LEAD_DOCUMENT_IS_EMPTY)
             }
 
-            if (leadRepository.getLeadByDocument(lead.document) != null) {
+            lead.document = lead.document!!.removeSpecialChars()
+            lead.phone = lead.phone!!.removeAlphaChars().removeSpecialChars()
+
+            if (leadRepository.getLeadByDocument(lead.document!!) != null) {
                 return LeadResponse(error = LEAD_ALREADY_EXISTS)
             }
 

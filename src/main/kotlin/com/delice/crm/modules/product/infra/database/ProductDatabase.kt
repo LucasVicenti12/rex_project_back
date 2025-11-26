@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.or
+import java.security.URIParameter
 
 object ProductDatabase : Table("product") {
     val uuid = uuid("uuid").uniqueIndex()

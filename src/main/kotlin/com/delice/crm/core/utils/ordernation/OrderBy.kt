@@ -10,7 +10,7 @@ value class OrderBy(private val raw: String) {
 
     val sortBy: SortBy
         get() {
-            val v = raw.substringAfter(":", "").toUpperCase()
+            val v = raw.substringAfter(":", "").uppercase()
 
             if (v.isBlank()) {
                 return SortBy.ASC

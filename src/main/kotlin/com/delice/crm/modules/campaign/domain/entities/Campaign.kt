@@ -1,6 +1,7 @@
 package com.delice.crm.modules.campaign.domain.entities
 
 import com.delice.crm.core.user.domain.entities.User
+import com.delice.crm.modules.product.domain.entities.SerializableProduct
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -24,19 +25,19 @@ class Campaign(
 
 @Serializable
 data class CampaignMetadata(
-    val products: List<DiscountedProduct>? = null,
-    val salesTarget: Double? = null,
-    val campaignLeadFields: List<CampaignLeadFields>? = null
+    var products: List<DiscountedProduct>? = null,
+    var salesTarget: Double? = null,
+    var campaignLeadFields: List<CampaignLeadFields>? = null
 )
 
 @Serializable
 data class DiscountedProduct(
-    val product: String,
+    val product: SerializableProduct,
     val discount: Double
 )
 
 @Serializable
 data class CampaignLeadFields(
-    val type: CampaignLeadFieldType,
+    val type: String,
     val active: Boolean
 )
