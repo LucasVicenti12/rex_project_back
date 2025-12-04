@@ -6,12 +6,14 @@ import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.function.convertDateTimeToDate
 import com.delice.crm.core.utils.function.convertDateTimeToMonth
 import com.delice.crm.core.utils.function.convertDateTimeToYear
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.task.domain.entities.*
 import com.delice.crm.modules.task.domain.repository.TaskRepository
 import com.delice.crm.modules.task.infra.database.TaskDatabase
 import com.delice.crm.modules.task.infra.database.TaskFilter
 import com.delice.crm.modules.task.infra.database.TaskHistoryDatabase
+import com.delice.crm.modules.task.infra.database.TaskOrderBy
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -99,7 +101,7 @@ class TaskRepositoryImplementation(
         }
     }
 
-    override fun getPaginatedTask(count: Int, page: Int, params: Map<String, Any?>): Pagination<Task>? = transaction {
+    override fun getPaginatedTask(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Task>? = transaction {
         val query = TaskDatabase
             .select(
                 TaskDatabase.uuid,
@@ -114,6 +116,7 @@ class TaskRepositoryImplementation(
                 TaskDatabase.modifiedAt,
             )
             .where(TaskFilter(params).toFilter(TaskDatabase))
+            .orderBy(TaskOrderBy(orderBy).toOrderBy())
 
         val total = ceil(query.count().toDouble() / count).toInt()
 

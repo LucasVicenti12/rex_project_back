@@ -1,6 +1,7 @@
 package com.delice.crm.modules.order.domain.usecase.implementation
 
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
 import com.delice.crm.modules.customer.domain.repository.CustomerRepository
 import com.delice.crm.modules.order.domain.entities.ManipulateOrder
@@ -121,9 +122,9 @@ class OrderUseCaseImplementation(
         }
     }
 
-    override fun getPaginatedOrder(count: Int, page: Int, params: Map<String, Any?>): OrderPaginationResponse = try {
+    override fun getPaginatedOrder(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): OrderPaginationResponse = try {
         OrderPaginationResponse(
-            orders = orderRepository.getPaginatedOrder(count, page, params)
+            orders = orderRepository.getPaginatedOrder(count, page, orderBy, params)
         )
     } catch (e: Exception) {
         logger.error("ERROR_GET_PAGINATED_ORDER", e)

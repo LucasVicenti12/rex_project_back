@@ -1,5 +1,6 @@
 package com.delice.crm.modules.order.domain.repository
 
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.order.domain.entities.ManipulateOrder
 import com.delice.crm.modules.order.domain.entities.ManipulateOrderItem
@@ -15,5 +16,5 @@ interface OrderRepository {
     fun getOrderItemByProductUUID(orderUUID: UUID, productUUID: UUID): OrderItem?
     fun getOrderItemsByUUID(orderUUID: UUID): List<OrderItem>?
     fun getOrderByUUID(orderUUID: UUID): Order?
-    fun getPaginatedOrder(count: Int, page: Int, params: Map<String, Any?>): Pagination<Order>?
+    fun getPaginatedOrder(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Order>?
 }

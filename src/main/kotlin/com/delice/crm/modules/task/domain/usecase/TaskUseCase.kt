@@ -1,5 +1,6 @@
 package com.delice.crm.modules.task.domain.usecase
 
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.task.domain.entities.Task
 import com.delice.crm.modules.task.domain.entities.TaskHistory
 import com.delice.crm.modules.task.domain.entities.TaskStatus
@@ -14,7 +15,7 @@ interface TaskUseCase {
     fun updateTask(task: Task): TaskResponse
     fun getTaskByUUID(uuid: UUID): TaskResponse
     fun deleteTask(taskUUID: UUID): MessageTaskResponse
-    fun getPaginatedTask(count: Int, page: Int, params: Map<String, Any?>): TaskPaginatedResponse
+    fun getPaginatedTask(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): TaskPaginatedResponse
 
     fun changeTaskStatus(taskUUID: UUID, status: TaskStatus): TaskResponse
     fun addTaskHistory(history: TaskHistory): TaskResponse

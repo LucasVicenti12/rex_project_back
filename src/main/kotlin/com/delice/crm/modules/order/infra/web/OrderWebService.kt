@@ -1,6 +1,7 @@
 package com.delice.crm.modules.order.infra.web
 
 import com.delice.crm.core.utils.filter.parametersToMap
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.order.domain.entities.ManipulateOrder
 import com.delice.crm.modules.order.domain.entities.ManipulateOrderItem
 import com.delice.crm.modules.order.domain.entities.Order
@@ -128,11 +129,15 @@ class OrderWebService(
             value = "count",
             required = true
         ) count: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy: OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<OrderPaginationResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = orderUseCase.getPaginatedOrder(count, page, params)
+        val response = orderUseCase.getPaginatedOrder(count, page, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

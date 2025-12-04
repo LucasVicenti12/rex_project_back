@@ -1,5 +1,6 @@
 package com.delice.crm.modules.order.domain.usecase;
 
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.order.domain.entities.ManipulateOrder
 import com.delice.crm.modules.order.domain.entities.ManipulateOrderItem
 import com.delice.crm.modules.order.domain.entities.Order
@@ -13,5 +14,5 @@ interface OrderUseCase {
     fun saveOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): OrderResponse
     fun removeOrderItem(orderUUID: UUID, manipulateOrderItem: ManipulateOrderItem): OrderResponse
     fun getOrderByUUID(orderUUID: UUID): OrderResponse
-    fun getPaginatedOrder(count: Int, page: Int, params: Map<String, Any?>): OrderPaginationResponse
+    fun getPaginatedOrder(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): OrderPaginationResponse
 }

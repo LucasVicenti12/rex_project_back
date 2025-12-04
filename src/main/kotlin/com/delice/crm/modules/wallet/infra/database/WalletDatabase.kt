@@ -9,14 +9,15 @@ import com.delice.crm.modules.customer.infra.database.CustomerDatabase
 import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.between
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.or
+import java.time.format.DateTimeFormatter
 
 object WalletDatabase : Table("wallet") {
     val uuid = uuid("uuid").uniqueIndex()
@@ -111,6 +112,24 @@ data class WalletFilter(
             }
         }
 
+        parameters["created_at"]?.let {
+            if (it is String && it.isNotBlank()) {
+                try {
+                    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val date = java.time.LocalDate.parse(it, formatter)
+
+                    val startOfDay = date.atStartOfDay()
+                    val endOfDay = date.atTime(23, 59, 59)
+
+                    op = op.and(
+                        table.createdAt.between(startOfDay, endOfDay)
+                    )
+                } catch (e: Exception) {
+                    throw e
+                }
+            }
+        }
+
         return op
     }
 }
@@ -118,35 +137,34 @@ data class WalletFilter(
 data class WalletOrderBy(
     private val orderBy: OrderBy? = null,
 ) : ExposedOrderBy<WalletDatabase> {
-    override fun toOrderBy(): Pair<Expression<*>, SortOrder> {
-        if (orderBy == null) {
-            return WalletDatabase.label to SortOrder.ASC
-        }
 
-        val orderByMap = mapOf(
-            "uuid" to WalletDatabase.uuid,
-            "label" to WalletDatabase.label,
-            "status" to WalletDatabase.status,
-            "created_at" to WalletDatabase.createdAt,
-            "modified_at" to WalletDatabase.modifiedAt,
-            "accountable" to WalletDatabase.accountable,
-            "created_by" to WalletDatabase.createdBy,
-            "modified_by" to WalletDatabase.modifiedBy,
-            // Tem que arrumar isso aqui, precisa ser feito um orderby a partir do count de registros de customers por carteira algo que gerasse um SQL como o abaixo:
-            // select * from wallet w order by (select count(wc.customer_uuid) from wallet_customers wc where wc.wallet_uuid = w.uuid);
-            "customers_quantity" to WalletCustomersDatabase.customerUUID.count()
-        )
+    override fun toOrderBy(): Pair<Expression<*>, SortOrder> {
+        if (orderBy == null) return WalletDatabase.label to SortOrder.ASC
 
         val sortByMap = mapOf(
             SortBy.ASC to SortOrder.ASC,
             SortBy.DESC to SortOrder.DESC,
         )
 
-        val column = orderByMap[orderBy.orderBy]
-        val sort = sortByMap[orderBy.sortBy]
+        val sort = sortByMap[orderBy.sortBy] ?: SortOrder.ASC
+        
+        val column = when (orderBy.orderBy) {
+            "uuid" -> WalletDatabase.uuid
+            "label" -> WalletDatabase.label
+            "status" -> WalletDatabase.status
+            "created_at" -> WalletDatabase.createdAt
+            "modified_at" -> WalletDatabase.modifiedAt
+            "accountable" -> WalletDatabase.accountable
+            "created_by" -> WalletDatabase.createdBy
+            "modified_by" -> WalletDatabase.modifiedBy
 
-        if (column == null || sort == null) {
-            return WalletDatabase.label to SortOrder.ASC
+            "customers_quantity" -> object : Expression<Int>() {
+                override fun toQueryBuilder(queryBuilder: org.jetbrains.exposed.sql.QueryBuilder) {
+                    queryBuilder.append("(SELECT COUNT(wc.customer_uuid) FROM wallet_customers wc WHERE wc.wallet_uuid = wallet.uuid)")
+                }
+            }
+
+            else -> WalletDatabase.label
         }
 
         return column to sort
