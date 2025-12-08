@@ -2,18 +2,32 @@ package com.delice.crm.modules.campaign.domain.usecase
 
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
-import com.delice.crm.modules.campaign.domain.entities.CampaignMedia
-import com.delice.crm.modules.campaign.domain.usecase.response.CampaignMediaResponse
+import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
+import com.delice.crm.modules.campaign.domain.usecase.response.CampaignListResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
-import com.delice.crm.modules.campaign.domain.usecase.response.FreeProducts
 import java.util.UUID
 
 interface CampaignUseCase {
     fun createCampaign(campaign: Campaign): CampaignResponse
+
     fun updateCampaign(campaign: Campaign): CampaignResponse
+
     fun getCampaignByUUID(campaignUUID: UUID): CampaignResponse
-    fun getCampaignPagination(page: Int, count: Int, orderBy: OrderBy?, params: Map<String, Any?>): CampaignPaginationResponse
-    fun saveCampaignMedia(media: List<CampaignMedia>, productUUID: UUID): CampaignMediaResponse
-    fun getFreeProducts(): FreeProducts
+
+    fun getAllSaleCampaign(): CampaignListResponse
+
+    fun getCampaignPagination(
+        page: Int,
+        count: Int,
+        orderBy: OrderBy?,
+        params: Map<String, Any?>
+    ): CampaignPaginationResponse
+
+    fun saveCampaignMetadata(
+        campaignUUID: UUID,
+        metadata: CampaignMetadata?,
+    ): CampaignResponse
+
+    fun getVisitCampaign(uuid: UUID): CampaignResponse
 }

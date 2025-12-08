@@ -34,7 +34,7 @@ class ServerConfig {
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain = http
-        .csrf{
+        .csrf {
             it.disable()
         }
         .cors {
@@ -47,7 +47,10 @@ class ServerConfig {
         }
         .authorizeHttpRequests {
             it
-                .requestMatchers("/auth/register").permitAll()
+                .requestMatchers("/preCustomer/query").permitAll()
+                .requestMatchers("/address/query").permitAll()
+                .requestMatchers("/lead/save").permitAll()
+                .requestMatchers("/campaign/visit/{uuid}").permitAll()
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/forgotPassword").permitAll()
                 .requestMatchers("/auth/resetPassword").permitAll()
@@ -56,7 +59,7 @@ class ServerConfig {
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .anyRequest().authenticated()
         }
-        .exceptionHandling{
+        .exceptionHandling {
             it.accessDeniedHandler(accessDeniedHandler)
         }
         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter::class.java)
@@ -65,7 +68,11 @@ class ServerConfig {
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = listOf("http://localhost:5173", "http://localhost:5175", "http://192.168.1.15:5173")
+        configuration.allowedOrigins = listOf(
+            "http://localhost:5173",
+            "http://localhost:5175",
+            "http://192.168.1.7:5173/"
+        )
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("Authorization", "Content-Type")
         configuration.allowCredentials = true
