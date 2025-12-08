@@ -30,6 +30,13 @@ data class SimpleProduct(
     val name: String
 )
 
+data class SimpleProductWithSales(
+    val uuid: UUID,
+    val name: String,
+    val quantity: Int,
+    val sold: Double
+)
+
 @Serializable
 data class SerializableProduct(
     val uuid: String,

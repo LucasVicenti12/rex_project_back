@@ -75,9 +75,7 @@ class LeadRepositoryImplementation(
 
     override fun getLeadByDocument(document: String): Lead? = transaction {
         LeadDatabase.selectAll().where {
-            LeadDatabase.document eq document and (
-                    LeadDatabase.status inList listOf(LeadStatus.APPROVED.code, LeadStatus.PENDING.code)
-                    )
+            LeadDatabase.document eq document
         }.map {
             resultRowToLead(it)
         }.firstOrNull()

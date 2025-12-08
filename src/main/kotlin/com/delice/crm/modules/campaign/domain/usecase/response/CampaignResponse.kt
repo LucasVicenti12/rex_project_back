@@ -13,3 +13,8 @@ data class CampaignPaginationResponse(
     val campaigns: Pagination<Campaign>? = null,
     val error: CampaignException? = null
 )
+
+data class CampaignListResponse(
+    val campaign: List<Campaign>? = listOf(),
+    val error: CampaignException? = null
+)

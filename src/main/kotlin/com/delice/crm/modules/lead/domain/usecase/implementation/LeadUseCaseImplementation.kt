@@ -1,7 +1,11 @@
 package com.delice.crm.modules.lead.domain.usecase.implementation
 
+import com.delice.crm.api.preCustomer.domain.entities.PreCustomer
+import com.delice.crm.api.preCustomer.domain.repository.PreCustomerRepository
+import com.delice.crm.api.preCustomer.domain.usecase.PreCustomerUseCase
 import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.queue.MailQueue
+import com.delice.crm.core.utils.contact.ContactType
 import com.delice.crm.core.utils.extensions.removeAlphaChars
 import com.delice.crm.core.utils.extensions.removeSpecialChars
 import com.delice.crm.core.utils.formatter.DateTimeFormat
@@ -24,6 +28,7 @@ import java.util.*
 @Service
 class LeadUseCaseImplementation(
     private val leadRepository: LeadRepository,
+    private val preCustomerUseCase: PreCustomerUseCase,
     private val mailQueue: MailQueue,
 ) : LeadUseCase {
     companion object {
@@ -32,28 +37,65 @@ class LeadUseCaseImplementation(
 
     override fun saveLead(lead: Lead): LeadResponse {
         try {
-            if (lead.document.isNullOrEmpty()) {
-                return LeadResponse(error = LEAD_DOCUMENT_IS_EMPTY)
-            }
+            val document = lead.document?.removeSpecialChars().orEmpty()
 
-            lead.document = lead.document!!.removeSpecialChars()
-            lead.phone = lead.phone!!.removeAlphaChars().removeSpecialChars()
+            if (document.isEmpty()) return LeadResponse(error = LEAD_DOCUMENT_IS_EMPTY)
 
-            if (leadRepository.getLeadByDocument(lead.document!!) != null) {
+            lead.document = document
+            lead.phone = lead.phone.orEmpty().removeAlphaChars().removeSpecialChars()
+
+            if (leadRepository.getLeadByDocument(document) != null) {
                 return LeadResponse(error = LEAD_ALREADY_EXISTS)
             }
 
-            if (lead.email.isNullOrEmpty()) {
+            if (lead.email.isNullOrBlank()) {
                 return LeadResponse(error = LEAD_EMAIL_IS_EMPTY)
             }
 
-            return LeadResponse(
-                lead = leadRepository.saveLead(lead)
-            )
+            val preCustomer = preCustomerUseCase.getPreCustomer(document)
+            val customer = preCustomer.customer
+
+            if (customer != null) {
+                mergeCustomerIntoLead(lead, customer)
+            }
+
+            val savedLead = leadRepository.saveLead(lead)
+            return LeadResponse(lead = savedLead)
+
         } catch (e: Exception) {
             logger.error("ERROR_ON_SAVE_LEAD", e)
             return LeadResponse(error = LEAD_UNEXPECTED)
         }
+    }
+
+    private fun <T> mergeField(
+        leadValue: T?,
+        customerValue: T?,
+        defaultEmpty: T
+    ): T = when (leadValue) {
+        null -> customerValue ?: defaultEmpty
+        is String -> leadValue.ifBlank { customerValue ?: defaultEmpty }
+        is Number -> if (leadValue.toDouble() != 0.0) leadValue else customerValue ?: defaultEmpty
+        else -> leadValue
+    }
+
+    private fun mergeCustomerIntoLead(lead: Lead, customer: PreCustomer) {
+        val phone = customer.contacts?.find { it.contactType == ContactType.PHONE }?.label
+        val email = customer.contacts?.find { it.contactType == ContactType.EMAIL }?.label
+        val econ = customer.economicActivitiesCodes?.firstOrNull()
+
+        lead.companyName = mergeField(lead.companyName, customer.companyName, "")
+        lead.tradingName = mergeField(lead.tradingName, customer.tradingName, "")
+        lead.personName = mergeField(lead.personName, customer.personName, "")
+        lead.email = mergeField(lead.email, email, "")
+        lead.phone = mergeField(lead.phone, phone, "")
+        lead.state = mergeField(lead.state, customer.state, "")
+        lead.city = mergeField(lead.city, customer.city, "")
+        lead.zipCode = mergeField(lead.zipCode, customer.zipCode, "")
+        lead.address = mergeField(lead.address, customer.address, "")
+        lead.complement = mergeField(lead.complement, customer.complement, "")
+        lead.addressNumber = mergeField(lead.addressNumber, customer.addressNumber, 0)
+        lead.economicActivity = mergeField(lead.economicActivity, econ, "")
     }
 
     override fun approveLead(uuid: UUID): LeadApprovalResponse {

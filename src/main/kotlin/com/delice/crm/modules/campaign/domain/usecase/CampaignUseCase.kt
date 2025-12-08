@@ -3,6 +3,7 @@ package com.delice.crm.modules.campaign.domain.usecase
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
 import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
+import com.delice.crm.modules.campaign.domain.usecase.response.CampaignListResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
 import java.util.UUID
@@ -13,6 +14,8 @@ interface CampaignUseCase {
     fun updateCampaign(campaign: Campaign): CampaignResponse
 
     fun getCampaignByUUID(campaignUUID: UUID): CampaignResponse
+
+    fun getAllSaleCampaign(): CampaignListResponse
 
     fun getCampaignPagination(
         page: Int,

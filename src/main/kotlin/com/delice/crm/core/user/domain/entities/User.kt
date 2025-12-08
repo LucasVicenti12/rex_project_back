@@ -34,3 +34,9 @@ data class SimpleUser(
 class ChangeAvatar(
     val avatar: String
 )
+
+class  SimplesSalesUser(
+    val uuid: UUID,
+    val name: String?,
+    val sold: Double
+)

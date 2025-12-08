@@ -12,8 +12,6 @@ import com.delice.crm.modules.product.domain.repository.ProductRepository
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.springframework.context.event.ContextClosedEvent
-import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
@@ -69,6 +67,28 @@ class CampaignRepositoryImplementation(
         }.firstOrNull()
     }
 
+    override fun getAllSaleCampaign(): List<Campaign>? = transaction {
+        val currentDate = LocalDateTime.now()
+
+        CampaignDatabase.selectAll().where {
+            CampaignDatabase.type eq CampaignType.SALE.code and (
+                    (
+                            CampaignDatabase.start.isNotNull() and CampaignDatabase.start.lessEq(currentDate)
+                            ) or (
+                            CampaignDatabase.start.isNull()
+                            )
+                    ) and (
+                    (CampaignDatabase.end.isNotNull() and CampaignDatabase.end.greaterEq(currentDate)) or (
+                            CampaignDatabase.end.isNull()
+                            )
+                    ) and (
+                    CampaignDatabase.status eq CampaignStatus.ACTIVE.code
+                    )
+        }.map {
+            resultRowToVisitCampaign(it)
+        }
+    }
+
     override fun getCampaignPagination(
         page: Int,
         count: Int,
@@ -119,17 +139,17 @@ class CampaignRepositoryImplementation(
         CampaignDatabase.selectAll().where {
             CampaignDatabase.uuid eq uuid and (
                     CampaignDatabase.type eq CampaignType.LEAD.code
-            ) and (
+                    ) and (
                     (CampaignDatabase.start.isNotNull() and CampaignDatabase.start.lessEq(currentDate)) or (
                             CampaignDatabase.start.isNull()
-                    )
-            ) and (
+                            )
+                    ) and (
                     (CampaignDatabase.end.isNotNull() and CampaignDatabase.end.greaterEq(currentDate)) or (
                             CampaignDatabase.end.isNull()
-                    )
-            ) and (
+                            )
+                    ) and (
                     CampaignDatabase.status eq CampaignStatus.ACTIVE.code
-            )
+                    )
         }.map {
             resultRowToVisitCampaign(it)
         }.firstOrNull()

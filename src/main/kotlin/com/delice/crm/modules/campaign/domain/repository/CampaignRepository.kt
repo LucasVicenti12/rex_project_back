@@ -13,6 +13,8 @@ interface CampaignRepository {
 
     fun getCampaignByUUID(campaignUUID: UUID): Campaign?
 
+    fun getAllSaleCampaign(): List<Campaign>?
+
     fun getCampaignPagination(
         page: Int,
         count: Int,

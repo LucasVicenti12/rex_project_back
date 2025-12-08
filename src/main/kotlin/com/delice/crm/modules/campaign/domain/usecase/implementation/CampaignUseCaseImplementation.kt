@@ -8,6 +8,7 @@ import com.delice.crm.modules.campaign.domain.entities.CampaignStatus
 import com.delice.crm.modules.campaign.domain.exceptions.*
 import com.delice.crm.modules.campaign.domain.repository.CampaignRepository
 import com.delice.crm.modules.campaign.domain.usecase.CampaignUseCase
+import com.delice.crm.modules.campaign.domain.usecase.response.CampaignListResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
 import org.slf4j.LoggerFactory
@@ -77,6 +78,13 @@ class CampaignUseCaseImplementation(
         CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
     }
 
+    override fun getAllSaleCampaign(): CampaignListResponse = try {
+        CampaignListResponse(campaign = campaignRepository.getAllSaleCampaign())
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_GET_ALL_SALLE_CAMPAIGN", e)
+        CampaignListResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
+    }
+
     override fun getCampaignPagination(
         page: Int,
         count: Int,
@@ -123,11 +131,11 @@ class CampaignUseCaseImplementation(
     override fun getVisitCampaign(uuid: UUID): CampaignResponse = try {
         val campaign = campaignRepository.getVisitCampaign(uuid)
 
-        if(campaign == null) {
+        if (campaign == null) {
             CampaignResponse(
                 error = CAMPAIGN_NOT_FOUND
             )
-        }else{
+        } else {
             CampaignResponse(
                 campaign = campaignRepository.getVisitCampaign(uuid)
             )
