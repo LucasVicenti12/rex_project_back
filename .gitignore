@@ -41,3 +41,6 @@ out/
 
 ### Environments ###
 .env
+
+### Minio data ###
+minio-data

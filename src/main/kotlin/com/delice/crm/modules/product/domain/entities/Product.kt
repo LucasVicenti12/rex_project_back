@@ -1,5 +1,6 @@
 package com.delice.crm.modules.product.domain.entities
 
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.util.UUID
 
@@ -27,4 +28,22 @@ class ProductMedia(
 data class SimpleProduct(
     val uuid: UUID,
     val name: String
+)
+
+data class SimpleProductWithSales(
+    val uuid: UUID,
+    val name: String,
+    val quantity: Int,
+    val sold: Double
+)
+
+@Serializable
+data class SerializableProduct(
+    val uuid: String,
+    val code: Int? = null,
+    val name: String? = null,
+    val image: String? = null,
+    val description: String? = null,
+    val price: Double? = null,
+    val weight: Double? = null
 )

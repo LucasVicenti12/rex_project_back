@@ -2,6 +2,8 @@ package com.delice.crm.core.utils.filter
 
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.Table
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 interface ExposedFilter<T : Table> {
     fun toFilter(table: T): Op<Boolean>
@@ -23,7 +25,7 @@ fun String?.parametersToMap(): Map<String, Any?> = try {
                 ).let { p -> p.getOrNull(0) to p.getOrNull(1) }
 
                 if (key != null && value != null) {
-                    key to value
+                    key to URLDecoder.decode(value, StandardCharsets.UTF_8)
                 } else null
             }.toMap()
         }

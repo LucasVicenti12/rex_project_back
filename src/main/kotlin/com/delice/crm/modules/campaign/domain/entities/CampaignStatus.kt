@@ -5,5 +5,10 @@ import com.delice.crm.core.utils.enums.HasCode
 enum class CampaignStatus(override val code: Int): HasCode {
     ACTIVE(0),
     INACTIVE(1),
-    WAITING(2)
+    FORM_PENDING(2)
+}
+
+enum class CampaignType(override val code: Int): HasCode {
+    SALE(0),
+    LEAD(1)
 }

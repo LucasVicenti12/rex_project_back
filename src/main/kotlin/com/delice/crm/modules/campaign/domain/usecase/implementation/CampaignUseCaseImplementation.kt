@@ -1,89 +1,68 @@
 package com.delice.crm.modules.campaign.domain.usecase.implementation
 
+import com.delice.crm.core.utils.function.getCurrentUser
 import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.campaign.domain.entities.Campaign
-import com.delice.crm.modules.campaign.domain.exceptions.CAMPAIGN_NOT_FOUND
-import com.delice.crm.modules.campaign.domain.exceptions.CAMPAIGN_UNEXPECTED_ERROR
+import com.delice.crm.modules.campaign.domain.entities.CampaignMetadata
+import com.delice.crm.modules.campaign.domain.entities.CampaignStatus
+import com.delice.crm.modules.campaign.domain.exceptions.*
 import com.delice.crm.modules.campaign.domain.repository.CampaignRepository
 import com.delice.crm.modules.campaign.domain.usecase.CampaignUseCase
+import com.delice.crm.modules.campaign.domain.usecase.response.CampaignListResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignResponse
 import com.delice.crm.modules.campaign.domain.usecase.response.CampaignPaginationResponse
-import com.delice.crm.modules.campaign.domain.entities.CampaignMedia
-import com.delice.crm.modules.campaign.domain.exceptions.CAMPAIGN_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL
-import com.delice.crm.modules.campaign.domain.exceptions.CAMPAIGN_MEDIA_MUST_BE_PRINCIPAL
-import com.delice.crm.modules.campaign.domain.usecase.response.CampaignMediaResponse
-import com.delice.crm.modules.campaign.domain.usecase.response.FreeProducts
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
 
 @Service
-class CampaignUseCaseImplementation (
+class CampaignUseCaseImplementation(
     private val campaignRepository: CampaignRepository,
 ) : CampaignUseCase {
-    companion object{
+    companion object {
         private val logger = LoggerFactory.getLogger(CampaignUseCaseImplementation::class.java)
     }
 
     override fun createCampaign(campaign: Campaign): CampaignResponse = try {
-        val validate = validateCampaign(campaign)
+        val user = getCurrentUser()
 
-        when {
+        campaign.createdBy = user.getUserData()
+        campaign.modifiedBy = user.getUserData()
+        campaign.status = CampaignStatus.FORM_PENDING
 
-            validate.error != null -> {
-                validate
-            }
-
-            else -> {
+        validateCampaign(campaign).let {
+            if (it != null) {
+                CampaignResponse(error = it)
+            } else {
                 CampaignResponse(campaign = campaignRepository.createCampaign(campaign))
             }
         }
     } catch (e: Exception) {
-        logger.error("CREATE_CAMPAIGN", e)
+        logger.error("ERROR_ON_CREATE_CAMPAIGN", e)
         CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
     }
 
     override fun updateCampaign(campaign: Campaign): CampaignResponse = try {
-        val validate = validateCampaign(campaign)
+        val user = getCurrentUser()
 
-        when {
-            validate.error != null -> {
-                validate
-            }
+        campaign.modifiedBy = user.getUserData()
 
-            campaign.uuid == null -> {
-                CampaignResponse(error = CAMPAIGN_NOT_FOUND)
-            }
+        validateCampaign(campaign).let {
+            if (it != null) {
+                CampaignResponse(error = it)
+            } else {
+                val exists = campaignRepository.getCampaignByUUID(campaign.uuid!!)
 
-            campaignRepository.getCampaignByUUID(campaign.uuid) == null -> {
-                CampaignResponse(error = CAMPAIGN_NOT_FOUND)
-            }
-
-            else -> {
-                CampaignResponse(campaign = campaignRepository.updateCampaign(campaign))
+                if (exists == null) {
+                    CampaignResponse(error = CAMPAIGN_NOT_FOUND)
+                } else {
+                    CampaignResponse(campaign = campaignRepository.updateCampaign(campaign))
+                }
             }
         }
     } catch (e: Exception) {
-        logger.error("UPDATE_CAMPAIGN", e)
+        logger.error("ERROR_ON_UPDATE_CAMPAIGN", e)
         CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
-    }
-
-    override fun saveCampaignMedia(media: List<CampaignMedia>, campaignUUID: UUID): CampaignMediaResponse {
-        try {
-            campaignRepository.getCampaignByUUID(campaignUUID) ?: return CampaignMediaResponse(error = CAMPAIGN_NOT_FOUND)
-
-            val hasMorePrincipal = media.count { it.isPrincipal == true }
-
-            if (hasMorePrincipal == 0) return CampaignMediaResponse(error = CAMPAIGN_MEDIA_AT_LEAST_MUST_BE_PRINCIPAL)
-
-            if (hasMorePrincipal > 1) return CampaignMediaResponse(error = CAMPAIGN_MEDIA_MUST_BE_PRINCIPAL)
-
-            campaignRepository.saveCampaignMedia(media, campaignUUID)
-            return CampaignMediaResponse(media = media)
-        } catch (e: Exception) {
-            CampaignUseCaseImplementation.logger.error("SAVE_CAMPAIGN_MEDIA", e)
-            return CampaignMediaResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
-        }
     }
 
     override fun getCampaignByUUID(campaignUUID: UUID): CampaignResponse = try {
@@ -95,8 +74,15 @@ class CampaignUseCaseImplementation (
             CampaignResponse(campaign = campaign)
         }
     } catch (e: Exception) {
-        logger.error("GET_CAMPAIGN_BY_UUID", e)
+        logger.error("ERROR_ON_GET_CAMPAIGN_BY_UUID", e)
         CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
+    }
+
+    override fun getAllSaleCampaign(): CampaignListResponse = try {
+        CampaignListResponse(campaign = campaignRepository.getAllSaleCampaign())
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_GET_ALL_SALLE_CAMPAIGN", e)
+        CampaignListResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
     }
 
     override fun getCampaignPagination(
@@ -111,30 +97,65 @@ class CampaignUseCaseImplementation (
                 error = null
             )
         } catch (e: Exception) {
-            logger.error("GET_CAMPAIGN_PAGINATION", e)
+            logger.error("ERROR_ON_GET_CAMPAIGN_PAGINATION", e)
             CampaignPaginationResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
         }
     }
 
-    override fun getFreeProducts(): FreeProducts {
-        return try {
-            return FreeProducts(
-                products = campaignRepository.getFreeProducts(),
-                error = null
+    override fun saveCampaignMetadata(
+        campaignUUID: UUID,
+        metadata: CampaignMetadata?
+    ): CampaignResponse = try {
+        val user = getCurrentUser()
+
+        val modifiedBy = user.getUserData().uuid!!
+
+        val exists = campaignRepository.getCampaignByUUID(campaignUUID)
+
+        if (exists == null) {
+            CampaignResponse(error = CAMPAIGN_NOT_FOUND)
+        } else {
+            CampaignResponse(
+                campaign = campaignRepository.saveCampaignMetadata(
+                    campaignUUID,
+                    metadata,
+                    modifiedBy
+                )
             )
-        } catch (e: Exception) {
-            logger.error("ERROR_GET_FREE_PRODUCT", e)
-            FreeProducts(error = CAMPAIGN_UNEXPECTED_ERROR)
         }
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_UPDATE_CAMPAIGN_METADATA", e)
+        CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
     }
 
-    private fun validateCampaign(campaign: Campaign): CampaignResponse = when {
-        campaign.title?.isBlank() == true -> {
-            CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
+    override fun getVisitCampaign(uuid: UUID): CampaignResponse = try {
+        val campaign = campaignRepository.getVisitCampaign(uuid)
+
+        if (campaign == null) {
+            CampaignResponse(
+                error = CAMPAIGN_NOT_FOUND
+            )
+        } else {
+            CampaignResponse(
+                campaign = campaignRepository.getVisitCampaign(uuid)
+            )
+        }
+    } catch (e: Exception) {
+        logger.error("ERROR_ON_GET_VISIT_CAMPAIGN", e)
+        CampaignResponse(error = CAMPAIGN_UNEXPECTED_ERROR)
+    }
+
+    private fun validateCampaign(campaign: Campaign): CampaignException? = when {
+        campaign.title.isNullOrBlank() -> {
+            CAMPAIGN_TITLE_IS_EMPTY
+        }
+
+        campaign.objective.isNullOrBlank() -> {
+            CAMPAIGN_OBJECTIVE_IS_EMPTY
         }
 
         else -> {
-            CampaignResponse()
+            null
         }
     }
 }

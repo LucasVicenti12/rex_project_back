@@ -55,7 +55,7 @@ const val CARD_CONTENT_EMAIL: String = """
         </tr>
         <tr>
             <td style="font-size: 12px; color: #666666; padding-top: 8px;">
-                Alterado: %s
+                Changed: %s
             </td>
         </tr>
         <tr>
