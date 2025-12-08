@@ -5,6 +5,7 @@ import com.delice.crm.core.user.infra.database.UserDatabase
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.extensions.round
 import com.delice.crm.core.utils.function.binaryToString
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.core.utils.pagination.Pagination
 import com.delice.crm.modules.customer.domain.entities.Customer
 import com.delice.crm.modules.customer.domain.entities.CustomerStatus
@@ -14,6 +15,7 @@ import com.delice.crm.modules.order.domain.repository.OrderRepository
 import com.delice.crm.modules.order.infra.database.OrderDatabase
 import com.delice.crm.modules.order.infra.database.OrderFilter
 import com.delice.crm.modules.order.infra.database.OrderItemDatabase
+import com.delice.crm.modules.order.infra.database.OrderOrderBy
 import com.delice.crm.modules.product.domain.entities.Product
 import com.delice.crm.modules.product.domain.entities.ProductMedia
 import com.delice.crm.modules.product.domain.entities.ProductStatus
@@ -321,7 +323,7 @@ class OrderRepositoryImplementation : OrderRepository {
         )
     }
 
-    override fun getPaginatedOrder(count: Int, page: Int, params: Map<String, Any?>): Pagination<Order>? =
+    override fun getPaginatedOrder(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): Pagination<Order>? =
         transaction {
             val query = OrderDatabase
                 .join(
@@ -361,6 +363,7 @@ class OrderRepositoryImplementation : OrderRepository {
                     UserDatabase.avatar,
                 )
                 .where(OrderFilter(params).toFilter(OrderDatabase))
+                .orderBy(OrderOrderBy(orderBy).toOrderBy())
 
             val total = ceil(query.count().toDouble() / count).toInt()
 

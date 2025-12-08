@@ -2,6 +2,7 @@ package com.delice.crm.modules.task.infra.web
 
 import com.delice.crm.core.utils.enums.enumFromTypeValue
 import com.delice.crm.core.utils.filter.parametersToMap
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.task.domain.entities.Task
 import com.delice.crm.modules.task.domain.entities.TaskHistory
 import com.delice.crm.modules.task.domain.usecase.TaskUseCase
@@ -104,11 +105,15 @@ class TaskWebService(
             value = "page",
             required = true
         ) page: Int,
+        @RequestParam(
+            value = "orderBy",
+            required = false
+        ) orderBy : OrderBy,
         request: HttpServletRequest
     ): ResponseEntity<TaskPaginatedResponse> {
         val params = request.queryString.parametersToMap()
 
-        val response = taskUseCase.getPaginatedTask(count, page, params)
+        val response = taskUseCase.getPaginatedTask(count, page, orderBy, params)
 
         if (response.error != null) {
             return ResponseEntity

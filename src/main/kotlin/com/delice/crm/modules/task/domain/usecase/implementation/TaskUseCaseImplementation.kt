@@ -2,6 +2,7 @@ package com.delice.crm.modules.task.domain.usecase.implementation
 
 import com.delice.crm.core.user.domain.repository.UserRepository
 import com.delice.crm.core.utils.function.getCurrentUser
+import com.delice.crm.core.utils.ordernation.OrderBy
 import com.delice.crm.modules.task.domain.entities.Task
 import com.delice.crm.modules.task.domain.entities.TaskHistory
 import com.delice.crm.modules.task.domain.entities.TaskStatus
@@ -102,11 +103,12 @@ class TaskUseCaseImplementation(
         )
     }
 
-    override fun getPaginatedTask(count: Int, page: Int, params: Map<String, Any?>): TaskPaginatedResponse = try {
+    override fun getPaginatedTask(count: Int, page: Int, orderBy: OrderBy?, params: Map<String, Any?>): TaskPaginatedResponse = try {
         TaskPaginatedResponse(
             tasks = taskRepository.getPaginatedTask(
                 count = count,
                 page = page,
+                orderBy = orderBy,
                 params = params
             )
         )
