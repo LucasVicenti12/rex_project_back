@@ -3,12 +3,13 @@ package com.delice.crm.core.mail.queue
 import com.delice.crm.core.mail.entities.Mail
 import com.delice.crm.core.mail.service.MailService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.util.LinkedList
 
 @Component
 class MailQueue(
-    private val service: MailService,
+    @Qualifier("resendMailServiceImplementation") private val service: MailService,
     private val list: LinkedList<Mail>
 ) : Thread() {
     companion object {
@@ -29,11 +30,11 @@ class MailQueue(
                 var mail: Mail?
 
                 synchronized(list) {
-                    mail = list.poll() ?: null
+                    mail = list.poll()
                 }
 
                 if (mail != null) {
-                    service.public(mail!!)
+                    service.public(mail)
                 }
             } catch (e: Exception) {
                 logger.error("ERROR ON MAIL QUEUE -> ${e.message}", e)
