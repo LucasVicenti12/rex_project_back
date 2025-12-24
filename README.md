@@ -14,7 +14,7 @@ CRM - Customer relationship management is a system for unifying all customer inf
 
 ---
 
-## 🧱 Technologies used
+### 🧱 Technologies used
 
 - Kotlin
 - Spring Boot
@@ -28,7 +28,7 @@ CRM - Customer relationship management is a system for unifying all customer inf
 
 ---
 
-## 📁 Folder Structure
+### 📁 Folder Structure
 
 ```text
 src
