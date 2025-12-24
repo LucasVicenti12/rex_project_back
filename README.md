@@ -1,10 +1,10 @@
 # 📦 Rex Project — Backend CRM - Delice
 
-## 📌 General
+### 📌 General
 
 This project is the backend of a CRM for the Delice enterprise. It was developed using clean architecture and following SOLID principles, for easy development and intruduction of tecnologies.
 
-## 💫 Delice
+### 💫 Delice
 
 Delice is the customer that us chosen to develop because the enterprise was needed a system to unique them customer's infomation.
 
