@@ -101,6 +101,6 @@ src
 └── test
     └── kotlin
         └── com
-            └── delcie
+            └── delice
                 └── crm
                     └── CrmApplicationTest.kt
