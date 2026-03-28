@@ -54,6 +54,7 @@ class ServerConfig {
                 .requestMatchers("/auth/login").permitAll()
                 .requestMatchers("/auth/forgotPassword").permitAll()
                 .requestMatchers("/auth/resetPassword").permitAll()
+                .requestMatchers("/ai").permitAll()
                 .requestMatchers("/app/**").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()

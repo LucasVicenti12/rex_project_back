@@ -1,0 +1,544 @@
+﻿Alunos: Kauã Melchioretto, Lucas Vicenti, Gustavo Alves da Silva
+Curso: Análise e Desenvolvimento de Sistemas
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Projeto Integrador
+Customer Relationship Management 
+Para Delicê Alimentos
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gaspar, 09 de Julho 2025
+SUMÁRIO
+
+
+1. Login        3
+1.1 Primeiro Acesso        4
+1.2 Login Normal        4
+1.3 Recuperação de Senha        4
+2. Dashboard/Tela Inicial        5
+2.1 O que tem na tela inicial?        5
+2.2 O que mais tem na tela inicial?        6
+3. Módulos        6
+3.1 O que são módulos?        6
+3.2 O que são permissões?        6
+3.3 Como usar?        7
+4. Usuários        8
+4.1 O que são usuários e como são separados        8
+4.2 Como adicionar novos usuários        9
+4.3 Como alterar seus dados        9
+5. Clientes        10
+5.1 O que são clientes?        10
+5.2 Como adicionar novos clientes        11
+5.4 Alterar dados do clientes        11
+5.3 Análise do cliente        12
+6. Carteira de clientes        12
+6.1 O que é uma carteira de clientes        12
+6.2 Como criar uma carteira        13
+6.3 Como alterar uma carteira        13
+6.4 Como atribuir a um usuário        14
+6.5 Como adicionar um novo cliente        14
+7. Produto        15
+7.1 O que é um produto?        15
+7.2 Como criar produtos        15
+7.3 Como alterar um produto        16
+7.4 Adicionar uma imagem e alterar imagem principal do produto        17
+8. Pedidos        18
+8.1 O que é um pedido?        18
+8.2 Como criar um pedido?        19
+8.3 Como vincular produtos a um pedido?        20
+8.3 Como DELETAR produtos de um pedido?        21
+8.4 Como alterar um pedido?        22
+9. Kanban        23
+9.1 O que é o Kanban?        23
+9.2 Como criar um Kanban?        23
+9.3 Como adicionar uma colunas no Kanban?        24
+9.4 Como adicionar regras no Kanban?        26
+9.5 Permissão de colunas        27
+9.6 Como editar um kanban?        28
+10. Quadro de clientes        29
+10.1 O que é o quadro de clientes?        29
+10.2 Como usar?        29
+11. Tarefas        30
+11.1 O que é as tarefas?        30
+11.2 Como visualizar a tarefa?        30
+11.3 Como adicionar uma tarefa?        32
+11.3 Iniciar ou para uma tarefa?        32
+12. Calendário        33
+12.2 O que é o calendário?        33
+12.2 Como usar?        34
+12.3 Como adicionar uma tarefa        34
+13. Minhas informações        34
+
+
+Introdução
+Este documento tem como objetivo apresentar de forma clara e didática o funcionamento do sistema CRM Delice, oferecendo uma visão geral de seus principais recursos, fluxos operacionais e funcionalidades. Foi desenvolvido para orientar usuários e colaboradores no uso eficiente da plataforma, promovendo maior autonomia e compreensão das atividades realizadas por meio do sistema.
+Ao longo deste material, serão detalhados os componentes essenciais, as etapas de utilização, boas práticas e respostas para dúvidas frequentes. A proposta é facilitar o aprendizado e garantir que o sistema seja utilizado de maneira eficaz, segura e alinhada com os objetivos da organização.
+Recomenda-se a leitura completa deste documento antes do início da utilização prática do sistema, a fim de proporcionar uma experiência mais produtiva, com menor margem para erros ou retrabalho.
+1. Login
+1.1 Primeiro Acesso
+No primeiro acesso ao sistema, será necessário confirmar o seu login via e-mail. Nesse email, você encontrará o nome de usuário que será utilizado no sistema. Uma senha temporária será disponibilizada para primeiro acesso. Ao acessar com essa credencial o sistema obriga a alterar sua senha, e redirecionar para a página inicial.
+1.2 Login Normal
+Aqui se trata do login que você fará normalmente toda vez que a sessão expirar. Para realizar o login basta colocar o seu usuário e senha nos campos com esses nomes.
+Caso seja o seu primeiro login, pegue o seu usuário no email  e adicione no campo de login, e no campo de senha, coloque a senha temporária. Após isso o sistema te pedirá para alterar sua senha, altere sua senha e após alterar, essa será sua senha. Com isso você poderá  acessar e realizar suas funções pelo sistema. 
+  
+
+1.3 Recuperação de Senha
+Esqueci a senha caso você esqueça a senha basta clicar no texto de você esqueceu sua senha? de que fica embaixo do botão de acessar, ao clicar nele você informar seu email e clicar em enviar recuperação. Assim será enviado um email parecido com o do primeiro acesso, mas nesse caso para reescrever sua senha. Após reescrever sua senha no email, tente realizar o login novamente com sua nova senha. 
+  
+
+2. Dashboard/Tela Inicial
+2.1 O que tem na tela inicial?
+Quando se entra no sistema, você abre nesta tela que é uma tela de dashboard. Ela serve para mostrar em forma de estatística como está a situação. A ideia por trás disso é o dono e os funcionários poderem acompanhar de forma mais geral suas estatísticas e metas e se estão de acordo com o cronograma. Os gráficos que aparecem são os seguintes: 
+* clientes pendentes, clientes inativos, clientes aptos, clientes não aptos: mostra a quantidade total de cada. Esses dados são pegos diretamente dos clientes, do seu campo “status”.
+* Pedidos Abertos, Pedidos Fechados, Pedidos Cancelados: mostra a quantidade total de cada. Esses dados são pegos diretamente dos pedidos, do seu campo “status”.
+* Total Vendido: Mostra o valor total vendido dos pedidos. Os dados são adquiridos somando o valor total de todos os pedidos fechados.
+* Carteira com Mais Vendas: Mostra o valor total vendido dos pedidos de uma determinada carteira. Os dados são adquiridos somando o valor total de todos os pedidos fechados de uma determinada carteira.
+* Operador com Mais Vendas: Mostra o valor total vendido dos pedidos de um determinado operador. Os dados são pegos somando o valor total de todos os pedidos fechados de um determinado operador.
+*  Vendas Mensais: Aqui é um gráfico mostrando o total de pedidos fechados vendidos por mês ao longo do tempo.  Os dados são adquiridos somando o valor total de todos os pedidos fechados por mês.
+*  Produtos Mais Vendidos, Produtos Menos Vendidos: Mostra os 6 produtos mais e menos vendidos: Os dados são adquiridos somando o valor total vendido daquele produto em pedidos fechados.
+
+
+
+
+  
+
+
+
+2.2 O que mais tem na tela inicial?
+Ao clicar no menu lateral em mapa, é mostrado um mapa múndi, essa mapa tem foco no Brasil. O mapa serve para mostrar a quantidade de clientes por estado em cada estado do Brasil, sendo a cor um indicativo da quantidade de clientes, quanto mais vermelho e escuro maior a quantidade e quanto mais claro menos clientes. Ao clicar no estado é mostrado seu nome e uf, junto com a quantidade de clientes totais no estado.
+  
+
+3. Módulos
+3.1 O que são módulos?
+Os módulos representam a forma como o sistema CRM Delice está estruturado. Cada módulo agrupa um conjunto de funcionalidades relacionadas a um determinado setor ou área de atuação da empresa, como, por exemplo, o módulo Comercial ou o módulo de Recursos Humanos (RH).
+Esses módulos contêm diversas permissões (funções ou permissões) que definem o que o usuário pode ou não fazer dentro do sistema. Ao vincular um módulo a um usuário, todas as roles associadas a esse módulo passam a estar disponíveis para ele, permitindo acesso a todas as rotinas e operações correspondentes. 
+Exemplo: se um colaborador tem acesso apenas ao módulo Comercial, ele poderá realizar pedidos, consultar preços de venda e interagir com funcionalidades comerciais. No entanto, ele não terá acesso a informações sensíveis de outros módulos, como salários ou gastos com folha de pagamento do módulo RH. 
+Essa organização modular garante controle de acesso por áreas, mantendo a segurança das informações e a eficiência na operação.
+3.2 O que são permissões?
+As permissões são permissões específicas dentro de um módulo. Elas representam funções ou ações que um usuário pode realizar no sistema de forma mais granular.
+Diferente dos módulos, que englobam um conjunto amplo de funcionalidades, as roles permitem conceder acessos mais restritos. Assim, um usuário pode ter acesso a uma permissão específica sem ter acesso ao módulo completo.
+Exemplo: Um usuário pode ter apenas a permissão de “criar pedidos”, sem necessariamente ter acesso a outras funções do módulo Comercial, como “visualizar dados de clientes” ou “editar produtos”.
+Essa abordagem torna a configuração de permissões mais flexível e adaptável às necessidades de cada cargo ou colaborador dentro da organização.
+3.3 Como usar?
+Para usuários comuns, os módulos e roles são atribuídos automaticamente no momento do login, ou seja, não é necessário se preocupar com configurações adicionais de acesso. O sistema já reconhece o perfil do usuário e libera as permissões adequadas conforme seu cargo ou função. 
+Por outro lado, usuários com perfil “Owner” ou “Dev” têm a permissão de atribuir ou alterar módulos e roles de outros usuários. Para isso, basta acessar a opção “Usuários” localizada na barra lateral do sistema. Ao clicar, será exibida uma tela contendo todos os usuários cadastrados. 
+Após localizar o usuário desejado, clique no último botão disponível na linha correspondente, identificado como o botão de “Papéis”. Ao acessá-lo, o sistema apresentará uma lista com todos as permissões disponíveis, organizados por módulo. Basta marcar as roles que deseja atribuir ao usuário e, automaticamente, ele terá acesso às funções relacionadas a essas permissões.
+  
+
+
+
+  
+
+
+
+4. Usuários
+4.1 O que são usuários e como são separados
+Os usuários no sistema são as pessoas autorizadas a utilizá-lo. Para que alguém tenha acesso, é necessário que outro usuário já cadastrado realize seu registro previamente. Dentro do sistema, os usuários são classificados em três níveis distintos: Funcionário, Owner e Dev. 
+O perfil Dev possui acesso total e irrestrito a todas as áreas da plataforma, incluindo módulos, rotinas e funcionalidades administrativas, sendo o único com permissão para criar novos módulos. O perfil Owner também conta com um alto nível de acesso, podendo, por exemplo, cadastrar novos usuários e operar grande parte do sistema, porém com restrições em determinadas funções mais técnicas, como a criação de módulos.
+ Já o perfil Funcionário é o mais limitado, tendo acesso apenas às áreas que forem explicitamente atribuídas e liberadas pelos usuários com perfil Owner ou Dev. Essa separação garante um controle mais seguro e organizado do uso do sistema, respeitando os diferentes níveis de responsabilidade e atuação de cada usuário.
+Para visualizar os usuários basta clicar nos usuários no menu lateral ou pesquisar na barra de pesquisar usuários. Após clicar em usuários irá aparecer todos os usuários e alguns dados deles previamente, e no canto direito algumas opções para editar e atrelar permissões. Encima terá os filtros onde podem ser usados para procurar usuários por CPF, nome, email entre outros dados.
+  
+
+4.2 Como adicionar novos usuários
+Para adicionar um novo usuário é algo bem simples e é um cadastro básico, para isso basta ir no módulo de usuário e clicar no botão de cadastrar usuário ou no botão de criar e solucionar a opção de cadastrar usuário. 
+Após isso, será aberto um formulário para adicionar os dados do usuário, basta preencher todos os campos obrigatórios, e após isso clicar em cadastrar. 
+Detalhe importante quando criar, coloca o status como primeiro acesso, para assim o usuário poder se cadastrar corretamente e alterar sua senha. Outro detalhe é não poder adicionar nenhuma permissão, isso deve ser feito após cadastrar o usuário.
+  
+  
+
+4.3 Como alterar seus dados
+Para alterar os dados de um usuário ou adicionar uma permissão basta procurar o usuário na listagem, podendo usar filtro para achar o usuário. Após achar o usuário clique no botão de editar que fica no canto direito que tem como símbolo um lápis. Após isso basta alterar os dados que deseja e clicar em salvar para salvar as alterações realizadas.
+  
+
+
+
+5. Clientes
+5.1 O que são clientes?
+No sistema podemos cadastrar clientes para assim conseguir ter uma melhor gestão, esses clientes são basicamente as empresas que compram os produtos. Sendo assim os clientes estão relacionados diretamente ao pedido. Você pode adicionar um novo cliente, assim mantendo o contato dele para futuros contatos e negociações ou para visualizar estatísticas e dados de vários ou um só.
+Para visualizar os dados de um cliente basta selecionar o módulo de clientes e por fim clique no botão de editar, não precisa alterar dado nenhum, evite clicar em salvar, clique fora ou no X se só quiser ver os dados. 
+Caso queira procurar um cliente específico pode utilizar dos filtros, existem filtros de CNPJ, Nome, Razão Social entre outros.
+  
+
+5.2 Como adicionar novos clientes
+Para adicionar um novo cliente é necessário entrar no módulo de cliente e clicar no botão de cadastrar cliente. Ou se preferir clicar no botão de cadastrar+ na barra de pesquisa e selecionar cadastrar cliente. Após isso basta preencher os dados do cliente e clicar no botão de cadastrar, caso falte algum campo o sistema irá informar o campo que está faltando.
+  
+
+5.4 Alterar dados do clientes
+Para alterar os dados de algum cliente basta ir no módulo de cliente e selecionar algum cliente, clicar no botão de editar que fica na parte direita e assim abrirá uma nova tela que estará listando todos os dados do cliente. Esses dados podem ser alterados, basta clicar no campo e alterar. Após isso, você pode clicar no botão de salvar e salvar as alterações ou clicar fora da tela ou no botão de Fechar para não salvar as alterações. 
+
+
+  
+
+5.3 Análise do cliente
+O cliente antes de estar oficialmente tudo concluído tem que passar por uma análise para aprovação, o sistema traz informações econômicas para poder ver se o estabelecimento o que é preciso para se tornar cliente. Para aprovar basta selecionar algum cliente indo no módulo de cliente e clicando no botão de aprovar e aprovando o cliente.
+6. Carteira de clientes
+6.1 O que é uma carteira de clientes
+A carteira de clientes é uma funcionalidade essencial do sistema que tem como principal objetivo organizar e gerenciar os clientes de forma prática e eficiente. Por meio dela, é possível visualizar de maneira estruturada todos os clientes cadastrados, facilitando o acompanhamento de suas informações, histórico de interações, negociações em andamento e outras ações comerciais. 
+Além disso, a carteira de clientes permite segmentar e classificar os contatos, o que contribui para uma gestão mais estratégica do relacionamento com cada cliente, fortalecendo o vínculo comercial e promovendo melhores resultados para a organização.
+
+
+  
+
+
+
+6.2 Como criar uma carteira
+Para criar uma carteira de clientes podes ir ao módulo de carteiras, selecionar ele e clicar no botão de cadastrar carteira. Podes ir no botão de criar na barra de pesquisar e selecionar cadastrar carteira. Feito um desses passos aparecerá uma tela pedindo as informações da carteira, preencha elas. Importante: o responsável será atrelado a essa carteira e será notificado das ações referentes à ela. Outro aviso é sobre os clientes, um cliente só pode estar em apenas uma carteira. Após preencher os dados corretamente, basta clicar no botão de criar e é criada a nova carteira.
+
+
+  
+
+6.3 Como alterar uma carteira
+Para alterar os dados de alguma carteira basta ir no módulo de carteiras e selecionar alguma carteira, clicar no botão de editar que fica na parte direita e assim abrirá uma nova tela que estará listando todos os dados da carteira. Esses dados podem ser alterados, basta clicar no campo e alterar. Após isso, você pode clicar no botão de salvar e salvar as alterações ou clicar fora da tela ou no botão de Fechar para não salvar as alterações. 
+
+
+  
+
+
+
+6.4 Como atribuir a um usuário 
+Quando se cria um carteira já se pede o responsável, selecione quem está responsável por essa carteira clicando no campo e selecionando para criar. Caso queira trocar o responsável, procure a carteira que deseja trocar no módulo de carteiras e selecione editar, clique no responsável e troque pelo que deseja e clique em salvar.
+6.5 Como adicionar um novo cliente
+Caso queira adicionar um novo cliente só precisa selecionar uma carteira no módulo de carteiras e clicar em editar, e clicar no botão de adicionar (+), ele copiará o cliente de semi, clique no novo campo criado e selecione o cliente que deseja adicionar. Com isso, clique em salvar.
+
+
+  
+
+7. Produto
+7.1 O que é um produto?
+O produto é uma das peças centrais da venda, o produto é o que é vendido através do CRM. Utilizado principalmente no pedido para ter uma ideia de orçamento e poder ter uma dinâmica melhor com o cliente. Também usados para estatísticas de vendas e histórico de vendas. E por fim é usado para mostrar ao cliente e vendedor com o uso das imagens o que é o que está sendo vendido e oferecido, podendo as fotos serem mandadas para o cliente.
+7.2 Como criar produtos
+Para adicionar um novo cliente é necessário entrar no módulo de cliente e clicar no botão de cadastrar cliente. Ou se preferir clicar no botão de “cadastrar +” na barra de pesquisa e selecionar cadastrar cliente. Após isso basta preencher os dados do cliente e clicar no botão de cadastrar, caso falte algum campo o sistema irá informar o campo que está faltando.
+  
+
+  
+
+
+
+7.3 Como alterar um produto
+Para alterar os dados de algum produto basta ir no módulo de produtos e selecionar algum produto, clicar no botão de editar que fica na parte direita e assim abrirá uma nova tela que estará listando todos os dados do produto. Esses dados podem ser alterados, basta clicar no campo e alterar. Após isso, você pode clicar no botão de salvar e salvar as alterações ou clicar fora da tela ou no botão de Fechar para não salvar as alterações. 
+
+
+  
+
+7.4 Adicionar uma imagem e alterar imagem principal do produto
+Para adicionar uma imagem no produto basta ir no módulo de produtos e selecionar algum produto, clicar no botão de imagem que fica na parte direita e assim abrirá uma nova tela que estará listando todas as imagens do produto.  
+Para deletar uma imagem clique no botão de deletar e essa imagem será deletada, para adicionar clique no botão de adicionar imagem e então selecione alguma imagem do seu computador e já aparecerá a imagem. Clicando no botão de alterar para principal a imagem que está acima do botão se tornar a imagem principal.
+Após isso, você pode clicar no botão de salvar e salvar as alterações ou clicar fora da tela ou no botão de Fechar para não salvar as alterações. 
+
+
+  
+
+
+
+8. Pedidos
+8.1 O que é um pedido?
+        Os pedidos são “solicitações de compra” de determinados produtos disponíveis cadastrados no CRM, os pedidos vinculam quais produtos, quantidades, valores, status do pedido e a qual cliente o pedido está determinado. Os pedidos são um dos objetos mais importantes do funcionamento do CRM, representando uma interação financeira do cliente com a empresa.
+8.2 Como criar um pedido?
+        Para criar um pedido, tendo o acesso ao módulo de “Pedidos”, basta acessar o menu através do menu lateral.
+        Ao acessar o módulo, basta clicar no botão “Cadastrar pedido” localizado no canto inferior direito.
+  
+
+Ao interagir com o botão, será aberto um modal para preenchimento dos campos “Cliente” e “Desconto padrão (%)”.O campo “Cliente” indica a qual cliente este pedido está relacionado, o campo “Desconto padrão (%)” serve para definir um desconto já definido por padrão em cima do valor total do pedido, após preencher os campos, basta clicar no botão “Salvar”.
+
+
+  
+
+
+
+        Ao clicar no botão “Salvar” o sistema redireciona para a tela detalhada do pedido com onde será exibido informações do cliente, capa do pedido, itens relacionados ao pedido, valores, quantidades, peso e desconto.
+
+
+  
+
+8.3 Como vincular produtos a um pedido?
+
+        Após preencher os campos e clicar no botão “Salvar” no modal de pedido, você será redirecionado para o cadastro do pedido, para assim, vincular os produtos os quais farão parte daquele pedido. Para vincular um produto a um pedido, basta clicar no botão “Adicionar produto” localizado no canto superior direito da tela.
+  
+
+
+
+Ao clicar no botão, será aberto um modal para o preenchimento dos campos “Produto”, “Quantidade” e “Desconto”.
+O campo “Produto” deve ser preenchido pelo usuário com as opções de produtos de status “Ativo” cadastrados no sistema através do módulo “Produtos”, este campo pode ser preenchido com mais de uma opção de produto por vez. 
+O campo “Quantidade” será replicado a mesma quantidade para cada um dos produtos selecionados no campo. 
+Após preencher os campos, basta clicar no botão “Incluir no pedido”.
+  
+
+        Ex: Neste exemplo acima, cada um dos produtos selecionados serão adicionados no pedido com a mesma quantidade de itens, 3 ararutas e 3 pães de mel.
+
+
+Após clicar no botão “Incluir no pedido” os produtos serão adicionados ao pedido, também podendo ser alterado a quantidade de cada item ou alterado o desconto padrão dos produtos através dos campos “Quantidade” e “Desconto (%)”
+
+
+  
+
+
+
+
+
+8.3 Como DELETAR produtos de um pedido?
+        Para deletar um produto do pedido, basta clicar no botão “Remover item” localizado ao lado direito do produto em que se deseja remover
+  
+
+
+
+        Após clicar no botão de remover item, será exibido um modal para confirmação da deleção do produto, basta clicar no botão “Sim” para confirmar a deleção.
+
+
+  
+
+8.4 Como alterar um pedido?
+        Após um pedido já cadastrado, caso desejado a alteração do registro, basta clicar no botão com o ícone de lápis localizado na coluna “Editar” no grid de pedidos
+  
+
+        
+
+
+
+
+
+
+Desta forma, o usuário será direcionado novamente para a tela de detalhes do pedido para prosseguir com as alterações desejadas.
+
+
+
+
+  
+
+
+
+8.5 Como alterar informações de um pedido?
+        Para alterar informações do pedido como quantidades de um item, desconto do item e desconto total, basta clicar em cima de qualquer um dos campos desejados, após alterar a informação do pedido basta clicar na tecla “ENTER” para que seja atualizado o registro com sucesso.
+9. Kanban
+9.1 O que é o Kanban?
+        O kanban é um quadro que serve para classificar clientes, buscando facilitar a identificação do status financeiro atual de um cliente, possibilitando a mobilidade de cada cadastro de cliente para um determinado status.
+Podemos ter vários registros de kanbans no sistema, podendo ser totalmente customizável a quantidade de colunas, regras a serem executadas e tags visuais para personalização.
+
+
+9.2 Como criar um Kanban?
+        Para a criação de registros de kanbans basta acessar o módulo “Kanban” localizado no menu lateral, e clicar no botão “Cadastrar quadro”
+  
+
+        
+Após clicar no botão para cadastro, será exibido um modal para o preenchimento dos campos “Código”, “Título” e “Descrição”. O campo “Código” serve de identificador para o quadro, o campo “Título” é utilizado para exibir o nome do quadro quando acessado o módulo “Quadro de clientes” e o campo “Descrição” serve apenas para detalhes extras do Kanban cadastrado.
+        Após preencher os campos, basta clicar no campo “Criar”.
+
+
+  
+
+9.3 Como adicionar uma colunas no Kanban?
+        Após criar um registro de um novo kanban, é possível adicionar colunas no kanban para que ao acessar o módulo “Quadro de clientes” seja visível os cadastros dos clientes nas devidas colunas cadastradas no módulo de kanba, caso não seja atrelado nenhuma coluna para o kanban, o mesmo será exibido sem colunas.
+        
+Para adicionar a coluna, basta clicar no botão localizado na coluna “Colunas” do grid de kanbans.
+  
+
+        Ao clicar no botão, será aberto um modal exibindo as colunas já cadastradas para o kanban em questão, caso seja cadastrada uma coluna, será atualizado esta lista de colunas.
+
+
+  
+
+        
+
+
+Clique no botão “Incluir uma nova coluna” para que seja possível o cadastro de novas colunas para o kanban, com isso, será exibido um modal para o preenchimento dos campos “Código”, “Tipo”, “Título” e “Descrição”.
+O campo “Código” apenas é um identificador para a coluna, o campo “Tipo” pode ser selecionado as opções “Contador” ou “Somador” caso seja desejado que a coluna tenha um dos comportamentos possíveis, o campo “Título” mostrará a coluna com o título preenchido no campo e o campo “Descrição” serve apenas para detalhes extras.
+
+
+  
+
+
+
+        Ao preencher os campos, basta clicar no botão “Salvar”, após isso, será exibido uma mensagem de sucesso do cadastro da coluna.
+  
+
+        
+9.4 Como adicionar regras no Kanban?
+        Para adicionar regras para o kanban é necessário que já tenha sido feito o cadastro de uma coluna para o kanban, caso ainda não existam colunas, a página de adicionar regras não haverá nenhuma coluna visível. Com isso, basta clicar no botão localizado na coluna “Regras”.
+
+
+  
+
+
+
+Ao clicar no botão, o usuário será direcionado para a página de configuração de regras do kanban, que também pode ser realizado o cadastro de novas colunas ou então, a edição do próprio registro do kanban.
+
+
+  
+
+Ao clicar no botão “Adicionar regra” localizado na coluna desejada, será exibido o modal para preenchimento dos campos “Título”, “Tipo” e “Tag”.
+O campo “Título” apenas identifica a regra cadastrada, o campo “Tipo” determinará qual comportamento de regra será executado quando o registro do cliente for movido para o quadro em que a regra está determinada, o campo “Tag” apenas identifica visualmente.
+O campo “Tipo” possui opções de regras como “Enviar e-mail”, “Notificar usuários‘, “Adicionar tag”, “Remover tag”, “Validar cliente”, “Validar carteira”, “Revisar cliente”, “Reprovar cliente”, “Não mover cartão” e “Aprovar cliente”, cada opção com seu comportamento auto-explicativo.
+
+
+  
+
+
+
+Ao clicar no botão “Salvar” no registro de regra, será exibido a regra cadastrada na coluna em questão, podendo ser deletada caso desejado
+  
+
+9.5 Permissão de colunas
+        Para configurar quais colunas permitem mover de uma para outra, deve ser clicado no botão “Permitir coluna” na tela configuração do Kanban:
+
+
+  
+
+
+
+Ao clicar no botão, o usuário será direcionado para uma janela onde o mesmo deve selecionar quais colunas estão habilitadas para mover para a coluna atual.
+
+
+  
+
+9.6 Como editar um kanban?
+        Para editar um registro de kanban basta clicar no botão localizado na coluna “Editar”.
+  
+
+        
+
+
+        Ao clicar no botão “Editar” será exibido o modal das informações do kanban cadastradas para o kanban em edição, os campos alteráveis são “Status” (ativo e inativo), “Título” e “Descrição”, basta alterar as informações e clicar no botão “Salvar” para que as alterações sejam salvas com sucesso.
+
+
+  
+
+10. Quadro de clientes
+10.1 O que é o quadro de clientes?
+        O quadro de clientes é a visualização do kanban, aqui é onde as tarefas irão aparecer e os status dela. Elas podem ser movidas à medida que são feitas ou apagadas se não for possível fazer elas. O quadro de clientes tem a ideia de ser bastante interativo e de fácil visualização.
+10.2 Como usar?
+        O quadro de clientes funciona arrastando o card da tarefa para a situação desejada, se deseja iniciar a tarefa, basta clicar e segurar em cima do card e depois arrastá-lo para a coluna que indica que iniciou a tarefa. As colunas e regras são todas feitas no módulo de kanban.
+  
+ 
+        
+11. Tarefas
+11.1 O que é as tarefas?
+        As tarefas servem para auxiliar o usuário a realizar melhor o seu trabalho e deixar ele de forma mais eficiente. Organizado suas funções e prioridades No próprio sistema evitando o uso de papel e possíveis esquecimentos uma vez que o sistema notifica o usuário sobre as tarefas pendentes. 
+Também pode ser usado para verificar a situação do time como um todo e como as metas e demandas estão,  se estão sendo feitas e cumpridas ou se está acontecendo algum problema assim evitando outro problema maior ou atrasos.
+
+
+11.2 Como visualizar a tarefa?
+        Para visualizar as tarefas no geral basta clicar no módulo de tarefas e irá mostrar todas as tarefas. Elas serão mostradas através de uma lista e cada linha é uma tarefa podendo ser editada ao clicar no botão de editar. Para visualizar com mais detalhes uma única tarefa você pode clicar no botão de detalhar. Assim aparece a tarefa com mais informações e o histórico de alterações dela e seu progresso. 
+  
+
+  
+
+  
+
+11.3 Como adicionar uma tarefa? 
+        Para criar a tarefa é preciso clicar no botão cadastrar tarefa onde aparecerá um formulário para preencher com os dados daquela tarefa, uma vez preenchidos basta clicar no botão de salvar e assim a tarefa estará criada e poderá ser visualizada.
+
+
+  
+
+11.3 Iniciar ou para uma tarefa? 
+        Para isso você precisa ir no modulo e clicar no botão de detalhar da tarefa que queira iniciar, assim que você clicar em inciar a tarefa irá ficar com o status “em progresso” e se parar volta para “pendente”, caso consiga concluir a tarefa basta voltar a tarefa e clicar em finalizar para a tarefa ficar com como concluída.
+  
+
+  
+
+12. Calendário
+12.2 O que é o calendário?
+        O calendário funciona muito igual um calendário normal, ele serve para mostrar os dias e as tarefas e eventos que aquele dia irá ter. Para usuários que não sejam Dev e Owner o calendário só mostra tarefas relacionadas ao usuário. Para os demais tipos é possível filtrar quem deseja ver.
+
+
+  
+
+12.2 Como usar?
+        Temos algumas utilidades a Mais além da visualização das tarefas no dia, como a possibilidade de visualização mais detalhada da tarefa em si e a possibilidade de adicionar mais tarefas. 
+12.3 Como adicionar uma tarefa
+        Basta clicar no botão de adicionar e assim inserir os dados referente à tarefa e clicar em confirmar.
+  
+
+
+
+
+
+13. Minhas informações
+        O menu “Minhas informações” pode ser acessado clicando na imagem de seu perfil localizado no canto superior direito no sistema.
+
+
+  
+
+        
+Ao clicar no botão, o sistema será redirecionado para a tela de informações detalhadas do usuário em que está logado, detalhando as informações pessoais, tipo de usuário, criação, última alteração e as permissões as quais o usuário possui no sistema.
+
+
+  
+
+
+
+        Também é possível definir uma foto de perfil para o seu usuário clicando no botão indicado na imagem abaixo
+  
+
+
+
+        Após isto, basta clicar no meio do círculo, selecionar um arquivo PNG ou JPG, após selecionar o arquivo de imagem, basta clicar no botão “Save” para que a foto de perfil seja salva.
